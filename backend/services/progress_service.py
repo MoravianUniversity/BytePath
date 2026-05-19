@@ -11,21 +11,25 @@ class ProgressService:
     """Business logic for tracking student progress."""
 
     @staticmethod
-    def get_user_progress(user_id: int) -> Iterable[StudentProgress]:
-        return progress_repository.get_by_user(user_id)
+    def get_user_progress(
+        user_id: int, class_id: Optional[int] = None
+    ) -> Iterable[StudentProgress]:
+        return progress_repository.get_by_user(user_id, class_id=class_id)
 
     @staticmethod
-    def get_topic_progress(user_id: int, topic_id: str) -> Optional[StudentProgress]:
-        return progress_repository.get_by_user_and_topic(user_id, topic_id)
+    def get_topic_progress(
+        user_id: int, topic_id: str, class_id: Optional[int] = None
+    ) -> Optional[StudentProgress]:
+        return progress_repository.get_by_user_and_topic(user_id, topic_id, class_id=class_id)
 
     @staticmethod
     def update_or_create_progress(
-        user_id: int, topic_id: str, data: Dict[str, int]
+        user_id: int, topic_id: str, data: Dict[str, int], class_id: Optional[int] = None
     ) -> tuple[StudentProgress, bool]:
         subtopics_completed = data["subtopics_completed"]
         total_subtopics = data["total_subtopics"]
 
-        progress = progress_repository.get_by_user_and_topic(user_id, topic_id)
+        progress = progress_repository.get_by_user_and_topic(user_id, topic_id, class_id=class_id)
         created = False
         if progress:
             progress.subtopics_completed = subtopics_completed
@@ -36,6 +40,7 @@ class ProgressService:
             progress = StudentProgress(
                 user_id=user_id,
                 topic=topic_id,
+                class_id=class_id,
                 subtopics_completed=subtopics_completed,
                 total_subtopics=total_subtopics,
                 questions_answered=0,
@@ -49,12 +54,16 @@ class ProgressService:
 
     @staticmethod
     def increment_questions_answered(
-        user_id: int, topic_id: str, *, timestamp: Optional[datetime] = None
+        user_id: int,
+        topic_id: str,
+        class_id: Optional[int] = None,
+        *,
+        timestamp: Optional[datetime] = None,
     ) -> StudentProgress:
         if timestamp is None:
             timestamp = datetime.utcnow()
 
-        progress = progress_repository.get_by_user_and_topic(user_id, topic_id)
+        progress = progress_repository.get_by_user_and_topic(user_id, topic_id, class_id=class_id)
 
         if progress:
             progress.questions_answered = (progress.questions_answered or 0) + 1
@@ -64,6 +73,7 @@ class ProgressService:
             progress = StudentProgress(
                 user_id=user_id,
                 topic=topic_id,
+                class_id=class_id,
                 subtopics_completed=0,
                 total_subtopics=0,
                 questions_answered=1,
@@ -73,4 +83,3 @@ class ProgressService:
 
         db.session.commit()
         return progress
-

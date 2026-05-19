@@ -15,6 +15,7 @@ import LoginScreen from './components/LoginScreen';
 import { authService } from './services/auth';
 import type { User } from './services/auth';
 import type { Class } from './services/classes';
+import { classesService } from './services/classes';
 import { responsesService } from './services/responses';
 import { progressService } from './services/progress';
 import InstructorDashboard from './pages/InstructorDashboard';
@@ -40,7 +41,11 @@ const getAllTopics = (): Topic[] => {
 
 
 function App() {
-  const [currentScreen, setCurrentScreen] = useState<'welcome' | 'question' | 'locked-topic' | 'students' | 'dashboard'>('welcome');
+  const [currentScreen, setCurrentScreen] = useState<'welcome' | 'question' | 'locked-topic' | 'students' | 'dashboard'>(() => {
+    const saved = localStorage.getItem('currentScreen');
+    return (saved as 'welcome' | 'question' | 'locked-topic' | 'students' | 'dashboard') ?? 'welcome';
+  });
+  useEffect(() => { localStorage.setItem('currentScreen', currentScreen); }, [currentScreen]);
   let [isLoading, setIsLoading] = useState(true);
   const [loadingError, setLoadingError] = useState<string | null>(null);
   let [topicToSelectAfterLoading, setTopicToSelectAfterLoading] = useState<Topic | null>(null);
@@ -70,7 +75,31 @@ function App() {
   const [theme, setThemeState] = useState<'light' | 'dark'>(getThemePreference());
   const isInstructor = currentUser?.role === 'instructor';
   const [instructorPractice, setInstructorPractice] = useState(false);
-  const [currentClass, setCurrentClass] = useState<Class | null>(null);
+  const [studentClasses, setStudentClasses] = useState<Class[]>([]);
+  const [currentClass, setCurrentClass] = useState<Class | null>(() => {
+    const saved = localStorage.getItem('currentClass');
+    return saved ? JSON.parse(saved) as Class : null;
+  });
+  useEffect(() => {
+    if (currentClass) {
+      localStorage.setItem('currentClass', JSON.stringify(currentClass));
+    } else {
+      localStorage.removeItem('currentClass');
+    }
+  }, [currentClass]);
+
+  // For students: detect which class(es) they belong to on login.
+  useEffect(() => {
+    if (!currentUser || isInstructor) return;
+    classesService.getMyClasses().then(classes => {
+      setStudentClasses(classes);
+      if (classes.length === 1) {
+        setCurrentClass(classes[0]);
+      }
+      // If multiple classes and no class selected yet, leave null — class picker will show.
+    });
+  }, [currentUser]);
+
   const clearUrlHash = () => {
     const { pathname, search } = window.location;
     window.history.replaceState(null, '', `${pathname}${search}`);
@@ -169,9 +198,9 @@ function App() {
     });
   }, []);
 
-  // Instructors land on the dashboard immediately.
+  // Instructors default to the dashboard, but respect a previously saved screen.
   useEffect(() => {
-    if (isInstructor) {
+    if (isInstructor && currentScreen !== 'dashboard' && currentScreen !== 'students') {
       setCurrentScreen('dashboard');
       setInstructorPractice(false);
     }
@@ -206,8 +235,11 @@ function App() {
   const handleLogout = async () => {
     await authService.logout();
     localStorage.removeItem('completedTopics');
+    localStorage.removeItem('currentClass');
+    localStorage.removeItem('currentScreen');
     resetState();
     setCurrentUser(null);
+    setCurrentClass(null);
     setInstructorPractice(false);
   };
 
@@ -218,8 +250,8 @@ function App() {
     (async () => {
       try {
         const [progress, responses] = await Promise.all([
-          progressService.getUserProgress(currentUser.id),
-          responsesService.getStudentResponses(currentUser.id),
+          progressService.getUserProgress(currentUser.id, currentClass?.id ?? null),
+          responsesService.getStudentResponses(currentUser.id, currentClass?.id ?? null),
         ]);
 
         const completedFromProgress = progress
@@ -262,7 +294,7 @@ function App() {
         console.error('Failed to load server progress:', error);
       }
     })();
-  }, [currentUser, allTopics]);
+  }, [currentUser, currentClass, allTopics]);
 
   if (!currentUser) {
     return <LoginScreen onLogin={(user) => setCurrentUser(user)} />;
@@ -393,6 +425,7 @@ function App() {
           answer ?? null,
           isCorrect,
           Math.floor((Date.now() - questionStartTime) / 1000),
+          currentClass?.id ?? null,
         );
 
         await responsesService.submitResponse(responseData);
@@ -400,6 +433,7 @@ function App() {
         await progressService.updateProgress(currentUser.id, currentTopic.id, {
           subtopics_completed: currentTopic.numCompletedSubtopics,
           total_subtopics: currentTopic.subtopics.length,
+          class_id: currentClass?.id ?? null,
         });
       } catch (error) {
         console.error('Failed to sync to backend:', error);
@@ -491,6 +525,28 @@ function App() {
                 }}
               />
             )}
+            {!isInstructor && studentClasses.length > 1 && (
+              <select
+                value={currentClass?.id ?? ''}
+                onChange={e => {
+                  const cls = studentClasses.find(c => c.id === Number(e.target.value)) ?? null;
+                  setCurrentClass(cls);
+                  setCompletedTopics(new Set());
+                }}
+                className="dashboard-button"
+                style={{ cursor: 'pointer' }}
+              >
+                <option value="" disabled>Select class</option>
+                {studentClasses.map(cls => (
+                  <option key={cls.id} value={cls.id}>{cls.class_name}</option>
+                ))}
+              </select>
+            )}
+            {!isInstructor && studentClasses.length === 1 && currentClass && (
+              <span className="dashboard-button" style={{ cursor: 'default', opacity: 0.8 }}>
+                {currentClass.class_name}
+              </span>
+            )}
             {isInstructor && (
               <button
                 onClick={() => {
@@ -543,7 +599,7 @@ function App() {
       <main className="App-main">
         {currentScreen === 'dashboard' ? (
           currentUser.role === 'instructor' ? (
-            <InstructorDashboard classId={currentClass?.id ?? null} />
+            <InstructorDashboard classId={currentClass?.id ?? null} className={currentClass?.class_name ?? null} />
           ) : (
             <StudentDashboard user={currentUser} />
           )
@@ -563,7 +619,7 @@ function App() {
           </div>
         ) : currentScreen === 'students' ? (
           <div className="content-area" ref={contentAreaRef}>
-            <StudentsPage classId={currentClass?.id ?? null} />
+            <StudentsPage classId={currentClass?.id ?? null} className={currentClass?.class_name ?? null} />
           </div>
         ) : (
           <>
@@ -675,26 +731,39 @@ function App() {
 
         <div className="content-area" ref={contentAreaRef}>
           {currentScreen === 'welcome' && (
-            <div className="welcome-screen">
-              <h2>Welcome to Bytepath</h2>
-              {
-                completedTopics.size === allTopics.length ? (
-                  <div>
-                    <p>You have completed all topics for now! 🎉</p>
-                    <p>You can restart any topic to review.</p>
-                    <p>You may also want to try quiz-mode in the top-right corner.</p>
-                  </div>
-                ) : (
-                  <p>Select an available topic from on the side to start.</p>
-                )
-              }
-              <div className="stats-overview">
-                <div className="stat-item">
-                  <span className="stat-number">{completedTopics.size}</span>
-                  <span className="stat-label">Topics Completed</span>
+            !isInstructor && studentClasses.length > 1 && !currentClass ? (
+              <div className="welcome-screen">
+                <h2>Select your class to begin</h2>
+                <div className="class-picker">
+                  {studentClasses.map(cls => (
+                    <button key={cls.id} className="class-picker-button" onClick={() => setCurrentClass(cls)}>
+                      {cls.class_name}
+                    </button>
+                  ))}
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="welcome-screen">
+                <h2>Welcome to Bytepath</h2>
+                {
+                  completedTopics.size === allTopics.length ? (
+                    <div>
+                      <p>You have completed all topics for now! 🎉</p>
+                      <p>You can restart any topic to review.</p>
+                      <p>You may also want to try quiz-mode in the top-right corner.</p>
+                    </div>
+                  ) : (
+                    <p>Select an available topic from on the side to start.</p>
+                  )
+                }
+                <div className="stats-overview">
+                  <div className="stat-item">
+                    <span className="stat-number">{completedTopics.size}</span>
+                    <span className="stat-label">Topics Completed</span>
+                  </div>
+                </div>
+              </div>
+            )
           )}
 
               {currentScreen === 'locked-topic' && currentTopic && (

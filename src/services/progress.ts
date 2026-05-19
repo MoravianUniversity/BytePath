@@ -9,16 +9,19 @@ export interface TopicProgress {
   completion_percentage: number;
   questions_answered: number;
   last_accessed: string | null;
+  class_id?: number | null;
 }
 
 export interface UpdateProgressRequest {
   subtopics_completed: number;
   total_subtopics: number;
+  class_id?: number | null;
 }
 
 export const progressService = {
-  async getUserProgress(userId: number): Promise<TopicProgress[]> {
-    const response = await api.get(`progress/${userId}`);
+  async getUserProgress(userId: number, classId?: number | null): Promise<TopicProgress[]> {
+    const params = classId != null ? `?class_id=${classId}` : '';
+    const response = await api.get(`progress/${userId}${params}`);
     return response.data.progress;
   },
 

@@ -9,7 +9,7 @@ type EditingState = {
   value: string;
 };
 
-export default function StudentsPage({ classId }: { classId: number | null }) {
+export default function StudentsPage({ classId, className }: { classId: number | null; className: string | null }) {
   const [students, setStudents] = useState<Student[]>([]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
@@ -218,7 +218,7 @@ export default function StudentsPage({ classId }: { classId: number | null }) {
   return (
     <div className="students-page">
       <div className="students-header">
-        <h2>Student Bank</h2>
+        <h2>{className ? `${className} — Student Bank` : 'Student Bank'}</h2>
         <button onClick={() => setShowHistory(true)} className="history-button">
           📋 Upload History
         </button>

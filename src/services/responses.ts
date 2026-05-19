@@ -12,6 +12,7 @@ export interface SubmitResponseRequest {
   is_correct: boolean;
   status: 'correct' | 'incorrect' | 'skipped';
   time_spent: number;
+  class_id?: number | null;
 }
 
 export interface StudentResponse {
@@ -33,8 +34,9 @@ export const responsesService = {
     await api.post('responses', data);
   },
 
-  async getStudentResponses(studentId: number): Promise<StudentResponse[]> {
-    const response = await api.get(`responses/student/${studentId}`);
+  async getStudentResponses(studentId: number, classId?: number | null): Promise<StudentResponse[]> {
+    const params = classId != null ? `?class_id=${classId}` : '';
+    const response = await api.get(`responses/student/${studentId}${params}`);
     return response.data.responses;
   },
 
@@ -46,6 +48,7 @@ export const responsesService = {
     userAnswer: Answer | null,
     isCorrect: boolean,
     timeSpent: number,
+    classId?: number | null,
   ): SubmitResponseRequest {
     const studentAnswer = userAnswer === null ? null : formatAnswer(userAnswer);
 
@@ -59,6 +62,7 @@ export const responsesService = {
       is_correct: isCorrect,
       status: userAnswer === null ? 'skipped' : isCorrect ? 'correct' : 'incorrect',
       time_spent: timeSpent,
+      class_id: classId ?? null,
     };
   },
 };

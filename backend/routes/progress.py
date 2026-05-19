@@ -32,8 +32,10 @@ def get_user_progress(user_id: int):
     if not user:
         return jsonify({"error": "User not found"}), 404
 
+    class_id = request.args.get("class_id", type=int)
+
     service = get_progress_service()
-    progress_records = service.get_user_progress(user_id)
+    progress_records = service.get_user_progress(user_id, class_id=class_id)
     topics = {record.topic: topics_repo.get_by_id(record.topic) for record in progress_records}
     progress_payload = [
         _serialise_progress(record, topics.get(record.topic)) for record in progress_records
@@ -99,6 +101,9 @@ def update_topic_progress(user_id: int, topic_id: str):
     if total_subtopics <= 0:
         return jsonify({"error": "total_subtopics must be greater than 0"}), 400
 
+    raw_class_id = payload.get("class_id")
+    class_id = int(raw_class_id) if raw_class_id is not None else None
+
     users = get_user_repository()
     topics_repo = get_topic_repository()
 
@@ -121,6 +126,7 @@ def update_topic_progress(user_id: int, topic_id: str):
             "subtopics_completed": subtopics_completed,
             "total_subtopics": total_subtopics,
         },
+        class_id=class_id,
     )
 
     response_payload = _serialise_progress(progress, topic)
@@ -145,8 +151,12 @@ def increment_questions_answered(user_id: int, topic_id: str):
             is_visible=True,
         )
 
+    class_id = request.args.get("class_id", type=int)
+
     service = get_progress_service()
-    progress = service.increment_questions_answered(user_id=user_id, topic_id=topic_id)
+    progress = service.increment_questions_answered(
+        user_id=user_id, topic_id=topic_id, class_id=class_id
+    )
     return jsonify(
         {"message": "Progress incremented", "questions_answered": progress.questions_answered}
     ), 200
@@ -168,6 +178,7 @@ def _serialise_progress(progress: StudentProgress, topic: Topic | None = None) -
 
     return {
         "user_id": progress.user_id,
+        "class_id": progress.class_id,
         "topic": progress.topic,
         "topic_name": topic.name if topic else progress.topic,
         "subtopics_completed": subtopics_completed,

@@ -5,6 +5,7 @@ Routes for class management.
 from __future__ import annotations
 
 from flask import Blueprint, jsonify, request, session
+from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
 from backend.models import Class, RosterStudent, db
@@ -35,6 +36,25 @@ def create_class():
     db.session.add(new_class)
     db.session.commit()
     return jsonify(new_class.to_dict()), 201
+
+
+@classes_bp.get("/my")
+def get_my_classes():
+    """Return classes the current user is enrolled in (by email match in roster)."""
+    from backend.models import RosterStudent, User
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"error": "Not authenticated"}), 401
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    roster_entries = RosterStudent.query.filter(
+        func.lower(RosterStudent.email) == func.lower(user.email),
+        RosterStudent.deleted_at.is_(None),
+    ).all()
+    class_ids = {r.class_id for r in roster_entries if r.class_id is not None}
+    classes = Class.query.filter(Class.id.in_(class_ids)).all()
+    return jsonify([c.to_dict() for c in classes])
 
 
 @classes_bp.get("/<int:id>")

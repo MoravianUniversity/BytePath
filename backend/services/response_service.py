@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Dict, Iterable, Tuple
+from typing import Dict, Iterable, Optional, Tuple
 
 from backend.models import StudentResponse, db
 from backend.repositories import response_repository
@@ -24,6 +24,7 @@ class ResponseService:
     def create_response(cls, data: Dict) -> StudentResponse:
         response = StudentResponse(
             user_id=data["user_id"],
+            class_id=data.get("class_id"),
             topic=data["topic"],
             subtopic_type=data["subtopic_type"],
             question_code=data["question_code"],
@@ -39,8 +40,10 @@ class ResponseService:
         return response
 
     @staticmethod
-    def get_student_responses(user_id: int) -> Iterable[StudentResponse]:
-        return response_repository.get_by_user(user_id)
+    def get_student_responses(
+        user_id: int, class_id: Optional[int] = None
+    ) -> Iterable[StudentResponse]:
+        return response_repository.get_by_user(user_id, class_id=class_id)
 
     @staticmethod
     def get_student_responses_for_topic(user_id: int, topic_id: str) -> Iterable[StudentResponse]:
@@ -56,4 +59,3 @@ class ResponseService:
             return False, "Invalid status value"
 
         return True, ""
-

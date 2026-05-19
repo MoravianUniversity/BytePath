@@ -580,8 +580,13 @@ class ReportService:
         # Sort by topic name
         topics_list.sort(key=lambda x: x.get("topic_name", ""))
 
-        rostered_student_list = [
-            {
+        seen_emails: set = set()
+        rostered_student_list = []
+        for entry in roster_entries:
+            if entry["email"].lower() in seen_emails:
+                continue
+            seen_emails.add(entry["email"].lower())
+            rostered_student_list.append({
                 "student_id": entry["user_id"],
                 "student_name": (
                     entry["user_name"]
@@ -589,9 +594,7 @@ class ReportService:
                     or entry["email"]
                 ),
                 "student_email": entry["email"],
-            }
-            for entry in roster_entries
-        ]
+            })
 
         top_performers = (
             db.session.execute(

@@ -27,7 +27,7 @@ const createDownload = (data: unknown, filename: string) => {
   URL.revokeObjectURL(link.href);
 };
 
-export default function InstructorDashboard({ classId }: { classId: number | null }) {
+export default function InstructorDashboard({ classId, className }: { classId: number | null; className: string | null }) {
   const [classOverview, setClassOverview] = useState<ClassOverview | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<StudentReport | null>(null);
   const [loading, setLoading] = useState(true);
@@ -504,7 +504,7 @@ export default function InstructorDashboard({ classId }: { classId: number | nul
 
       <header className="dashboard-header">
         <div className="dashboard-header__content">
-          <h1>Class Analytics</h1>
+          <h1>{className ? `${className} Analytics` : 'All Classes — Analytics'}</h1>
           <p className="dashboard-subtitle">
             Comprehensive overview of student progress and performance
           </p>
@@ -637,9 +637,9 @@ export default function InstructorDashboard({ classId }: { classId: number | nul
           {rosterMatches.length === 0 ? (
             <div className="students-table__empty">No students match that search.</div>
           ) : (
-            rosterMatches.map((student) => (
+            rosterMatches.map((student, index) => (
               <button
-                key={`${student.student_email}-${student.student_id ?? 'pending'}`}
+                key={`${student.student_email}-${student.student_id ?? `pending-${index}`}`}
                 className="roster-lookup-card"
                 onClick={() => handleRosterSelection(student.student_id)}
                 type="button"

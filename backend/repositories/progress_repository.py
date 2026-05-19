@@ -5,22 +5,24 @@ from typing import Iterable, Optional
 from backend.models import StudentProgress, db
 
 
-def get_by_user(user_id: int) -> Iterable[StudentProgress]:
-    return (
-        db.session.execute(
-            db.select(StudentProgress)
-            .filter_by(user_id=user_id)
-            .order_by(StudentProgress.last_accessed.desc())
-        )
-        .scalars()
-        .all()
+def get_by_user(user_id: int, class_id: Optional[int] = None) -> Iterable[StudentProgress]:
+    query = (
+        db.select(StudentProgress)
+        .filter_by(user_id=user_id)
+        .order_by(StudentProgress.last_accessed.desc())
     )
+    if class_id is not None:
+        query = query.filter(StudentProgress.class_id == class_id)
+    return db.session.execute(query).scalars().all()
 
 
-def get_by_user_and_topic(user_id: int, topic_id: str) -> Optional[StudentProgress]:
-    return db.session.execute(
-        db.select(StudentProgress).filter_by(user_id=user_id, topic=topic_id)
-    ).scalar_one_or_none()
+def get_by_user_and_topic(
+    user_id: int, topic_id: str, class_id: Optional[int] = None
+) -> Optional[StudentProgress]:
+    query = db.select(StudentProgress).filter_by(user_id=user_id, topic=topic_id)
+    if class_id is not None:
+        query = query.filter(StudentProgress.class_id == class_id)
+    return db.session.execute(query).scalar_one_or_none()
 
 
 def add_progress(progress: StudentProgress) -> StudentProgress:
@@ -32,4 +34,3 @@ def add_progress(progress: StudentProgress) -> StudentProgress:
 def save(progress: StudentProgress) -> StudentProgress:
     db.session.flush()
     return progress
-

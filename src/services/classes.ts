@@ -76,4 +76,10 @@ export const classesService = {
     });
     if (!res.ok) throw new Error(`Failed to remove student (${res.status})`);
   },
+
+  async getMyClasses(): Promise<Class[]> {
+    const res = await fetch(`${API_BASE}/classes/my`, { credentials: 'include' });
+    if (!res.ok) return [];
+    return res.json();
+  },
 };

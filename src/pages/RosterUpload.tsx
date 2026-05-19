@@ -34,7 +34,7 @@ async function uploadStudentsCsv(file: File) {
   return res.json() as Promise<{ summary: any; errors: Array<{ line: number; reason: string }> }>;
 }
 
-export default function StudentsPage() {
+export default function StudentsPage({ classId, className }: { classId: number | null; className: string | null }) {
   const [students, setStudents] = useState<Student[]>([]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
@@ -87,7 +87,7 @@ export default function StudentsPage() {
 
   return (
     <div style={{ padding: "1rem 1.5rem", maxWidth: 1000, margin: "0 auto", color: "white" }}>
-      <h2 style={{ margin: 0, marginBottom: ".5rem" }}>Students</h2>
+      <h2 style={{ margin: 0, marginBottom: ".5rem" }}>{className || 'Students'}</h2>
       <p style={{ opacity: .9, marginTop: 0 }}>
         Upload a CSV and browse the roster with pagination. 
         <span style={{ fontSize: "0.9em", display: "block", marginTop: "0.25rem", opacity: 0.8 }}>

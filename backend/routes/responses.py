@@ -59,7 +59,11 @@ def create_response():
         )
 
     response = response_service.create_response(payload)
-    progress_service.increment_questions_answered(user_id=user.id, topic_id=topic.id)
+    progress_service.increment_questions_answered(
+        user_id=user.id,
+        topic_id=topic.id,
+        class_id=payload.get("class_id"),
+    )
 
     return (
         jsonify({"message": "Response recorded successfully.", "response": response.to_dict()}),
@@ -71,6 +75,8 @@ def create_response():
 def get_responses_for_student(student_id: int):
     """Return all responses recorded for a given student."""
 
+    class_id = request.args.get("class_id", type=int)
+
     response_service = get_response_service()
-    responses = response_service.get_student_responses(student_id)
+    responses = response_service.get_student_responses(student_id, class_id=class_id)
     return jsonify({"responses": [response.to_dict() for response in responses]}), 200

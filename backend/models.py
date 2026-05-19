@@ -88,7 +88,7 @@ class StudentResponse(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    class_id = db.Column(db.Integer, db.ForeignKey("classes.id"), nullable=False)
+    class_id = db.Column(db.Integer, db.ForeignKey("classes.id"), nullable=True)
     topic = db.Column(db.String(100), db.ForeignKey("topics.id"), nullable=False)
     subtopic_type = db.Column(
         db.String(100), nullable=False
@@ -126,7 +126,7 @@ class StudentProgress(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    class_id = db.Column(db.Integer, db.ForeignKey("classes.id"), nullable=False)
+    class_id = db.Column(db.Integer, db.ForeignKey("classes.id"), nullable=True)
     topic = db.Column(db.String(100), db.ForeignKey("topics.id"), nullable=False)
     subtopics_completed = db.Column(db.Integer, default=0)
     total_subtopics = db.Column(db.Integer)

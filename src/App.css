@@ -16,6 +16,8 @@
   align-items: center;
   height: 2.5rem;
   color: var(--text-on-gradient);
+  position: relative;
+  z-index: 200;
 }
 
 .header-actions {
