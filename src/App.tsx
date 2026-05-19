@@ -601,7 +601,7 @@ function App() {
           currentUser.role === 'instructor' ? (
             <InstructorDashboard classId={currentClass?.id ?? null} className={currentClass?.class_name ?? null} />
           ) : (
-            <StudentDashboard user={currentUser} />
+            <StudentDashboard user={currentUser} currentClassId={currentClass?.id ?? null} />
           )
         ) : isLoading ? (
           <div className="loading-screen">

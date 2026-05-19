@@ -60,7 +60,7 @@ export default function InstructorDashboard({ classId, className }: { classId: n
   const viewStudentReport = async (studentId: number) => {
     try {
       setLookupError(null);
-      const report = await reportsService.getStudentReport(studentId);
+      const report = await reportsService.getStudentReport(studentId, classId);
       setSelectedStudent(report);
     } catch (error) {
       console.error('Failed to load student report:', error);
@@ -129,8 +129,8 @@ export default function InstructorDashboard({ classId, className }: { classId: n
     setSelectedSubtopic(null);
     try {
       const [report, analytics] = await Promise.all([
-        reportsService.getTopicReport(topic.topic),
-        reportsService.getQuestionAnalytics(topic.topic),
+        reportsService.getTopicReport(topic.topic, classId),
+        reportsService.getQuestionAnalytics(topic.topic, undefined, classId),
       ]);
       setTopicReport(report);
       setTopicQuestionAnalytics(analytics);

@@ -12,17 +12,21 @@ class ReportService:
     """Service for generating analytics and reports."""
 
     @staticmethod
-    def get_student_report(student_id: int) -> Optional[Dict]:
+    def get_student_report(student_id: int, class_id: Optional[int] = None) -> Optional[Dict]:
         user = db.session.get(User, student_id)
         if not user:
             return None
 
+        roster_filter = [
+            func.lower(RosterStudent.email) == func.lower(user.email),
+            RosterStudent.deleted_at.is_(None),
+        ]
+        if class_id is not None:
+            roster_filter.append(RosterStudent.class_id == class_id)
+
         roster_entry = (
             db.session.execute(
-                db.select(RosterStudent).filter(
-                    func.lower(RosterStudent.email) == func.lower(user.email),
-                    RosterStudent.deleted_at.is_(None),
-                )
+                db.select(RosterStudent).filter(*roster_filter)
             )
             .scalars()
             .first()
@@ -32,10 +36,14 @@ class ReportService:
         if roster_entry is None:
             return None
 
+        response_filter = [StudentResponse.user_id == student_id]
+        if class_id is not None:
+            response_filter.append(StudentResponse.class_id == class_id)
+
         responses: List[StudentResponse] = (
             db.session.execute(
                 db.select(StudentResponse)
-                .filter_by(user_id=student_id)
+                .filter(*response_filter)
                 .order_by(StudentResponse.attempted_at.asc())
             )
             .scalars()
@@ -76,6 +84,10 @@ class ReportService:
             (correct / (correct + incorrect) * 100) if (correct + incorrect) > 0 else 0
         )
 
+        topic_stats_filter = [StudentResponse.user_id == student_id]
+        if class_id is not None:
+            topic_stats_filter.append(StudentResponse.class_id == class_id)
+
         topic_stats = (
             db.session.execute(
                 db.select(
@@ -99,7 +111,7 @@ class ReportService:
                     ).label("avg_time"),
                 )
                 .join(Topic, StudentResponse.topic == Topic.id)
-                .filter(StudentResponse.user_id == student_id)
+                .filter(*topic_stats_filter)
                 .group_by(StudentResponse.topic, Topic.name)
             )
             .mappings()
@@ -108,8 +120,11 @@ class ReportService:
 
         topic_breakdown = []
         for stat in topic_stats:
+            progress_filter = {"user_id": student_id, "topic": stat["topic"]}
+            if class_id is not None:
+                progress_filter["class_id"] = class_id
             progress = db.session.execute(
-                db.select(StudentProgress).filter_by(user_id=student_id, topic=stat["topic"])
+                db.select(StudentProgress).filter_by(**progress_filter)
             ).scalar_one_or_none()
 
             answered = stat["correct"] + stat["incorrect"]
@@ -148,7 +163,7 @@ class ReportService:
                         case((StudentResponse.is_correct.is_(True), 100.0), else_=0.0)
                     ).label("accuracy"),
                 )
-                .filter(StudentResponse.user_id == student_id)
+                .filter(*response_filter)
                 .group_by(func.date(StudentResponse.attempted_at))
                 .order_by(func.date(StudentResponse.attempted_at))
             )
@@ -177,7 +192,7 @@ class ReportService:
                 )
                 .filter(
                     and_(
-                        StudentResponse.user_id == student_id,
+                        *response_filter,
                         StudentResponse.status != "skipped",
                     )
                 )
@@ -203,8 +218,11 @@ class ReportService:
 
         struggling.sort(key=lambda x: x["accuracy"])
 
+        progress_kwargs = {"user_id": student_id}
+        if class_id is not None:
+            progress_kwargs["class_id"] = class_id
         progress_records: List[StudentProgress] = (
-            db.session.execute(db.select(StudentProgress).filter_by(user_id=student_id))
+            db.session.execute(db.select(StudentProgress).filter_by(**progress_kwargs))
             .scalars()
             .all()
         )
@@ -235,10 +253,14 @@ class ReportService:
         }
 
     @staticmethod
-    def get_topic_report(topic_id: str) -> Optional[Dict]:
+    def get_topic_report(topic_id: str, class_id: Optional[int] = None) -> Optional[Dict]:
         topic = db.session.get(Topic, topic_id)
         if not topic:
             return None
+
+        roster_filter = [User.role == "student", RosterStudent.deleted_at.is_(None)]
+        if class_id is not None:
+            roster_filter.append(RosterStudent.class_id == class_id)
 
         rostered_students_subquery = (
             db.select(User.id)
@@ -247,16 +269,20 @@ class ReportService:
                 RosterStudent,
                 func.lower(RosterStudent.email) == func.lower(User.email),
             )
-            .filter(User.role == "student", RosterStudent.deleted_at.is_(None))
+            .filter(*roster_filter)
             .subquery()
         )
 
+        response_base_filter = [
+            StudentResponse.topic == topic_id,
+            StudentResponse.user_id.in_(rostered_students_subquery),
+        ]
+        if class_id is not None:
+            response_base_filter.append(StudentResponse.class_id == class_id)
+
         responses: List[StudentResponse] = (
             db.session.execute(
-                db.select(StudentResponse).filter(
-                    StudentResponse.topic == topic_id,
-                    StudentResponse.user_id.in_(rostered_students_subquery),
-                )
+                db.select(StudentResponse).filter(*response_base_filter)
             )
             .scalars()
             .all()
@@ -287,23 +313,22 @@ class ReportService:
         students_started = db.session.execute(
             db.select(func.count(func.distinct(StudentResponse.user_id)))
             .select_from(StudentResponse)
-            .filter(
-                StudentResponse.topic == topic_id,
-                StudentResponse.user_id.in_(rostered_students_subquery),
-            )
+            .filter(*response_base_filter)
         ).scalar_one()
+
+        progress_completed_filter = [
+            StudentProgress.topic == topic_id,
+            StudentProgress.total_subtopics > 0,
+            StudentProgress.subtopics_completed >= StudentProgress.total_subtopics,
+            StudentProgress.user_id.in_(rostered_students_subquery),
+        ]
+        if class_id is not None:
+            progress_completed_filter.append(StudentProgress.class_id == class_id)
 
         students_completed = db.session.execute(
             db.select(func.count(StudentProgress.id))
             .select_from(StudentProgress)
-            .filter(
-                and_(
-                    StudentProgress.topic == topic_id,
-                    StudentProgress.total_subtopics > 0,
-                    StudentProgress.subtopics_completed >= StudentProgress.total_subtopics,
-                    StudentProgress.user_id.in_(rostered_students_subquery),
-                )
-            )
+            .filter(and_(*progress_completed_filter))
         ).scalar_one()
 
         non_skipped = [r for r in responses if r.status != "skipped"]
@@ -329,9 +354,8 @@ class ReportService:
                 )
                 .filter(
                     and_(
-                        StudentResponse.topic == topic_id,
+                        *response_base_filter,
                         StudentResponse.status != "skipped",
-                        StudentResponse.user_id.in_(rostered_students_subquery),
                     )
                 )
                 .group_by(StudentResponse.subtopic_type)
@@ -380,9 +404,8 @@ class ReportService:
                 )
                 .filter(
                     and_(
-                        StudentResponse.topic == topic_id,
+                        *response_base_filter,
                         StudentResponse.status != "skipped",
-                        StudentResponse.user_id.in_(rostered_students_subquery),
                     )
                 )
                 .group_by(StudentResponse.question_code, StudentResponse.subtopic_type)
@@ -471,11 +494,17 @@ class ReportService:
 
         one_week_ago = datetime.utcnow() - timedelta(days=7)
 
+        resp_filter = [StudentResponse.user_id.in_(rostered_students_subquery)]
+        prog_filter = [StudentProgress.user_id.in_(rostered_students_subquery)]
+        if class_id is not None:
+            resp_filter.append(StudentResponse.class_id == class_id)
+            prog_filter.append(StudentProgress.class_id == class_id)
+
         active_last_week = db.session.execute(
             db.select(func.count(func.distinct(StudentResponse.user_id)))
             .select_from(StudentResponse)
             .filter(
-                StudentResponse.user_id.in_(rostered_students_subquery),
+                *resp_filter,
                 StudentResponse.attempted_at >= one_week_ago,
             )
         ).scalar_one()
@@ -483,9 +512,7 @@ class ReportService:
         total_questions = db.session.execute(
             db.select(func.count(StudentResponse.id))
             .select_from(StudentResponse)
-            .filter(
-                StudentResponse.user_id.in_(rostered_students_subquery)
-            )
+            .filter(*resp_filter)
         ).scalar_one()
 
         responses = (
@@ -493,8 +520,8 @@ class ReportService:
                 db.select(StudentResponse)
                 .select_from(StudentResponse)
                 .filter(
+                    *resp_filter,
                     StudentResponse.status != "skipped",
-                    StudentResponse.user_id.in_(rostered_students_subquery),
                 )
             )
             .scalars()
@@ -517,7 +544,7 @@ class ReportService:
                     StudentProgress,
                     and_(
                         Topic.id == StudentProgress.topic,
-                        StudentProgress.user_id.in_(rostered_students_subquery)
+                        *prog_filter,
                     )
                 )
                 .group_by(Topic.id, Topic.name, Topic.order_index)
@@ -534,9 +561,9 @@ class ReportService:
                     func.count(func.distinct(StudentProgress.user_id)).label("completed_count")
                 )
                 .filter(
+                    *prog_filter,
                     StudentProgress.subtopics_completed >= StudentProgress.total_subtopics,
                     StudentProgress.total_subtopics > 0,
-                    StudentProgress.user_id.in_(rostered_students_subquery)
                 )
                 .group_by(StudentProgress.topic)
             ).all()
@@ -551,8 +578,8 @@ class ReportService:
                 func.avg(StudentResponse.time_spent).label("avg_time")
             )
             .filter(
+                *resp_filter,
                 StudentResponse.status != "skipped",
-                StudentResponse.user_id.in_(rostered_students_subquery)
             )
             .group_by(StudentResponse.topic)
         ):
@@ -610,7 +637,7 @@ class ReportService:
                 .filter(
                     and_(
                         User.role == "student",
-                        User.id.in_(rostered_students_subquery),
+                        *resp_filter,
                         StudentResponse.status != "skipped",
                     )
                 )
@@ -649,7 +676,7 @@ class ReportService:
                 .filter(
                     and_(
                         User.role == "student",
-                        User.id.in_(rostered_students_subquery),
+                        *resp_filter,
                         StudentResponse.status != "skipped",
                     )
                 )
@@ -682,7 +709,7 @@ class ReportService:
                     func.count(func.distinct(StudentResponse.user_id)).label("active_students"),
                 )
                 .filter(
-                    StudentResponse.user_id.in_(rostered_students_subquery),
+                    *resp_filter,
                     StudentResponse.attempted_at >= one_week_ago,
                 )
                 .group_by(func.date(StudentResponse.attempted_at))
@@ -714,7 +741,7 @@ class ReportService:
         }
 
     @staticmethod
-    def get_question_analytics(topic_id: str, subtopic_type: Optional[str] = None) -> Dict:
+    def get_question_analytics(topic_id: str, subtopic_type: Optional[str] = None, class_id: Optional[int] = None) -> Dict:
         query = (
             db.session.query(
                 StudentResponse.question_code,
@@ -742,6 +769,9 @@ class ReportService:
 
         if subtopic_type:
             query = query.filter(StudentResponse.subtopic_type == subtopic_type)
+
+        if class_id is not None:
+            query = query.filter(StudentResponse.class_id == class_id)
 
         results = (
             query.group_by(StudentResponse.question_code, StudentResponse.subtopic_type)

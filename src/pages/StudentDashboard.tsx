@@ -7,6 +7,7 @@ import './StudentDashboard.css';
 
 interface StudentDashboardProps {
   user: User;
+  currentClassId: number | null;
 }
 
 interface SummaryStats {
@@ -63,7 +64,7 @@ const formatLastAccessed = (isoDate: string | null): string | null => {
   });
 };
 
-export default function StudentDashboard({ user }: StudentDashboardProps) {
+export default function StudentDashboard({ user, currentClassId }: StudentDashboardProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<TopicProgress[]>([]);
@@ -76,8 +77,8 @@ export default function StudentDashboard({ user }: StudentDashboardProps) {
     setError(null);
 
     Promise.all([
-      progressService.getUserProgress(user.id),
-      responsesService.getStudentResponses(user.id),
+      progressService.getUserProgress(user.id, currentClassId),
+      responsesService.getStudentResponses(user.id, currentClassId),
     ])
       .then(([progressData, responseData]) => {
         if (!mounted) {
@@ -107,7 +108,7 @@ export default function StudentDashboard({ user }: StudentDashboardProps) {
     return () => {
       mounted = false;
     };
-  }, [user.id]);
+  }, [user.id, currentClassId]);
 
   const summary = useMemo(() => buildSummary(responses), [responses]);
 

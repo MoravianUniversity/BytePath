@@ -109,8 +109,9 @@ export interface QuestionAnalyticsResponse {
 }
 
 export const reportsService = {
-  async getStudentReport(studentId: number): Promise<StudentReport> {
-    const response = await api.get(`reports/student/${studentId}`);
+  async getStudentReport(studentId: number, classId?: number | null): Promise<StudentReport> {
+    const params = classId ? `?class_id=${classId}` : '';
+    const response = await api.get(`reports/student/${studentId}${params}`);
     return response.data;
   },
 
@@ -120,14 +121,17 @@ export const reportsService = {
     return response.data;
   },
 
-  async getTopicReport(topicId: string): Promise<TopicReport> {
-    const response = await api.get(`reports/topic/${topicId}`);
+  async getTopicReport(topicId: string, classId?: number | null): Promise<TopicReport> {
+    const params = classId ? `?class_id=${classId}` : '';
+    const response = await api.get(`reports/topic/${topicId}${params}`);
     return response.data;
   },
 
-  async getQuestionAnalytics(topicId: string, subtopicType?: string): Promise<QuestionAnalyticsResponse> {
-    const params = subtopicType ? { subtopic_type: subtopicType } : undefined;
-    const response = await api.get(`reports/question/${topicId}/analytics`, { params });
+  async getQuestionAnalytics(topicId: string, subtopicType?: string, classId?: number | null): Promise<QuestionAnalyticsResponse> {
+    const params: Record<string, string | number> = {};
+    if (subtopicType) params.subtopic_type = subtopicType;
+    if (classId) params.class_id = classId;
+    const response = await api.get(`reports/question/${topicId}/analytics`, { params: Object.keys(params).length ? params : undefined });
     return response.data;
   },
 };
