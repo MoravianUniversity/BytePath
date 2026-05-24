@@ -1,6 +1,14 @@
 import { API_BASE } from './api';
 import type { Student } from './students';
 
+export type CoInstructor = {
+  user_id: number;
+  class_id: number;
+  added_at: string;
+  name: string;
+  email: string;
+};
+
 export type Class = {
   id: number;
   class_name: string;
@@ -81,5 +89,33 @@ export const classesService = {
     const res = await fetch(`${API_BASE}/classes/my`, { credentials: 'include' });
     if (!res.ok) return [];
     return res.json();
+  },
+
+  async listCoInstructors(classId: number): Promise<CoInstructor[]> {
+    const res = await fetch(`${API_BASE}/classes/${classId}/instructors`, { credentials: 'include' });
+    if (!res.ok) throw new Error(`Failed to fetch co-instructors (${res.status})`);
+    return res.json();
+  },
+
+  async addCoInstructor(classId: number, email: string): Promise<CoInstructor> {
+    const res = await fetch(`${API_BASE}/classes/${classId}/instructors`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+      credentials: 'include',
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || `Failed to add co-instructor (${res.status})`);
+    }
+    return res.json();
+  },
+
+  async removeCoInstructor(classId: number, userId: number): Promise<void> {
+    const res = await fetch(`${API_BASE}/classes/${classId}/instructors/${userId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+    if (!res.ok) throw new Error(`Failed to remove co-instructor (${res.status})`);
   },
 };

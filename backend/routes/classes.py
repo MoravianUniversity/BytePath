@@ -8,17 +8,24 @@ from flask import Blueprint, jsonify, request, session
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
-from backend.models import Class, RosterStudent, db
+from backend.models import Class, Instructor, RosterStudent, User, db
 
 classes_bp = Blueprint("classes", __name__, url_prefix="/api/classes")
 
 
 @classes_bp.get("")
 def list_classes():
-    """List all classes for the current instructor."""
-    instructor_id = session.get("user_id")
-    classes = Class.query.filter_by(instructor_id=instructor_id).order_by(Class.created_at.desc()).all()
-    return jsonify([c.to_dict() for c in classes])
+    """List all classes where the current user is the owner or a co-instructor."""
+    user_id = session.get("user_id")
+    owned = Class.query.filter_by(instructor_id=user_id).all()
+    co_class_ids = db.session.execute(
+        db.select(Instructor.class_id).where(Instructor.user_id == user_id)
+    ).scalars().all()
+    co_classes = Class.query.filter(
+        Class.id.in_(co_class_ids), Class.instructor_id != user_id
+    ).all()
+    all_classes = sorted(owned + co_classes, key=lambda c: c.created_at, reverse=True)
+    return jsonify([c.to_dict() for c in all_classes])
 
 
 @classes_bp.post("")
@@ -136,5 +143,71 @@ def remove_student(id: int, student_id: int):
         return jsonify({"error": "Student not found in this class"}), 404
 
     student.class_id = None
+    db.session.commit()
+    return "", 204
+
+
+@classes_bp.get("/<int:id>/instructors")
+def list_class_instructors(id: int):
+    """List co-instructors for a class."""
+    c = db.session.get(Class, id)
+    if not c:
+        return jsonify({"error": "Class not found"}), 404
+    entries = Instructor.query.filter_by(class_id=id).all()
+    return jsonify([e.to_dict() for e in entries])
+
+
+@classes_bp.post("/<int:id>/instructors")
+def add_class_instructor(id: int):
+    """Add a co-instructor to a class by email. Only the class owner can do this."""
+    c = db.session.get(Class, id)
+    if not c:
+        return jsonify({"error": "Class not found"}), 404
+
+    current_user_id = session.get("user_id")
+    if c.instructor_id != current_user_id:
+        return jsonify({"error": "Only the class owner can add co-instructors"}), 403
+
+    data = request.get_json(silent=True) or {}
+    email = (data.get("email") or "").strip().lower()
+    if not email:
+        return jsonify({"error": "email is required"}), 400
+
+    user = User.query.filter(func.lower(User.email) == email).first()
+    if not user:
+        return jsonify({"error": "No user with that email found. They must log in first."}), 404
+
+    if user.id == c.instructor_id:
+        return jsonify({"error": "That user is already the class owner"}), 400
+
+    existing = Instructor.query.filter_by(user_id=user.id, class_id=id).first()
+    if existing:
+        return jsonify({"error": "That user is already a co-instructor for this class"}), 409
+
+    if user.role != "instructor":
+        user.role = "instructor"
+
+    entry = Instructor(user_id=user.id, class_id=id, added_by=current_user_id)
+    db.session.add(entry)
+    db.session.commit()
+    return jsonify(entry.to_dict()), 201
+
+
+@classes_bp.delete("/<int:id>/instructors/<int:user_id>")
+def remove_class_instructor(id: int, user_id: int):
+    """Remove a co-instructor from a class. Only the class owner can do this."""
+    c = db.session.get(Class, id)
+    if not c:
+        return jsonify({"error": "Class not found"}), 404
+
+    current_user_id = session.get("user_id")
+    if c.instructor_id != current_user_id:
+        return jsonify({"error": "Only the class owner can remove co-instructors"}), 403
+
+    entry = Instructor.query.filter_by(user_id=user_id, class_id=id).first()
+    if not entry:
+        return jsonify({"error": "Co-instructor not found for this class"}), 404
+
+    db.session.delete(entry)
     db.session.commit()
     return "", 204

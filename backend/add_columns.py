@@ -100,6 +100,30 @@ with app.app_context():
             conn.commit()
             print("roster_students recreated with UNIQUE(email, class_id).")
 
+    # ── instructors (co-instructor join table) ───────────────────────────────
+    # Recreate if the table is missing class_id (old schema had only user_id).
+    with db.engine.connect() as conn:
+        instructor_cols = [
+            col['name'] for col in inspector.get_columns('instructors')
+        ] if inspector.has_table('instructors') else []
+        print(f"instructors columns: {instructor_cols}")
+
+        if 'class_id' not in instructor_cols:
+            print("Recreating instructors table with class_id support...")
+            conn.execute(db.text("DROP TABLE IF EXISTS instructors"))
+            conn.execute(db.text("""
+                CREATE TABLE instructors (
+                    id INTEGER NOT NULL PRIMARY KEY,
+                    user_id INTEGER NOT NULL REFERENCES users(id),
+                    class_id INTEGER NOT NULL REFERENCES classes(id),
+                    added_by INTEGER REFERENCES users(id),
+                    added_at DATETIME,
+                    UNIQUE (user_id, class_id)
+                )
+            """))
+            conn.commit()
+            print("instructors table recreated.")
+
     # ── create any new tables (classes, upload_history, etc.) ────────────────
     db.create_all()
 

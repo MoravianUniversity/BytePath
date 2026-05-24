@@ -26,6 +26,10 @@ export default function StudentsPage({ classId, className }: { classId: number |
   const [selectedUpload, setSelectedUpload] = useState<UploadHistory | null>(null);
   const [editing, setEditing] = useState<EditingState | null>(null);
   const [selectedStudents, setSelectedStudents] = useState<Set<number>>(new Set());
+  const [showManualForm, setShowManualForm] = useState(false);
+  const [manualForm, setManualForm] = useState({ first_name: "", last_name: "", email: "", notes: "" });
+  const [manualError, setManualError] = useState<string | null>(null);
+  const [manualSaving, setManualSaving] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -128,6 +132,28 @@ export default function StudentsPage({ classId, className }: { classId: number |
       await studentsService.downloadTemplate();
     } catch (error) {
       alert(`Failed to download template: ${error}`);
+    }
+  };
+
+  const handleManualSubmit = async (e?: React.FormEvent | React.MouseEvent) => {
+    e?.preventDefault();
+    setManualError(null);
+    setManualSaving(true);
+    try {
+      await studentsService.create({
+        email: manualForm.email,
+        first_name: manualForm.first_name,
+        last_name: manualForm.last_name,
+        notes: manualForm.notes || undefined,
+        class_id: classId,
+      });
+      setManualForm({ first_name: "", last_name: "", email: "", notes: "" });
+      setShowManualForm(false);
+      await load();
+    } catch (err) {
+      setManualError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setManualSaving(false);
     }
   };
 
@@ -358,6 +384,75 @@ export default function StudentsPage({ classId, className }: { classId: number |
             </tr>
           </thead>
           <tbody>
+            {showManualForm ? (
+              <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+                <td />
+                <td>
+                  <input
+                    type="email"
+                    value={manualForm.email}
+                    onChange={e => setManualForm(f => ({ ...f, email: e.target.value }))}
+                    placeholder="email@school.edu"
+                    autoFocus
+                    className="inline-edit-input"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    value={manualForm.first_name}
+                    onChange={e => setManualForm(f => ({ ...f, first_name: e.target.value }))}
+                    placeholder="First name"
+                    className="inline-edit-input"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    value={manualForm.last_name}
+                    onChange={e => setManualForm(f => ({ ...f, last_name: e.target.value }))}
+                    placeholder="Last name"
+                    className="inline-edit-input"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    value={manualForm.notes}
+                    onChange={e => setManualForm(f => ({ ...f, notes: e.target.value }))}
+                    placeholder="Notes (optional)"
+                    className="inline-edit-input"
+                  />
+                </td>
+                <td colSpan={2} style={{ whiteSpace: "nowrap" }}>
+                  <button
+                    onClick={handleManualSubmit}
+                    className="search-button"
+                    disabled={manualSaving || !manualForm.email || !manualForm.first_name || !manualForm.last_name}
+                    style={{ marginRight: 6 }}
+                  >
+                    {manualSaving ? "Saving…" : "Save"}
+                  </button>
+                  <button
+                    onClick={() => { setShowManualForm(false); setManualForm({ first_name: "", last_name: "", email: "", notes: "" }); setManualError(null); }}
+                    className="delete-button"
+                    title="Cancel"
+                  >
+                    ✕
+                  </button>
+                  {manualError && <span style={{ color: "#ff8080", fontSize: "0.85em", marginLeft: 8 }}>{manualError}</span>}
+                </td>
+              </tr>
+            ) : (
+              <tr
+                style={{ cursor: "pointer", opacity: 0.5 }}
+                onClick={() => { setShowManualForm(true); setManualError(null); }}
+                title="Add a student"
+              >
+                <td />
+                <td colSpan={6} style={{ padding: "0.5rem 0.6rem", fontSize: "1.2em", letterSpacing: 1 }}>+</td>
+              </tr>
+            )}
             {loading ? (
               <tr>
                 <td colSpan={7} className="loading-cell">Loading…</td>

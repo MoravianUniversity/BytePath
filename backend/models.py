@@ -35,6 +35,29 @@ class User(db.Model):
             "created_at": self.created_at.isoformat(),
         }
 
+class Instructor(db.Model):
+    __tablename__ = "instructors"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    class_id = db.Column(db.Integer, db.ForeignKey("classes.id"), nullable=False)
+    added_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    added_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (db.UniqueConstraint("user_id", "class_id", name="_instructor_class_uc"),)
+
+    user = db.relationship("User", foreign_keys=[user_id])
+    klass = db.relationship("Class", backref="co_instructors")
+
+    def to_dict(self) -> dict:
+        return {
+            "user_id": self.user_id,
+            "class_id": self.class_id,
+            "added_at": self.added_at.isoformat(),
+            "name": self.user.name,
+            "email": self.user.email,
+        }
+
 class Class(db.Model):
     __tablename__ = "classes"
 
