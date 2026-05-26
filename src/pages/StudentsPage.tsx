@@ -12,7 +12,7 @@ type EditingState = {
 export default function StudentsPage({ classId, className }: { classId: number | null; className: string | null }) {
   const [students, setStudents] = useState<Student[]>([]);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(50);
   const [totalPages, setTotalPages] = useState(0);
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
@@ -165,7 +165,7 @@ export default function StudentsPage({ classId, className }: { classId: number |
         </Button>
         <div className="upload-details">
           <h2>Upload Details: {selectedUpload.filename}</h2>
-          <div className="upload-meta">
+          <div className="upload-meta app-page-panel">
             <p><strong>Uploaded:</strong> {new Date(selectedUpload.uploaded_at).toLocaleString()}</p>
             <p><strong>Action:</strong> {selectedUpload.action}</p>
             <p><strong>Summary:</strong></p>
@@ -178,7 +178,7 @@ export default function StudentsPage({ classId, className }: { classId: number |
               {selectedUpload.summary.not_found > 0 && <li>{selectedUpload.summary.not_found} not found</li>}
             </ul>
           </div>
-          <div className="change-log">
+          <div className="change-log app-page-panel">
             <h3>Change Log</h3>
             <div className="change-list">
               {selectedUpload.changes.map((change, i) => (
@@ -207,7 +207,7 @@ export default function StudentsPage({ classId, className }: { classId: number |
           {uploadHistory.map((upload) => (
             <div
               key={upload.id}
-              className="history-item"
+              className="history-item app-page-panel"
               onClick={() => setSelectedUpload(upload)}
             >
               <div className="history-item-header">
@@ -244,17 +244,17 @@ export default function StudentsPage({ classId, className }: { classId: number |
   return (
     <div className="students-page">
       <div className="students-header">
-        <h2>{className ? `${className} — Student Bank` : 'Student Bank'}</h2>
+        <h1>{className ? `${className} Student Bank` : 'Student Bank'}</h1>
         <button onClick={() => setShowHistory(true)} className="history-button">
           📋 Upload History
         </button>
       </div>
 
-      <p className="students-description">
+      <p className="students-description app-page-lead">
         Manage your student roster. Add students via CSV upload, edit inline, or remove students.
       </p>
 
-      <div className="students-controls">
+      <div className="students-controls app-page-panel">
         <form onSubmit={doSearch} className="search-form">
           <input
             value={search}
@@ -296,7 +296,7 @@ export default function StudentsPage({ classId, className }: { classId: number |
       )}
 
       {uploadSummary && (
-        <div className="upload-summary">
+        <div className="upload-summary app-page-panel">
           <strong>Upload Summary:</strong>{" "}
           <>
             {uploadSummary.added > 0 && <span>+{uploadSummary.added} added</span>}
@@ -321,7 +321,7 @@ export default function StudentsPage({ classId, className }: { classId: number |
       )}
 
       {selectedStudents.size > 0 && (
-        <div className="bulk-actions">
+        <div className="bulk-actions app-page-panel">
           <span>{selectedStudents.size} selected</span>
           <button onClick={handleBulkDelete} className="bulk-delete-button">
             Remove Selected

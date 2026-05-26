@@ -49,6 +49,18 @@ export default function InstructorDashboard({ classId, className }: { classId: n
   const [coInstructorSaving, setCoInstructorSaving] = useState(false);
 
   useEffect(() => {
+    setSelectedStudent(null);
+    setLookupError(null);
+    setShowRoster(false);
+    setShowCoInstructors(false);
+    setSelectedTopic(null);
+    setTopicReport(null);
+    setTopicQuestionAnalytics(null);
+    setTopicError(null);
+    setTopicLoading(false);
+    setSelectedQuestion(null);
+    setSelectedSubtopic(null);
+    setLoading(true);
     loadClassOverview();
     if (classId) loadCoInstructors();
   }, [classId]);
@@ -195,7 +207,16 @@ export default function InstructorDashboard({ classId, className }: { classId: n
   };
 
   if (loading) {
-    return <div className="dashboard-loading">Loading dashboard…</div>;
+    return (
+      <div className="instructor-dashboard app-page">
+        <header className="dashboard-header">
+          <div className="dashboard-header__content">
+            <h1>{className ? `${className} Analytics` : 'All Class Analytics'}</h1>
+            <div className="dashboard-loading">Loading dashboard…</div>
+          </div>
+        </header>
+      </div>
+    );
   }
 
   if (selectedStudent) {
@@ -205,7 +226,7 @@ export default function InstructorDashboard({ classId, className }: { classId: n
     const topicsStarted = selectedStudent.topic_breakdown.length;
 
     return (
-      <div className="instructor-dashboard">
+      <div className="instructor-dashboard app-page">
         <Button onClick={() => setSelectedStudent(null)} className="back-button" variant="ghost">
           Back to Class Overview
         </Button>
@@ -324,7 +345,7 @@ export default function InstructorDashboard({ classId, className }: { classId: n
   }
 
   return (
-    <div className="instructor-dashboard">
+    <div className="instructor-dashboard app-page">
       {showRoster && (
         <div
           className="roster-modal"
@@ -546,7 +567,7 @@ export default function InstructorDashboard({ classId, className }: { classId: n
 
       <header className="dashboard-header">
         <div className="dashboard-header__content">
-          <h1>{className ? `${className} Analytics` : 'All Classes — Analytics'}</h1>
+          <h1>{className ? `${className} Analytics` : 'All Class Analytics'}</h1>
           <p className="dashboard-subtitle">
             Comprehensive overview of student progress and performance
           </p>

@@ -11,19 +11,20 @@
   top: calc(100% + 6px);
   right: 0;
   min-width: 200px;
-  background: var(--bg-page);
-  border: 2px solid var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary-dark) 85%, rgb(var(--color-white-rgb)));
+  border: 2px solid color-mix(in srgb, var(--color-primary-dark) 60%, rgb(var(--color-white-rgb)));
   border-radius: 8px;
   box-shadow: 0 8px 24px var(--shadow-color);
   z-index: 100;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 2px 8px var(--overlay-on-gradient-20);
 }
 
 .class-dropdown-empty {
   padding: 10px 14px;
-  color: var(--text-muted);
+  color: var(--overlay-on-gradient-text-70);
   font-size: 0.875rem;
 }
 
@@ -33,52 +34,56 @@
   padding: 10px 14px;
   background: none;
   border: none;
-  color: var(--color-primary);
+  color: var(--text-on-gradient);
   font-size: 0.9rem;
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .class-dropdown-item:hover {
-  background: var(--overlay-on-gradient-07);
+  background: var(--overlay-on-gradient-20);
 }
 
 .class-dropdown-item.selected {
-  background: var(--overlay-on-gradient-07);
-  color: var(--color-primary);
+  background: var(--overlay-on-gradient-30);
+  color: var(--text-on-gradient);
   font-weight: 600;
 }
 
 .class-dropdown-item.selected:hover {
-  background: var(--overlay-on-gradient-21);
+  background: var(--overlay-on-gradient-40);
 }
 
 .class-dropdown-item.add-new {
-  color: var(--color-primary);
-  border-top: 1px solid var(--border-card);
-  margin-top: 4px;
+  color: var(--text-on-gradient);
+  border-top: 2px solid color-mix(in srgb, var(--color-primary-dark) 60%, rgb(var(--color-white-rgb)));
 }
 
 .class-dropdown-add-form {
   display: flex;
   gap: 6px;
   padding: 8px 10px;
-  border-top: 1px solid var(--border-card);
+  border-top: 2px solid color-mix(in srgb, var(--color-primary-dark) 60%, rgb(var(--color-white-rgb)));
 }
 
 .class-dropdown-add-form input {
   flex: 1;
   padding: 6px 10px;
-  background: var(--bg-page);
-  border: 1px solid var(--border-card);
+  background: var(--overlay-on-gradient-10);
+  border: 2px solid color-mix(in srgb, var(--color-primary-dark) 60%, rgb(var(--color-white-rgb)));
   border-radius: 6px;
-  color: var(--text-primary);
+  color: var(--text-on-gradient);
   font-size: 0.875rem;
   outline: none;
 }
 
+.class-dropdown-add-form input::placeholder {
+  color: var(--overlay-on-gradient-text-50);
+}
+
 .class-dropdown-add-form input:focus {
-  border-color: var(--color-primary);
+  border-color: var(--overlay-on-gradient-text-50);
+  background: var(--overlay-on-gradient-20);
 }
 
 .class-dropdown-add-form button {

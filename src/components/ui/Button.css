@@ -16,7 +16,6 @@
 
 .ui-btn:hover {
   background: var(--bg-card-hover);
-  transform: translateY(-1px);
 }
 
 .ui-btn:disabled {

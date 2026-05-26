@@ -84,7 +84,6 @@
 .restart-button:hover {
   background: var(--overlay-on-gradient-20);
   border-color: var(--overlay-on-gradient-30);
-  transform: translateY(-2px);
 }
 
 .next-button {
@@ -103,7 +102,6 @@
 
 .next-button:hover {
   background: var(--gradient-success-bright-hover);
-  transform: translateY(-2px);
   box-shadow: var(--shadow-success-glow);
 }
 

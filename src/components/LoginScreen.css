@@ -48,7 +48,7 @@
 }
 
 .login-input::placeholder {
-  color: var(--overlay-on-gradient-text-60);
+  color: var(--overlay-on-gradient-text-50);
 }
 
 .login-input:focus {
@@ -81,7 +81,6 @@
 }
 
 .login-button:hover:not(:disabled) {
-  transform: translateY(-2px);
   box-shadow: var(--shadow-accent-btn);
 }
 

@@ -14,7 +14,7 @@ code {
   background: var(--bg-code);
   padding: 0.5em 1em;
   border-radius: 10px;
-  border: 2px solid var(--syntax-border);
+  border: 2px solid var(--border-subtle);
   white-space: pre;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 1rem !important;

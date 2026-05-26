@@ -1,16 +1,16 @@
 .question-screen {
   padding: 1.5rem;
-  background: var(--overlay-on-gradient-05);
+  background: var(--bg-question-panel);
   border-radius: 15px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-question-panel);
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
 }
 
 .question-screen.completed.correct {
-  background: var(--overlay-on-gradient-25);
-  border-color: var(--overlay-on-gradient-text-50);
-  box-shadow: 0 0 20px var(--overlay-on-gradient-40);
+  background: var(--bg-question-panel-correct);
+  border-color: var(--border-question-panel-correct);
+  box-shadow: var(--shadow-question-panel-correct);
 }
 
 .code-block {
@@ -53,7 +53,6 @@
 }
 .answer-option:hover:not(:disabled) {
   border-color: var(--color-primary);
-  transform: translateY(-2px);
   background: var(--bg-question-input-focus);
   outline-color: var(--syntax-outline);
 }
@@ -80,7 +79,7 @@
 .skip-button {
   background: var(--syntax-hint-bg);
   outline-color: var(--syntax-hint-outline);
-  color: var(--syntax-hint-text);
+  color: var(--syntax-hint-outline);
   margin-left: auto;
   float: right;
   padding: 0.1em 0.75em;
@@ -88,7 +87,7 @@
 .skip-button:hover:not(:disabled) {
   background: var(--syntax-hint-bg-active);
   outline-color: var(--syntax-hint-outline-active);
-  color: var(--syntax-hint-text-active);
+  color: var(--syntax-hint-outline-active);
 }
 
 .quiz-input-container {
@@ -136,7 +135,7 @@ input.quiz-input, textarea.quiz-input {
   border-color: var(--syntax-outline-strong);
 }
 .quiz-input::placeholder {
-  color: var(--syntax-placeholder);
+  color: var(--syntax-outline);
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
 .submit-button {

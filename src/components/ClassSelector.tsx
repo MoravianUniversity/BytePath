@@ -55,7 +55,7 @@ export default function ClassSelector({ currentClassId, onClassChange }: Props) 
   return (
     <div className="class-selector" ref={ref}>
       <button
-        className={`dashboard-button class-selector-btn`}
+        className={`dashboard-button class-selector-btn ${open ? 'active' : ''}`}
         onClick={() => { setOpen(o => !o); setAdding(false); setNewName(''); }}
       >
         {currentClass ? currentClass.class_name : 'Classes'} ▾

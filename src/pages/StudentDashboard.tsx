@@ -144,7 +144,7 @@ export default function StudentDashboard({ user, currentClassId }: StudentDashbo
   };
 
   return (
-    <div className="student-dashboard">
+    <div className="student-dashboard app-page">
       <header className="student-dashboard__hero">
         <div className="hero__content">
           <h1>Welcome back, {user.name}!</h1>

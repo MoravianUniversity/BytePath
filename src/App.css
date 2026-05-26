@@ -1,4 +1,5 @@
 .App {
+  height: 100vh;
   min-height: 100vh;
   background: var(--bg-page);
   color: var(--text-primary);
@@ -14,16 +15,22 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 2.5rem;
+  /* Allow the header to grow on small screens instead of clipping buttons. */
+  min-height: 2.5rem;
+  height: auto;
+  flex-shrink: 0;
   color: var(--text-on-gradient);
   position: relative;
   z-index: 200;
+  flex-wrap: wrap;
 }
 
 .header-actions {
   display: flex;
   gap: 0.75rem;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .App-header img {
@@ -65,6 +72,8 @@
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .toggle-button {
@@ -100,6 +109,10 @@
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
 }
 
 .dashboard-button:hover {
@@ -109,6 +122,44 @@
 .dashboard-button.active {
   background: var(--overlay-on-gradient-35);
   box-shadow: 0 2px 8px var(--overlay-on-gradient-20);
+}
+
+select.dashboard-button {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 2rem;
+  background-color: var(--overlay-on-gradient-15);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--text-on-gradient) 50%),
+    linear-gradient(135deg, var(--text-on-gradient) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(50% + 2px),
+    calc(100% - 12px) calc(50% + 2px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+select.dashboard-button:hover {
+  background-color: var(--overlay-on-gradient-25);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--text-on-gradient) 50%),
+    linear-gradient(135deg, var(--text-on-gradient) 50%, transparent 50%);
+}
+
+select.dashboard-button option {
+  background: var(--color-primary-light);
+  color: var(--text-on-gradient);
+}
+
+.dashboard-button-label {
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .dashboard-button-label {
+    display: none;
+  }
 }
 
 .theme-toggle {
@@ -131,13 +182,16 @@
 }
 
 .logout-button {
-  padding: 0.5rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.75rem;
+  min-width: 2.5rem;
   border: 1px solid var(--border-on-gradient-strong);
   border-radius: 8px;
   background: var(--overlay-on-gradient-10);
   color: var(--text-on-gradient);
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
@@ -152,6 +206,109 @@
   flex: 1;
   display: flex;
   width: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Shared shell: full-width scroll, centered content, dashboard text tokens */
+.app-page {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+  box-sizing: border-box;
+  background: var(--bg-page);
+  color: var(--text-dashboard);
+  padding-block: var(--app-page-padding-block);
+  padding-inline: max(
+    var(--app-page-padding-inline-min),
+    calc((100% - var(--app-page-content-max)) / 2)
+  );
+}
+
+.app-page-header,
+.dashboard-header,
+.students-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.app-page-header h1,
+.app-page-header h2,
+.dashboard-header__content h1,
+.students-header h1,
+.students-header h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  color: var(--text-dashboard);
+}
+
+.app-page-lead,
+.dashboard-subtitle,
+.students-description {
+  margin: 0 0 1rem 0;
+  opacity: 0.65;
+  font-size: 1rem;
+  color: var(--text-dashboard);
+}
+
+.app-page-panel {
+  background: var(--bg-dashboard-card);
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-dashboard-card);
+  margin-bottom: 1rem;
+  color: var(--text-dashboard);
+}
+
+.app-page-input {
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-dashboard-card);
+  background: var(--bg-dashboard-card);
+  color: var(--text-dashboard);
+  font-size: 0.9rem;
+}
+
+.app-page-input:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.app-page-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-dashboard-card);
+  background: var(--bg-dashboard-card);
+  color: var(--text-dashboard);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.app-page-btn:hover:not(:disabled) {
+  background: var(--bg-dashboard-card-hover);
+}
+
+.app-page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.app-page-btn--primary {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--text-on-primary-btn);
+}
+
+.app-page-btn--primary:hover:not(:disabled) {
+  background: var(--color-primary-light);
 }
 
 .sidebar {
@@ -162,7 +319,8 @@
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  height: calc(100vh - 4.5rem);
+  height: 100%;
+  min-height: 0;
   transform: scaleX(-1);
 }
 
@@ -192,9 +350,16 @@
 
 .sidebar-item.active {
   background: var(--bg-sidebar-item-active);
+  border-color: var(--color-primary);
   border-left-color: var(--color-primary);
+  border-left-width: 3px;
   color: var(--color-primary);
   box-shadow: var(--shadow-card);
+}
+
+.sidebar-item.active:hover {
+  border-color: var(--color-primary);
+  border-left-color: var(--color-primary);
 }
 
 .sidebar-item.completed {
@@ -253,8 +418,8 @@
 }
 
 .status-indicator.available {
-  background: var(--overlay-on-gradient-20);
-  color: var(--text-on-primary-btn);
+  background: var(--bg-sidebar-item-active);
+  color: var(--color-primary);
 }
 
 .status-indicator.locked {
@@ -339,7 +504,8 @@
 .expand-icon {
   font-size: 0.7rem;
   transition: transform 0.2s ease;
-  color: var(--overlay-on-gradient-text-70);
+  /* Use a real text color so the icon stays visible on the light sidebar header. */
+  color: var(--text-secondary);
 }
 
 .expand-icon.expanded {
@@ -369,38 +535,54 @@
 }
 
 .group-status-indicator.available {
-  background: var(--overlay-on-gradient-20);
-  color: var(--text-on-primary-btn);
+  /* Light mode: avoid white/alpha text on a light background. */
+  background: var(--bg-sidebar-item-active);
+  color: var(--color-primary);
 }
 
 .sidebar-group-content {
   margin-top: 0.25rem;
   margin-left: 1rem;
-  border-left: 2px solid var(--border-subtle);
+  border-left: 2px solid var(--border-card);
   padding-left: 0.75rem;
 }
 
 .sidebar-group-content .sidebar-item {
   margin-bottom: 0.25rem;
-  background: var(--overlay-on-gradient-03);
+  background: var(--bg-sidebar-item);
 }
 
 .sidebar-group-content .sidebar-item:hover {
-  background: var(--overlay-on-gradient-08);
+  background: var(--bg-sidebar-item-active);
+  border-color: var(--border-card);
 }
 
 .sidebar-group-content .sidebar-item.active {
-  background: var(--overlay-on-gradient-12);
-  border-color: var(--overlay-on-gradient-25);
+  background: var(--bg-sidebar-item-active);
+  border-color: var(--color-primary);
+  border-left-color: var(--color-primary);
+  border-left-width: 3px;
+  color: var(--color-primary);
+}
+
+.sidebar-group-content .sidebar-item.active:hover {
+  border-color: var(--color-primary);
+  border-left-color: var(--color-primary);
 }
 
 .content-area {
   flex: 1;
   display: flex;
   align-items: flex-start;
-  height: calc(100vh - 4.5rem);
   overflow-y: auto;
+  min-height: 0;
   background: var(--bg-page);
+}
+
+.content-area.app-page {
+  display: block;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
 }
 
 .topic-container {
@@ -514,7 +696,10 @@
     border-right: none;
     border-bottom: 1px solid var(--border-subtle);
   }
-  .content-area { padding: 1rem; }
+  .app-page {
+    --app-page-padding-block: 1.25rem;
+    --app-page-padding-inline-min: 1rem;
+  }
   .stats-overview { gap: 1rem; }
   .stat-number { font-size: 1.5rem; }
 }
@@ -525,13 +710,14 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: calc(100vh - 4.5rem);
-  background: var(--bg-gradient);
+  height: 100%;
+  background: var(--bg-page);
+  min-height: 0;
 }
 
 .loading-content {
   text-align: center;
-  background: var(--overlay-on-gradient-10);
+  background: var(--bg-gradient);
   backdrop-filter: blur(10px);
   border-radius: 20px;
   margin: 2rem;
@@ -543,7 +729,7 @@
 .loading-content .loading-error p {
   font-size: 1rem;
   opacity: 0.8;
-  color: var(--color-error-alt);
+  color: var(--color-error-bright);
 }
 
 .loading-spinner {

@@ -1,11 +1,3 @@
-.student-dashboard {
-  padding: 2.5rem 2rem;
-  max-width: 1150px;
-  margin: 0 auto;
-  color: var(--text-dashboard);
-  overflow-y: auto;
-}
-
 .student-dashboard__loading,
 .student-dashboard__error {
   padding: 1.5rem;
@@ -61,7 +53,6 @@
 }
 
 .hero__cta:hover {
-  transform: translateY(-2px);
   box-shadow: var(--shadow-on-gradient);
 }
 
@@ -85,7 +76,6 @@
 }
 
 .stat-card:hover {
-  transform: translateY(-4px);
   box-shadow: var(--shadow-elevated);
   background: var(--bg-dashboard-card-hover);
 }
@@ -112,7 +102,7 @@
 .stat-card__label {
   margin: 0;
   font-size: 0.8rem;
-  opacity: 0.8;
+  opacity: 0.75;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -176,7 +166,6 @@
 }
 
 .topic-card:hover {
-  transform: translateY(-4px);
   border-color: var(--overlay-primary-55);
   box-shadow: var(--shadow-primary-soft);
 }
@@ -275,7 +264,6 @@
 
 .activity-item:hover {
   background: var(--bg-dashboard-card-hover);
-  transform: translateY(-2px);
 }
 
 .activity-item__indicator {
@@ -415,7 +403,7 @@
 }
 
 .response-row--incorrect {
-  background: var(--overlay-error-06);
+  background: var(--overlay-error-12);
 }
 
 .response-row--skipped {
@@ -479,10 +467,6 @@
 }
 
 @media (max-width: 768px) {
-  .student-dashboard {
-    padding: 1.75rem 1.1rem;
-  }
-
   .student-dashboard__hero {
     text-align: center;
     align-items: center;

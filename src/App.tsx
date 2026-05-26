@@ -21,6 +21,8 @@ import { progressService } from './services/progress';
 import InstructorDashboard from './pages/InstructorDashboard';
 import StudentDashboard from './pages/StudentDashboard';
 import { toggleTheme, getThemePreference } from './utils/theme';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlayCircle, faRightFromBracket, faTachographDigital, faUsers } from '@fortawesome/free-solid-svg-icons';
 
 export const SKIPPED = Symbol('(skipped)');
 
@@ -510,21 +512,42 @@ function App() {
           <div className="header-buttons">
             {isInstructor && (
               <button
-                onClick={() => setCurrentScreen('students')}
-                className={`dashboard-button ${currentScreen === 'students' ? 'active' : ''}`}
+                onClick={() => {
+                  setInstructorPractice(true);
+                  setCurrentScreen('welcome');
+                }}
+                className={`dashboard-button ${instructorPractice && currentScreen !== 'dashboard' && currentScreen !== 'students' ? 'active' : ''}`}
               >
-                Students
+                <FontAwesomeIcon icon={faPlayCircle} aria-hidden="true" />
+                <span className="dashboard-button-label">Practice</span>
               </button>
             )}
             {isInstructor && (
-              <ClassSelector
-                currentClassId={currentClass?.id ?? null}
-                onClassChange={(cls) => {
-                  setCurrentClass(cls);
-                  setCurrentScreen('dashboard');
-                }}
-              />
+              <button
+                onClick={() => setCurrentScreen('students')}
+                className={`dashboard-button ${currentScreen === 'students' ? 'active' : ''}`}
+              >
+                <FontAwesomeIcon icon={faUsers} aria-hidden="true" />
+                <span className="dashboard-button-label">Students</span>
+              </button>
             )}
+            <button
+              onClick={() => {
+                if (!isInstructor && currentScreen === 'dashboard') {
+                  setCurrentScreen('welcome'); 
+                } else {
+                  setCurrentScreen('dashboard');
+                  if (isInstructor) {
+                    setInstructorPractice(false);
+                    clearUrlHash();
+                  }
+                }
+              }}
+              className={`dashboard-button ${currentScreen === 'dashboard' ? 'active' : ''}`}
+            >
+              <FontAwesomeIcon icon={faTachographDigital} aria-hidden="true" />
+              <span className="dashboard-button-label">Dashboard</span>
+            </button>
             {!isInstructor && studentClasses.length > 1 && (
               <select
                 value={currentClass?.id ?? ''}
@@ -548,32 +571,11 @@ function App() {
               </span>
             )}
             {isInstructor && (
-              <button
-                onClick={() => {
-                  setInstructorPractice(true);
-                  setCurrentScreen('welcome');
-                }}
-                className={`dashboard-button ${instructorPractice && currentScreen !== 'dashboard' && currentScreen !== 'students' ? 'active' : ''}`}
-              >
-                Practice
-              </button>
+              <ClassSelector
+                currentClassId={currentClass?.id ?? null}
+                onClassChange={setCurrentClass}
+              />
             )}
-            <button
-              onClick={() => {
-                if (!isInstructor && currentScreen === 'dashboard') {
-                  setCurrentScreen('welcome'); 
-                } else {
-                  setCurrentScreen('dashboard');
-                  if (isInstructor) {
-                    setInstructorPractice(false);
-                    clearUrlHash();
-                  }
-                }
-              }}
-              className={`dashboard-button ${currentScreen === 'dashboard' ? 'active' : ''}`}
-            >
-              Dashboard
-            </button>
             <button
               onClick={() => {
                 const newTheme = toggleTheme();
@@ -587,10 +589,13 @@ function App() {
               <span className="icon-moon" style={{ display: theme === 'dark' ? 'inline' : 'none' }}>🌙</span>
             </button>
             <button
+              type="button"
               onClick={handleLogout}
               className="logout-button"
+              aria-label="Log out"
+              title="Log out"
             >
-              Logout
+              <FontAwesomeIcon icon={faRightFromBracket} aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -618,7 +623,7 @@ function App() {
             </div>
           </div>
         ) : currentScreen === 'students' ? (
-          <div className="content-area" ref={contentAreaRef}>
+          <div className="content-area app-page" ref={contentAreaRef}>
             <StudentsPage classId={currentClass?.id ?? null} className={currentClass?.class_name ?? null} />
           </div>
         ) : (
