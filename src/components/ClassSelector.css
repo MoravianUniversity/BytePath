@@ -11,10 +11,10 @@
   top: calc(100% + 6px);
   right: 0;
   min-width: 200px;
-  background: var(--bg-secondary, #1e2a3a);
-  border: 1px solid var(--border-color, #2d3f55);
+  background: var(--bg-page);
+  border: 2px solid var(--color-primary);
   border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 24px var(--shadow-color);
   z-index: 100;
   overflow: hidden;
   display: flex;
@@ -23,7 +23,7 @@
 
 .class-dropdown-empty {
   padding: 10px 14px;
-  color: var(--text-muted, #8899aa);
+  color: var(--text-muted);
   font-size: 0.875rem;
 }
 
@@ -33,24 +33,29 @@
   padding: 10px 14px;
   background: none;
   border: none;
-  color: var(--text-primary, #e0e8f0);
+  color: var(--color-primary);
   font-size: 0.9rem;
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .class-dropdown-item:hover {
-  background: var(--bg-hover, rgba(255, 255, 255, 0.07));
+  background: var(--overlay-on-gradient-07);
 }
 
 .class-dropdown-item.selected {
-  color: var(--accent, #4a9eff);
+  background: var(--overlay-on-gradient-07);
+  color: var(--color-primary);
   font-weight: 600;
 }
 
+.class-dropdown-item.selected:hover {
+  background: var(--overlay-on-gradient-21);
+}
+
 .class-dropdown-item.add-new {
-  color: var(--accent, #4a9eff);
-  border-top: 1px solid var(--border-color, #2d3f55);
+  color: var(--color-primary);
+  border-top: 1px solid var(--border-card);
   margin-top: 4px;
 }
 
@@ -58,30 +63,30 @@
   display: flex;
   gap: 6px;
   padding: 8px 10px;
-  border-top: 1px solid var(--border-color, #2d3f55);
+  border-top: 1px solid var(--border-card);
 }
 
 .class-dropdown-add-form input {
   flex: 1;
   padding: 6px 10px;
-  background: var(--bg-primary, #0f1923);
-  border: 1px solid var(--border-color, #2d3f55);
+  background: var(--bg-page);
+  border: 1px solid var(--border-card);
   border-radius: 6px;
-  color: var(--text-primary, #e0e8f0);
+  color: var(--text-primary);
   font-size: 0.875rem;
   outline: none;
 }
 
 .class-dropdown-add-form input:focus {
-  border-color: var(--accent, #4a9eff);
+  border-color: var(--color-primary);
 }
 
 .class-dropdown-add-form button {
   padding: 6px 12px;
-  background: var(--accent, #4a9eff);
+  background: var(--color-primary);
   border: none;
   border-radius: 6px;
-  color: white;
+  color: var(--text-on-primary-btn);
   font-size: 0.875rem;
   cursor: pointer;
 }

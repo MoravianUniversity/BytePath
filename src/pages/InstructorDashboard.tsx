@@ -610,9 +610,9 @@ export default function InstructorDashboard({ classId, className }: { classId: n
               )}
             </div>
 
-            <div style={{ padding: '1rem', borderTop: '1px solid var(--border-color, #e5e7eb)' }}>
+            <div style={{ padding: '1rem', borderTop: '1px solid var(--border-card)' }}>
               {coInstructorError && (
-                <p style={{ color: 'var(--color-error, #dc2626)', marginBottom: '0.5rem', fontSize: '0.875rem' }}>
+                <p style={{ color: 'var(--color-error)', marginBottom: '0.5rem', fontSize: '0.875rem' }}>
                   {coInstructorError}
                 </p>
               )}
@@ -623,7 +623,7 @@ export default function InstructorDashboard({ classId, className }: { classId: n
                   value={coInstructorEmail}
                   onChange={(e) => setCoInstructorEmail(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddCoInstructor()}
-                  style={{ flex: 1, padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid var(--border-color, #d1d5db)', fontSize: '0.875rem' }}
+                  style={{ flex: 1, padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid var(--border-card)', fontSize: '0.875rem' }}
                 />
                 <Button
                   variant="primary"

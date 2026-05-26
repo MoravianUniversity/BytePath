@@ -385,7 +385,7 @@ export default function StudentsPage({ classId, className }: { classId: number |
           </thead>
           <tbody>
             {showManualForm ? (
-              <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+              <tr style={{ borderBottom: "1px solid var(--border-subtle)" }}>
                 <td />
                 <td>
                   <input
@@ -440,7 +440,7 @@ export default function StudentsPage({ classId, className }: { classId: number |
                   >
                     ✕
                   </button>
-                  {manualError && <span style={{ color: "#ff8080", fontSize: "0.85em", marginLeft: 8 }}>{manualError}</span>}
+                  {manualError && <span style={{ color: "var(--color-error-bright)", fontSize: "0.85em", marginLeft: 8 }}>{manualError}</span>}
                 </td>
               </tr>
             ) : (

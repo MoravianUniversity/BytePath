@@ -9,90 +9,326 @@
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
 
-  /* Light Mode (Default) - Python Color Scheme */
-  --color-primary: #3776ab;
-  --color-primary-light: #4a8ec4;
-  --color-accent: #ffd343;
-  
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
-  --color-info: #3b82f6;
-  
-  --bg-page: #f8fafc;
-  --bg-gradient: linear-gradient(135deg, #3776ab 0%, #4a8ec4 50%, #2d6a9f 100%);
-  --bg-card: rgba(255, 255, 255, 0.95);
-  --bg-card-hover: rgba(255, 255, 255, 1);
-  --bg-sidebar: rgba(255, 255, 255, 0.9);
-  --bg-sidebar-item: rgba(55, 118, 171, 0.1);
-  --bg-sidebar-item-active: rgba(55, 118, 171, 0.2);
-  --bg-code: #1e293b;
-  
-  --border-card: rgba(55, 118, 171, 0.2);
-  --border-hover: rgba(255, 211, 67, 0.5);
-  
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --text-on-gradient: #ffffff;
-  --text-code: #e2e8f0;
-  
-  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.08);
-  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.12);
-  
-  /* Dashboard card variables for light mode */
-  --bg-dashboard-card: rgba(255, 255, 255, 0.85);
-  --bg-dashboard-card-hover: rgba(255, 255, 255, 0.95);
-  --border-dashboard-card: rgba(55, 118, 171, 0.25);
-  --text-dashboard: #1e293b;
+  /* ── Palette (override per theme) ── */
+  --palette-primary: #3776ab;
+  --palette-primary-light: #4a8ec4;
+  --palette-primary-dark: #2d6a9f;
+  --palette-accent: #ffd343;
+  --palette-success: #10b981;
+  --palette-success-bright: #4ade80;
+  --palette-success-mid: #22c55e;
+  --palette-success-dark: #059669;
+  --palette-success-darker: #16a34a;
+  --palette-warning: #f59e0b;
+  --palette-warning-bright: #fbbf24;
+  --palette-warning-dark: #b45309;
+  --palette-error: #ef4444;
+  --palette-error-bright: #ff6b6b;
+  --palette-error-alt: #ff5555;
+  --palette-error-dark: #b91c1c;
+  --palette-info: #3b82f6;
+  --palette-neutral: #9ca3af;
+  --palette-slate-900: #1e293b;
+  --palette-slate-800: #0f172a;
+  --palette-slate-700: #1e293b;
+  --palette-white: #ffffff;
+  --palette-black: #000000;
 
-  /* Modal surface for light mode */
-  --bg-modal: rgba(255, 255, 255, 0.98);
-  --border-modal: rgba(55, 118, 171, 0.25);
-  --shadow-modal: 0 24px 48px rgba(0, 0, 0, 0.18);
+  /* RGB channels for alpha overlays */
+  --color-primary-rgb: 55, 118, 171;
+  --color-primary-light-rgb: 74, 142, 196;
+  --color-accent-rgb: 255, 211, 67;
+  --color-success-rgb: 16, 185, 129;
+  --color-success-bright-rgb: 74, 222, 128;
+  --color-warning-rgb: 245, 158, 11;
+  --color-warning-bright-rgb: 251, 191, 36;
+  --color-error-rgb: 239, 68, 68;
+  --color-error-bright-rgb: 255, 107, 107;
+  --color-info-rgb: 59, 130, 246;
+  --color-neutral-rgb: 156, 163, 175;
+  --color-white-rgb: 255, 255, 255;
+  --color-black-rgb: 0, 0, 0;
+
+  /* ── Semantic colors ── */
+  --color-primary: var(--palette-primary);
+  --color-primary-light: var(--palette-primary-light);
+  --color-primary-dark: var(--palette-primary-dark);
+  --color-accent: var(--palette-accent);
+  --color-success: var(--palette-success);
+  --color-success-bright: var(--palette-success-bright);
+  --color-success-mid: var(--palette-success-mid);
+  --color-success-dark: var(--palette-success-dark);
+  --color-success-darker: var(--palette-success-darker);
+  --color-warning: var(--palette-warning);
+  --color-warning-bright: var(--palette-warning-bright);
+  --color-warning-dark: var(--palette-warning-dark);
+  --color-error: var(--palette-error);
+  --color-error-bright: var(--palette-error-bright);
+  --color-error-alt: var(--palette-error-alt);
+  --color-info: var(--palette-info);
+  --color-neutral: var(--palette-neutral);
+
+  /* ── Text ── */
+  --text-primary: var(--palette-slate-900);
+  --text-secondary: #64748b;
+  --text-muted: #8899aa;
+  --text-on-gradient: var(--palette-white);
+  --text-on-accent: var(--palette-slate-900);
+  --text-on-primary-btn: var(--palette-white);
+  --text-code: #e2e8f0;
+  --text-input-light: #1f2937;
+
+  /* ── Surfaces ── */
+  --bg-page: #f8fafc;
+  --bg-gradient: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-primary-light) 50%,
+    var(--color-primary-dark) 100%
+  );
+  --bg-card: #fffffff2;
+  --bg-card-hover: var(--palette-white);
+  --bg-sidebar: #ffffffe6;
+  --bg-sidebar-item: rgba(var(--color-primary-rgb), 0.1);
+  --bg-sidebar-item-active: rgba(var(--color-primary-rgb), 0.2);
+  --bg-code: var(--palette-slate-900);
+  --bg-input-light: var(--palette-white);
+  --bg-question-input: rgba(31, 31, 31, 0.7);
+  --bg-question-input-focus: rgba(31, 31, 31, 1);
+  --bg-modal-tooltip: rgba(15, 23, 42, 0.85);
+
+  /* ── Borders ── */
+  --border-card: rgba(var(--color-primary-rgb), 0.2);
+  --border-hover: rgba(var(--color-accent-rgb), 0.5);
+  --border-subtle: rgba(var(--color-white-rgb), 0.1);
+  --border-on-gradient: rgba(var(--color-white-rgb), 0.2);
+  --border-on-gradient-strong: rgba(var(--color-white-rgb), 0.3);
+  --border-input-light: rgba(31, 41, 55, 0.15);
+
+  /* ── Overlays on gradient / glass UI ── */
+  --overlay-on-gradient-03: rgba(var(--color-white-rgb), 0.03);
+  --overlay-on-gradient-05: rgba(var(--color-white-rgb), 0.05);
+  --overlay-on-gradient-07: rgba(var(--color-white-rgb), 0.07);
+  --overlay-on-gradient-08: rgba(var(--color-white-rgb), 0.08);
+  --overlay-on-gradient-10: rgba(var(--color-white-rgb), 0.1);
+  --overlay-on-gradient-12: rgba(var(--color-white-rgb), 0.12);
+  --overlay-on-gradient-15: rgba(var(--color-white-rgb), 0.15);
+  --overlay-on-gradient-20: rgba(var(--color-white-rgb), 0.2);
+  --overlay-on-gradient-21: rgba(var(--color-white-rgb), 0.21);
+  --overlay-on-gradient-25: rgba(var(--color-white-rgb), 0.25);
+  --overlay-on-gradient-30: rgba(var(--color-white-rgb), 0.3);
+  --overlay-on-gradient-35: rgba(var(--color-white-rgb), 0.35);
+  --overlay-on-gradient-40: rgba(var(--color-white-rgb), 0.4);
+  --overlay-on-gradient-text-50: rgba(var(--color-white-rgb), 0.5);
+  --overlay-on-gradient-text-60: rgba(var(--color-white-rgb), 0.6);
+  --overlay-on-gradient-text-70: rgba(var(--color-white-rgb), 0.7);
+  --overlay-scrim: rgba(var(--color-black-rgb), 0.55);
+  --overlay-scrim-strong: rgba(var(--color-black-rgb), 0.65);
+  --overlay-dark-25: rgba(var(--color-black-rgb), 0.25);
+  --overlay-dark-30: rgba(var(--color-black-rgb), 0.3);
+  --overlay-dark-60: rgba(var(--color-black-rgb), 0.6);
+
+  /* ── Semantic tinted overlays ── */
+  --overlay-primary-15: rgba(var(--color-primary-rgb), 0.15);
+  --overlay-primary-18: rgba(var(--color-primary-rgb), 0.18);
+  --overlay-primary-20: rgba(var(--color-primary-rgb), 0.2);
+  --overlay-primary-25: rgba(var(--color-primary-rgb), 0.25);
+  --overlay-primary-40: rgba(var(--color-primary-rgb), 0.4);
+  --overlay-primary-55: rgba(var(--color-primary-rgb), 0.55);
+  --overlay-primary-60: rgba(var(--color-primary-rgb), 0.6);
+  --overlay-primary-70: rgba(var(--color-primary-rgb), 0.7);
+  --overlay-accent-18: rgba(var(--color-accent-rgb), 0.18);
+  --overlay-accent-20: rgba(var(--color-accent-rgb), 0.2);
+  --overlay-accent-30: rgba(var(--color-accent-rgb), 0.3);
+  --overlay-accent-35: rgba(var(--color-accent-rgb), 0.35);
+  --overlay-accent-45: rgba(var(--color-accent-rgb), 0.45);
+  --overlay-success-06: rgba(var(--color-success-rgb), 0.06);
+  --overlay-success-10: rgba(var(--color-success-rgb), 0.1);
+  --overlay-success-12: rgba(var(--color-success-rgb), 0.12);
+  --overlay-success-15: rgba(var(--color-success-rgb), 0.15);
+  --overlay-success-18: rgba(var(--color-success-rgb), 0.18);
+  --overlay-success-20: rgba(var(--color-success-rgb), 0.2);
+  --overlay-success-30: rgba(var(--color-success-rgb), 0.3);
+  --overlay-success-35: rgba(var(--color-success-rgb), 0.35);
+  --overlay-success-45: rgba(var(--color-success-rgb), 0.45);
+  --overlay-success-55: rgba(var(--color-success-bright-rgb), 0.55);
+  --overlay-success-70: rgba(var(--color-success-bright-rgb), 0.7);
+  --overlay-success-bright-15: rgba(var(--color-success-bright-rgb), 0.15);
+  --overlay-success-bright-18: rgba(var(--color-success-bright-rgb), 0.18);
+  --overlay-success-bright-20: rgba(var(--color-success-bright-rgb), 0.2);
+  --overlay-success-bright-30: rgba(var(--color-success-bright-rgb), 0.3);
+  --overlay-warning-10: rgba(var(--color-warning-rgb), 0.1);
+  --overlay-warning-12: rgba(var(--color-warning-rgb), 0.12);
+  --overlay-warning-15: rgba(var(--color-warning-rgb), 0.15);
+  --overlay-warning-20: rgba(var(--color-warning-bright-rgb), 0.2);
+  --overlay-warning-30: rgba(var(--color-warning-bright-rgb), 0.3);
+  --overlay-warning-35: rgba(var(--color-warning-bright-rgb), 0.35);
+  --overlay-warning-50: rgba(var(--color-warning-bright-rgb), 0.5);
+  --overlay-error-06: rgba(var(--color-error-rgb), 0.06);
+  --overlay-error-10: rgba(var(--color-error-rgb), 0.1);
+  --overlay-error-12: rgba(var(--color-error-rgb), 0.12);
+  --overlay-error-15: rgba(var(--color-error-rgb), 0.15);
+  --overlay-error-18: rgba(var(--color-error-rgb), 0.18);
+  --overlay-error-20: rgba(var(--color-error-rgb), 0.2);
+  --overlay-error-30: rgba(var(--color-error-rgb), 0.3);
+  --overlay-error-50: rgba(var(--color-error-rgb), 0.5);
+  --overlay-error-70: rgba(var(--color-error-rgb), 0.7);
+  --overlay-error-bright-10: rgba(var(--color-error-bright-rgb), 0.1);
+  --overlay-error-bright-30: rgba(var(--color-error-bright-rgb), 0.3);
+  --overlay-info-12: rgba(var(--color-info-rgb), 0.12);
+  --overlay-info-20: rgba(var(--color-info-rgb), 0.2);
+  --overlay-info-50: rgba(var(--color-info-rgb), 0.5);
+  --overlay-neutral-06: rgba(var(--color-neutral-rgb), 0.06);
+  --overlay-neutral-18: rgba(var(--color-neutral-rgb), 0.18);
+  --overlay-neutral-70: rgba(var(--color-neutral-rgb), 0.7);
+
+  /* ── Gradients ── */
+  --gradient-primary: linear-gradient(
+    135deg,
+    var(--overlay-primary-20) 0%,
+    rgba(var(--color-primary-light-rgb), 0.2) 100%
+  );
+  --gradient-primary-vertical: linear-gradient(
+    180deg,
+    var(--color-primary) 0%,
+    var(--color-primary-light) 100%
+  );
+  --gradient-primary-horizontal: linear-gradient(
+    90deg,
+    var(--color-primary),
+    var(--color-primary-light)
+  );
+  --gradient-primary-strong: linear-gradient(
+    135deg,
+    var(--overlay-primary-70),
+    rgba(var(--color-primary-light-rgb), 0.7)
+  );
+  --gradient-primary-medium: linear-gradient(
+    135deg,
+    var(--overlay-primary-60),
+    rgba(var(--color-primary-light-rgb), 0.6)
+  );
+  --gradient-accent: linear-gradient(
+    135deg,
+    var(--overlay-accent-20) 0%,
+    var(--overlay-warning-20) 100%
+  );
+  --gradient-success: linear-gradient(
+    135deg,
+    var(--overlay-success-20) 0%,
+    rgba(var(--color-success-rgb), 0.2) 100%
+  );
+  --gradient-success-bright: linear-gradient(
+    135deg,
+    var(--color-success-bright),
+    var(--color-success-mid)
+  );
+  --gradient-success-bright-hover: linear-gradient(
+    135deg,
+    var(--color-success-mid),
+    var(--color-success-darker)
+  );
+  --gradient-success-text: linear-gradient(
+    135deg,
+    var(--color-success) 0%,
+    var(--color-success-dark) 100%
+  );
+  --gradient-error: linear-gradient(135deg, var(--color-error), var(--palette-error-dark));
+
+  /* ── Shadows ── */
+  --black-10: #0000001a;
+  --black-50: #00000080;
+  --shadow-color: var(--black-10);
+  --shadow-card: 0 4px 20px var(--shadow-color);
+  --shadow-hover: 0 8px 24px var(--shadow-color);
+  --shadow-primary-glow: 0 18px 40px rgba(var(--color-primary-rgb), 0.35);
+  --shadow-primary-soft: 0 12px 26px rgba(var(--color-primary-rgb), 0.25);
+  --shadow-success-glow: 0 4px 15px var(--overlay-success-bright-30);
+  --shadow-on-gradient: 0 10px 20px rgba(var(--color-white-rgb), 0.35);
+  --shadow-elevated: 0 12px 24px rgba(var(--color-black-rgb), 0.2);
+  --shadow-card-elevated: 0 10px 24px rgba(var(--color-black-rgb), 0.18);
+  --shadow-card-medium: 0 12px 18px rgba(var(--color-black-rgb), 0.12);
+  --shadow-button-light: 0 8px 16px rgba(15, 23, 42, 0.08);
+  --shadow-button-light-hover: 0 10px 20px rgba(15, 23, 42, 0.16);
+  --shadow-accent-btn: 0 4px 12px rgba(var(--color-white-rgb), 0.3);
+
+  /* Dashboard & modal */
+  --bg-dashboard-card: #ffffffd9;
+  --bg-dashboard-card-hover: #fffffff2;
+  --border-dashboard-card: rgba(var(--color-primary-rgb), 0.25);
+  --text-dashboard: var(--text-primary);
+  --bg-modal: #fffffffa;
+  --border-modal: rgba(var(--color-primary-rgb), 0.25);
+  --shadow-modal: 0 24px 48px #0000002e;
+
+  /* Code syntax (VS dark-inspired) */
+  --syntax-comment: #6a9955;
+  --syntax-operator: #d4d4d4;
+  --syntax-keyword: #569cd6;
+  --syntax-punctuation: #cccccc;
+  --syntax-number: #b5cea8;
+  --syntax-keyword-alt: #c586c0;
+  --syntax-string: #ce9178;
+  --syntax-variable: #9cdcfe;
+  --syntax-constant: #4fc1ff;
+  --syntax-function: #dcdcaa;
+  --syntax-type: #4ec9b0;
+  --syntax-selection: #667b8f;
+  --syntax-border: rgba(var(--color-white-rgb), 0.1);
+  --syntax-outline: rgba(212, 212, 212, 0.5);
+  --syntax-outline-strong: rgba(212, 212, 212, 0.7);
+  --syntax-success-bg: rgba(42, 79, 55, 0.7);
+  --syntax-error-bg: rgba(83, 40, 40, 0.7);
+  --syntax-hint-bg: rgba(255, 255, 0, 0.2);
+  --syntax-hint-outline: rgba(255, 255, 0, 0.7);
+  --syntax-hint-text: rgba(255, 255, 0, 0.7);
+  --syntax-hint-bg-active: rgba(255, 255, 0, 0.4);
+  --syntax-hint-outline-active: rgba(255, 255, 0, 1);
+  --syntax-hint-text-active: rgba(255, 255, 0, 1);
+  --syntax-placeholder: rgba(212, 212, 212, 0.5);
 }
 
 [data-theme="dark"] {
-  --color-primary: #60a5fa;
-  --color-primary-light: #93c5fd;
-  
-  --bg-page: #0f172a;
-  --bg-gradient: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 50%, #1a2f4a 100%);
-  --bg-card: rgba(30, 41, 59, 0.9);
-  --bg-card-hover: rgba(30, 41, 59, 1);
-  --bg-sidebar: rgba(30, 41, 59, 0.95);
-  --bg-sidebar-item: rgba(96, 165, 250, 0.1);
-  --bg-sidebar-item-active: rgba(96, 165, 250, 0.2);
-  --bg-code: #0f172a;
-  
-  --border-card: rgba(100, 116, 139, 0.2);
-  --border-hover: rgba(255, 211, 67, 0.4);
-  
+  --palette-primary: #60a5fa;
+  --palette-primary-light: #93c5fd;
+  --palette-primary-dark: #1a2f4a;
+
+  --color-primary-rgb: 96, 165, 250;
+  --color-primary-light-rgb: 147, 197, 253;
+
   --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
-  
-  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
-  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.4);
-  
-  /* Dashboard card variables for dark mode */
-  --bg-dashboard-card: rgba(255, 255, 255, 0.1);
-  --bg-dashboard-card-hover: rgba(255, 255, 255, 0.15);
-  --border-dashboard-card: rgba(255, 255, 255, 0.2);
-  --text-dashboard: #ffffff;
+  --text-muted: #94a3b8;
 
-  /* Modal surface for dark mode */
-  --bg-modal: rgba(15, 23, 42, 0.95);
+  --bg-page: var(--palette-slate-800);
+  --bg-gradient: linear-gradient(135deg, #1e3a5f 0%, #2d4a6f 50%, var(--color-primary-dark) 100%);
+  --bg-card: #1e293be6;
+  --bg-card-hover: var(--palette-slate-900);
+  --bg-sidebar: #1e293bf2;
+  --bg-sidebar-item: rgba(var(--color-primary-rgb), 0.1);
+  --bg-sidebar-item-active: rgba(var(--color-primary-rgb), 0.2);
+  --bg-code: var(--palette-slate-800);
+
+  --border-card: rgba(100, 116, 139, 0.2);
+  --border-hover: rgba(var(--color-accent-rgb), 0.4);
+
+  --shadow-card: 0 4px 20px #0000004d;
+  --shadow-hover: 0 8px 24px #00000066;
+
+  --bg-dashboard-card: rgba(var(--color-white-rgb), 0.1);
+  --bg-dashboard-card-hover: rgba(var(--color-white-rgb), 0.15);
+  --border-dashboard-card: rgba(var(--color-white-rgb), 0.2);
+  --text-dashboard: var(--palette-white);
+
+  --bg-modal: #0f172af2;
   --border-modal: rgba(148, 163, 184, 0.35);
-  --shadow-modal: 0 24px 48px rgba(0, 0, 0, 0.55);
+  --shadow-modal: 0 24px 48px #0000008c;
 }
 
 /* Focus states for accessibility */
 :focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
-}
-
-[data-theme="dark"] :focus-visible {
-  outline-color: var(--color-accent);
 }
 
 body {

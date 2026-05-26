@@ -18,8 +18,8 @@
 }
 
 .student-dashboard__error {
-  border-color: rgba(255, 107, 107, 0.5);
-  background: rgba(255, 107, 107, 0.15);
+  border-color: var(--overlay-error-50);
+  background: var(--overlay-error-15);
 }
 
 .student-dashboard__hero {
@@ -31,26 +31,26 @@
   justify-content: space-between;
   align-items: center;
   gap: 2rem;
-  box-shadow: 0 18px 40px rgba(55, 118, 171, 0.35);
+  box-shadow: var(--shadow-primary-glow);
 }
 
 .hero__content h1 {
   margin: 0 0 0.75rem 0;
   font-size: 2.1rem;
-  color: white;
+  color: var(--text-on-gradient);
 }
 
 .hero__subtitle {
   margin: 0;
   font-size: 1.1rem;
-  color: white;
+  color: var(--text-on-gradient);
   opacity: 0.9;
   max-width: 600px;
 }
 
 .hero__cta {
   background: var(--color-accent);
-  color: #1e293b;
+  color: var(--text-on-accent);
   padding: 0.875rem 1.75rem;
   border-radius: 12px;
   border: none;
@@ -62,7 +62,7 @@
 
 .hero__cta:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(255, 255, 255, 0.35);
+  box-shadow: var(--shadow-on-gradient);
 }
 
 .student-dashboard__quick-stats {
@@ -86,23 +86,23 @@
 
 .stat-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-elevated);
   background: var(--bg-dashboard-card-hover);
 }
 
 .stat-card--primary {
-  background: linear-gradient(135deg, rgba(55, 118, 171, 0.2) 0%, rgba(74, 142, 196, 0.2) 100%);
-  border-color: rgba(55, 118, 171, 0.4);
+  background: var(--gradient-primary);
+  border-color: var(--overlay-primary-40);
 }
 
 .stat-card--accent {
-  background: linear-gradient(135deg, rgba(255, 211, 67, 0.2) 0%, rgba(245, 158, 11, 0.2) 100%);
-  border-color: rgba(255, 211, 67, 0.45);
+  background: var(--gradient-accent);
+  border-color: var(--overlay-accent-45);
 }
 
 .stat-card--success {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%);
-  border-color: rgba(16, 185, 129, 0.45);
+  background: var(--gradient-success);
+  border-color: var(--overlay-success-45);
 }
 
 .stat-card__content {
@@ -177,13 +177,13 @@
 
 .topic-card:hover {
   transform: translateY(-4px);
-  border-color: rgba(55, 118, 171, 0.55);
-  box-shadow: 0 12px 26px rgba(55, 118, 171, 0.25);
+  border-color: var(--overlay-primary-55);
+  box-shadow: var(--shadow-primary-soft);
 }
 
 .topic-card--complete {
-  border-color: rgba(74, 222, 128, 0.55);
-  background: rgba(74, 222, 128, 0.15);
+  border-color: var(--overlay-success-55);
+  background: var(--overlay-success-15);
 }
 
 .topic-card--expanded {
@@ -212,8 +212,8 @@
 }
 
 .topic-card__badge {
-  background: #4ade80;
-  color: white;
+  background: var(--color-success-bright);
+  color: var(--text-on-gradient);
   padding: 0.25rem 0.6rem;
   border-radius: 6px;
   font-size: 0.7rem;
@@ -290,21 +290,21 @@
 }
 
 .activity-item__indicator--correct {
-  background: rgba(74, 222, 128, 0.18);
-  color: #4ade80;
-  border: 2px solid rgba(74, 222, 128, 0.7);
+  background: var(--overlay-success-bright-18);
+  color: var(--color-success-bright);
+  border: 2px solid var(--overlay-success-70);
 }
 
 .activity-item__indicator--incorrect {
-  background: rgba(239, 68, 68, 0.18);
-  color: #ef4444;
-  border: 2px solid rgba(239, 68, 68, 0.7);
+  background: var(--overlay-error-18);
+  color: var(--color-error);
+  border: 2px solid var(--overlay-error-70);
 }
 
 .activity-item__indicator--skipped {
-  background: rgba(156, 163, 175, 0.18);
-  color: #9ca3af;
-  border: 2px solid rgba(156, 163, 175, 0.7);
+  background: var(--overlay-neutral-18);
+  color: var(--color-neutral);
+  border: 2px solid var(--overlay-neutral-70);
 }
 
 .activity-item__content {
@@ -415,11 +415,11 @@
 }
 
 .response-row--incorrect {
-  background: rgba(239, 68, 68, 0.06);
+  background: var(--overlay-error-06);
 }
 
 .response-row--skipped {
-  background: rgba(156, 163, 175, 0.06);
+  background: var(--overlay-neutral-06);
 }
 
 .response-row__content {
@@ -454,11 +454,11 @@
 }
 
 .response-row__student {
-  color: #ef4444;
+  color: var(--color-error);
 }
 
 .response-row__correct {
-  color: #4ade80;
+  color: var(--color-success-bright);
 }
 
 .response-row__time {

@@ -15,7 +15,7 @@
 }
 
 .ui-btn:hover {
-  background: var(--bg-card-hover, rgba(255, 255, 255, 0.95));
+  background: var(--bg-card-hover);
   transform: translateY(-1px);
 }
 
@@ -28,11 +28,11 @@
 .ui-btn--primary {
   background: var(--color-primary);
   border-color: var(--color-primary);
-  color: #fff;
+  color: var(--text-on-primary-btn);
 }
 
 .ui-btn--primary:hover {
-  background: var(--color-primary-light, var(--color-primary));
+  background: var(--color-primary-light);
 }
 
 .ui-btn--ghost {

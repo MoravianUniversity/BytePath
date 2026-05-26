@@ -127,26 +127,40 @@ export default function StudentsPage({ classId, className }: { classId: number |
     }
   };
 
+  const panelStyle = {
+    background: "var(--overlay-on-gradient-08)",
+    padding: "0.75rem 1rem",
+    borderRadius: 10,
+    border: "1px solid var(--overlay-on-gradient-15)",
+  };
+  const inputStyle = {
+    padding: "0.5rem 0.75rem",
+    borderRadius: 8,
+    border: "1px solid var(--border-on-gradient)",
+    background: "var(--overlay-dark-25)",
+    color: "var(--text-on-gradient)",
+  };
+
   return (
-    <div style={{ padding: "1rem 1.5rem", maxWidth: 1000, margin: "0 auto", color: "white" }}>
+    <div style={{ padding: "1rem 1.5rem", maxWidth: 1000, margin: "0 auto", color: "var(--text-on-gradient)" }}>
       <h2 style={{ margin: 0, marginBottom: ".5rem" }}>{className || 'Students'}</h2>
       <p style={{ opacity: .9, marginTop: 0 }}>
         Upload a CSV and browse the roster with pagination. 
         <span style={{ fontSize: "0.9em", display: "block", marginTop: "0.25rem", opacity: 0.8 }}>
-          Sample CSV files are located in: <code style={{ background: "rgba(0,0,0,0.3)", padding: "0.1rem 0.3rem", borderRadius: 4 }}>sample-data/students/</code>
+          Sample CSV files are located in: <code style={{ background: "var(--overlay-dark-30)", padding: "0.1rem 0.3rem", borderRadius: 4 }}>sample-data/students/</code>
         </span>
       </p>
 
       <div style={{
         display: "flex", gap: "1rem", alignItems: "center", flexWrap: "wrap",
-        background: "rgba(255,255,255,0.08)", padding: "0.75rem 1rem", borderRadius: 10, border: "1px solid rgba(255,255,255,0.15)"
+        ...panelStyle,
       }}>
         <form onSubmit={doSearch} style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search name or email…"
-            style={{ padding: "0.5rem 0.75rem", borderRadius: 8, border: "1px solid rgba(255,255,255,0.2)", background: "rgba(0,0,0,0.25)", color: "white" }}
+            style={inputStyle}
           />
           <button type="submit" className="toggle-button">Search</button>
         </form>
@@ -176,7 +190,7 @@ export default function StudentsPage({ classId, className }: { classId: number |
           />
         </label>
 
-        <a href={`${API_BASE}/students/template`} style={{ color: "white", textDecoration: "underline" }}>
+        <a href={`${API_BASE}/students/template`} style={{ color: "var(--text-on-gradient)", textDecoration: "underline" }}>
           Download template
         </a>
       </div>
@@ -192,8 +206,8 @@ export default function StudentsPage({ classId, className }: { classId: number |
         {showManualForm && (
           <form onSubmit={handleManualSubmit} style={{
             marginTop: 10, display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.6rem 1rem",
-            background: "rgba(255,255,255,0.08)", padding: "1rem", borderRadius: 10,
-            border: "1px solid rgba(255,255,255,0.15)"
+            ...panelStyle,
+            padding: "1rem",
           }}>
             <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
               <span style={{ fontSize: "0.85em", opacity: 0.8 }}>First name *</span>
@@ -202,7 +216,7 @@ export default function StudentsPage({ classId, className }: { classId: number |
                 onChange={e => setManualForm(f => ({ ...f, first_name: e.target.value }))}
                 placeholder="Jane"
                 required
-                style={{ padding: "0.45rem 0.75rem", borderRadius: 8, border: "1px solid rgba(255,255,255,0.2)", background: "rgba(0,0,0,0.25)", color: "white" }}
+                style={{ ...inputStyle, padding: "0.45rem 0.75rem" }}
               />
             </label>
             <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -212,7 +226,7 @@ export default function StudentsPage({ classId, className }: { classId: number |
                 onChange={e => setManualForm(f => ({ ...f, last_name: e.target.value }))}
                 placeholder="Doe"
                 required
-                style={{ padding: "0.45rem 0.75rem", borderRadius: 8, border: "1px solid rgba(255,255,255,0.2)", background: "rgba(0,0,0,0.25)", color: "white" }}
+                style={{ ...inputStyle, padding: "0.45rem 0.75rem" }}
               />
             </label>
             <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -223,7 +237,7 @@ export default function StudentsPage({ classId, className }: { classId: number |
                 onChange={e => setManualForm(f => ({ ...f, email: e.target.value }))}
                 placeholder="jane.doe@school.edu"
                 required
-                style={{ padding: "0.45rem 0.75rem", borderRadius: 8, border: "1px solid rgba(255,255,255,0.2)", background: "rgba(0,0,0,0.25)", color: "white" }}
+                style={{ ...inputStyle, padding: "0.45rem 0.75rem" }}
               />
             </label>
             <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -232,28 +246,28 @@ export default function StudentsPage({ classId, className }: { classId: number |
                 value={manualForm.notes}
                 onChange={e => setManualForm(f => ({ ...f, notes: e.target.value }))}
                 placeholder="Optional"
-                style={{ padding: "0.45rem 0.75rem", borderRadius: 8, border: "1px solid rgba(255,255,255,0.2)", background: "rgba(0,0,0,0.25)", color: "white" }}
+                style={{ ...inputStyle, padding: "0.45rem 0.75rem" }}
               />
             </label>
             <div style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: 12, marginTop: 4 }}>
               <button type="submit" className="toggle-button" disabled={manualSaving}>
                 {manualSaving ? "Saving…" : "Add student"}
               </button>
-              {manualError && <span style={{ color: "#ff8080", fontSize: "0.9em" }}>{manualError}</span>}
-              {manualSuccess && <span style={{ color: "#80ffaa", fontSize: "0.9em" }}>{manualSuccess}</span>}
+              {manualError && <span style={{ color: "var(--color-error-bright)", fontSize: "0.9em" }}>{manualError}</span>}
+              {manualSuccess && <span style={{ color: "var(--color-success-bright)", fontSize: "0.9em" }}>{manualSuccess}</span>}
             </div>
           </form>
         )}
       </div>
 
       {summary && (
-        <div style={{ marginTop: 12, fontSize: 14, background: "rgba(255,255,255,0.08)", padding: "0.75rem 1rem", borderRadius: 10, border: "1px solid rgba(255,255,255,0.15)" }}>
+        <div style={{ marginTop: 12, fontSize: 14, ...panelStyle }}>
           <strong>Upload summary:</strong>{" "}
           inserted {summary.inserted}, updated {summary.updated}, skipped {summary.skipped} (processed {summary.total_processed})
         </div>
       )}
       {errors.length > 0 && (
-        <div style={{ marginTop: 8, fontSize: 14, background: "rgba(255,0,0,0.15)", padding: "0.75rem 1rem", borderRadius: 10, border: "1px solid rgba(255,255,255,0.15)" }}>
+        <div style={{ marginTop: 8, fontSize: 14, background: "var(--overlay-error-15)", padding: "0.75rem 1rem", borderRadius: 10, border: "1px solid var(--overlay-on-gradient-15)" }}>
           <strong>Errors:</strong>
           <ul style={{ margin: "6px 0 0 1rem" }}>
             {errors.map((er, i) => <li key={i}>Line {er.line}: {er.reason}</li>)}
@@ -273,9 +287,9 @@ export default function StudentsPage({ classId, className }: { classId: number |
         <span style={{ opacity: .8 }}>Total: {total}</span>
       </div>
 
-      <div style={{ marginTop: 12, overflowX: "auto", borderRadius: 10, border: "1px solid rgba(255,255,255,0.15)" }}>
+      <div style={{ marginTop: 12, overflowX: "auto", borderRadius: 10, border: "1px solid var(--overlay-on-gradient-15)" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead style={{ background: "rgba(255,255,255,0.1)" }}>
+          <thead style={{ background: "var(--overlay-on-gradient-10)" }}>
             <tr>
               <th style={{ textAlign: "left", padding: "0.6rem" }}>Email</th>
               <th style={{ textAlign: "left", padding: "0.6rem" }}>First name</th>
@@ -290,7 +304,7 @@ export default function StudentsPage({ classId, className }: { classId: number |
               <tr><td colSpan={4} style={{ padding: "0.8rem" }}>No students</td></tr>
             ) : (
               students.map(s => (
-                <tr key={s.id} style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+                <tr key={s.id} style={{ borderTop: "1px solid var(--border-subtle)" }}>
                   <td style={{ padding: "0.6rem" }}>{s.email}</td>
                   <td style={{ padding: "0.6rem" }}>{s.first_name}</td>
                   <td style={{ padding: "0.6rem" }}>{s.last_name}</td>

@@ -10,12 +10,12 @@
 .locked-topic-content {
   max-width: 600px;
   width: 100%;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--overlay-on-gradient-10);
   backdrop-filter: blur(10px);
   border-radius: 20px;
   padding: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-on-gradient);
+  box-shadow: 0 8px 32px var(--shadow-color);
 }
 
 .locked-topic-header {
@@ -27,14 +27,14 @@
   margin: 0 0 1rem 0;
   font-size: 1.8rem;
   font-weight: bold;
-  color: white;
+  color: var(--text-on-gradient);
 }
 
 .locked-topic-description {
   margin: 0;
   font-size: 1rem;
   opacity: 0.9;
-  color: white;
+  color: var(--text-on-gradient);
   line-height: 1.5;
 }
 
@@ -46,21 +46,21 @@
   margin: 0 0 1.5rem 0;
   font-size: 1.3rem;
   font-weight: 600;
-  color: white;
+  color: var(--text-on-gradient);
   text-align: center;
 }
 
 .no-requirements {
   text-align: center;
   padding: 2rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--overlay-on-gradient-05);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-subtle);
 }
 
 .no-requirements p {
   margin: 0;
-  color: white;
+  color: var(--text-on-gradient);
   opacity: 0.8;
 }
 
@@ -72,10 +72,10 @@
 
 .completed-requirements,
 .remaining-requirements {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--overlay-on-gradient-05);
   border-radius: 12px;
   padding: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-subtle);
 }
 
 .completed-requirements h4,
@@ -83,7 +83,7 @@
   margin: 0 0 1rem 0;
   font-size: 1.1rem;
   font-weight: 600;
-  color: white;
+  color: var(--text-on-gradient);
 }
 
 .topic-list {
@@ -97,9 +97,9 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 1rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--overlay-on-gradient-05);
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-subtle);
   transition: all 0.3s ease;
 }
 
@@ -108,13 +108,13 @@
 }
 
 .topic-item.accessible:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--overlay-on-gradient-10);
+  border-color: var(--border-on-gradient);
 }
 
 .topic-item.completed {
-  border-color: #4ade80;
-  background: rgba(74, 222, 128, 0.1);
+  border-color: var(--color-success-bright);
+  background: var(--overlay-success-10);
 }
 
 .topic-item.locked {
@@ -124,7 +124,7 @@
 
 .topic-name {
   font-weight: 500;
-  color: white;
+  color: var(--text-on-gradient);
 }
 
 .status-badge {
@@ -139,18 +139,18 @@
 }
 
 .status-badge.completed {
-  background: #4ade80;
-  color: white;
+  background: var(--color-success-bright);
+  color: var(--text-on-primary-btn);
 }
 
 .status-badge.available {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
+  background: var(--overlay-on-gradient-20);
+  color: var(--text-on-gradient);
 }
 
 .status-badge.locked {
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.5);
+  background: var(--overlay-on-gradient-10);
+  color: var(--overlay-on-gradient-text-50);
 }
 
 .progress-summary {
@@ -160,7 +160,7 @@
 .progress-bar {
   width: 100%;
   height: 8px;
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--overlay-on-gradient-20);
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 1rem;
@@ -168,14 +168,14 @@
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #4ade80, #22c55e);
+  background: var(--gradient-success-bright);
   transition: width 0.3s ease;
 }
 
 .progress-text {
   margin: 0;
   font-size: 0.9rem;
-  color: white;
+  color: var(--text-on-gradient);
   opacity: 0.8;
 }
 
@@ -213,16 +213,16 @@
 
 :root:not([data-theme="dark"]) .status-badge.available {
   background: var(--color-primary);
-  color: white;
+  color: var(--text-on-gradient);
 }
 
 :root:not([data-theme="dark"]) .status-badge.locked {
-  background: rgba(0, 0, 0, 0.08);
+  background: var(--black-10);
   color: var(--text-secondary);
 }
 
 :root:not([data-theme="dark"]) .progress-bar {
-  background: rgba(0, 0, 0, 0.1);
+  background: var(--black-10);
 }
 
 /* Responsive design */

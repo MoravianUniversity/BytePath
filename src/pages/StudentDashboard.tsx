@@ -270,7 +270,7 @@ export default function StudentDashboard({ user, currentClassId }: StudentDashbo
                               cy="30"
                               r="25"
                               fill="none"
-                              stroke="rgba(255, 255, 255, 0.1)"
+                              stroke="var(--border-subtle)"
                               strokeWidth="4"
                             />
                             <circle
@@ -278,7 +278,7 @@ export default function StudentDashboard({ user, currentClassId }: StudentDashbo
                               cy="30"
                               r="25"
                               fill="none"
-                              stroke={isComplete ? '#4ade80' : 'var(--color-primary)'}
+                              stroke={isComplete ? 'var(--color-success-bright)' : 'var(--color-primary)'}
                               strokeWidth="4"
                               strokeDasharray={`${
                                 (Math.min(topic.completion_percentage, 100) / 100) * 157

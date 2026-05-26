@@ -14,7 +14,7 @@ code {
   background: var(--bg-code);
   padding: 0.5em 1em;
   border-radius: 10px;
-  border: 2px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid var(--syntax-border);
   white-space: pre;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 1rem !important;
@@ -23,17 +23,17 @@ code {
   color: var(--text-code);
 }
 
-/* Python syntax highlighting colors for dark theme from VS Code Dark Modern */
-code .token.comment { color: #6A9955 !important; }
-code .token.operator { color: #D4D4D4 !important; }
-code .token.operator.keyword { color: #569CD6 !important; }  /* the word-operators and, or, not, is */
-code .token.punctuation { color: #CCCCCC !important; }  /* square brackets, parentheses, etc. - should actually take into account nesting */
-code .token.number { color: #B5CEA8 !important; }
-code .token.keyword { color: #C586C0 !important; }
-code .token.boolean { color: #569CD6 !important; }
-code .token.string { color: #CE9178 !important; }
-code .token.variable { color: #9CDCFE !important; }
-code .token.constant { color: #4FC1FF !important; }
-code .token.function, code .token.builtin, code .token.function-call { color: #DCDCAA !important; }
-code .token.class-name, code .token.type { color: #4EC9B0 !important; }
-code::selection, code .token::selection { background: #667B8F !important; }
+/* Python syntax highlighting (VS Code Dark Modern) */
+code .token.comment { color: var(--syntax-comment) !important; }
+code .token.operator { color: var(--syntax-operator) !important; }
+code .token.operator.keyword { color: var(--syntax-keyword) !important; }
+code .token.punctuation { color: var(--syntax-punctuation) !important; }
+code .token.number { color: var(--syntax-number) !important; }
+code .token.keyword { color: var(--syntax-keyword-alt) !important; }
+code .token.boolean { color: var(--syntax-keyword) !important; }
+code .token.string { color: var(--syntax-string) !important; }
+code .token.variable { color: var(--syntax-variable) !important; }
+code .token.constant { color: var(--syntax-constant) !important; }
+code .token.function, code .token.builtin, code .token.function-call { color: var(--syntax-function) !important; }
+code .token.class-name, code .token.type { color: var(--syntax-type) !important; }
+code::selection, code .token::selection { background: var(--syntax-selection) !important; }
