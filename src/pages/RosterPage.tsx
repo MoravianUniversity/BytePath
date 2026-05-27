@@ -3,7 +3,7 @@ import { studentsService, type Student } from "../services/students";
 import { classesService, type CoInstructor } from "../services/classes";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload } from '@fortawesome/free-solid-svg-icons';
-import "./StudentsPage.css";
+import "./RosterPage.css";
 
 type EditingState = {
   id: number;
@@ -11,7 +11,7 @@ type EditingState = {
   value: string;
 };
 
-export default function StudentsPage({ classId, className }: { classId: number | null; className: string | null }) {
+export default function RosterPage({ classId }: { classId: number | null }) {
   type SortField = "email" | "first_name" | "last_name" | "notes" | "created_at";
   const PAGE_SIZE = 10;
 
@@ -256,15 +256,6 @@ export default function StudentsPage({ classId, className }: { classId: number |
 
   return (
     <div className="students-page">
-      <div className="students-header">
-        <div className="students-header__content">
-          <h1>{className ? `${className} Roster` : 'Class Roster'}</h1>
-          <p className="students-description app-page-lead">
-            Manage co-instructors and the class roster.
-          </p>
-        </div>
-      </div>
-
       {classId && (
         <section className="co-instructors-panel app-page-panel">
           <div className="co-instructors-panel__header">

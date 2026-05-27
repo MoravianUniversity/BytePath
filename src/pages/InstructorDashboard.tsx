@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState, type KeyboardEvent } from 'react';
 import Button from '../components/ui/Button';
+import RosterPage from './RosterPage';
+import TopicSettingsPage from './TopicSettingsPage';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBook, faGaugeHigh, faUsers } from '@fortawesome/free-solid-svg-icons';
 import {
   reportsService,
   type ClassOverview,
@@ -27,7 +31,17 @@ const createDownload = (data: unknown, filename: string) => {
   URL.revokeObjectURL(link.href);
 };
 
-export default function InstructorDashboard({ classId, className }: { classId: number | null; className: string | null }) {
+export default function InstructorDashboard({
+  classId,
+  className,
+  activeTab = 'analytics',
+  onTabChange,
+}: {
+  classId: number | null;
+  className: string | null;
+  activeTab?: 'analytics' | 'roster' | 'topics';
+  onTabChange?: (tab: 'analytics' | 'roster' | 'topics') => void;
+}) {
   const [classOverview, setClassOverview] = useState<ClassOverview | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<StudentReport | null>(null);
   const [loading, setLoading] = useState(true);
@@ -41,6 +55,18 @@ export default function InstructorDashboard({ classId, className }: { classId: n
   const [topicError, setTopicError] = useState<string | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<QuestionAnalyticsResponse['analytics'][number] | null>(null);
   const [selectedSubtopic, setSelectedSubtopic] = useState<string | null>(null);
+  const pageTitle = className
+    ? `${className} ${activeTab === 'analytics' ? 'Analytics' : activeTab === 'roster' ? 'Roster' : 'Topics'}`
+    : activeTab === 'analytics'
+      ? 'All Class Analytics'
+      : activeTab === 'roster'
+        ? 'Class Roster'
+        : 'Topic Settings';
+  const pageSubtitle = activeTab === 'analytics'
+    ? 'Comprehensive overview of student progress and performance'
+    : activeTab === 'roster'
+      ? 'Manage co-instructors and the class roster.'
+      : 'Configure topic availability and schedules.';
 
   useEffect(() => {
     setSelectedStudent(null);
@@ -168,8 +194,22 @@ export default function InstructorDashboard({ classId, className }: { classId: n
       <div className="instructor-dashboard app-page">
         <header className="dashboard-header">
           <div className="dashboard-header__content">
-            <h1>{className ? `${className} Analytics` : 'All Class Analytics'}</h1>
+            <h1>{pageTitle}</h1>
             <div className="dashboard-subtitle">Loading dashboard…</div>
+          </div>
+          <div className="dashboard-header__actions dashboard-header__actions--tabs">
+            <button className={`dashboard-tab ${activeTab === 'analytics' ? 'is-active' : ''}`} onClick={() => onTabChange?.('analytics')}>
+              <FontAwesomeIcon icon={faGaugeHigh} aria-hidden="true" />
+              <span className="dashboard-tab__label">Analytics</span>
+            </button>
+            <button className={`dashboard-tab ${activeTab === 'roster' ? 'is-active' : ''}`} onClick={() => onTabChange?.('roster')}>
+              <FontAwesomeIcon icon={faUsers} aria-hidden="true" />
+              <span className="dashboard-tab__label">Roster</span>
+            </button>
+            <button className={`dashboard-tab ${activeTab === 'topics' ? 'is-active' : ''}`} onClick={() => onTabChange?.('topics')}>
+              <FontAwesomeIcon icon={faBook} aria-hidden="true" />
+              <span className="dashboard-tab__label">Topics</span>
+            </button>
           </div>
         </header>
       </div>
@@ -184,18 +224,44 @@ export default function InstructorDashboard({ classId, className }: { classId: n
 
     return (
       <div className="instructor-dashboard app-page">
-        <Button onClick={() => setSelectedStudent(null)} className="back-button" variant="ghost">
-          Back to Class Overview
-        </Button>
-
-        <div className="student-detail-header">
-          <div>
-            <h1>{selectedStudent.student_name}</h1>
-            <p className="student-email">{selectedStudent.student_email}</p>
+        <header className="dashboard-header">
+          <div className="dashboard-header__content">
+            <h1>{pageTitle}</h1>
+            <p className="dashboard-subtitle">{pageSubtitle}</p>
           </div>
-        </div>
+          <div className="dashboard-header__actions dashboard-header__actions--tabs">
+            <button className={`dashboard-tab ${activeTab === 'analytics' ? 'is-active' : ''}`} onClick={() => onTabChange?.('analytics')}>
+              <FontAwesomeIcon icon={faGaugeHigh} aria-hidden="true" />
+              <span className="dashboard-tab__label">Analytics</span>
+            </button>
+            <button className={`dashboard-tab ${activeTab === 'roster' ? 'is-active' : ''}`} onClick={() => onTabChange?.('roster')}>
+              <FontAwesomeIcon icon={faUsers} aria-hidden="true" />
+              <span className="dashboard-tab__label">Roster</span>
+            </button>
+            <button className={`dashboard-tab ${activeTab === 'topics' ? 'is-active' : ''}`} onClick={() => onTabChange?.('topics')}>
+              <FontAwesomeIcon icon={faBook} aria-hidden="true" />
+              <span className="dashboard-tab__label">Topics</span>
+            </button>
+          </div>
+        </header>
+        <div className="dashboard-scroll-content">
+          {activeTab === 'analytics' && (
+            <div className="dashboard-toolbar">
+              <button className="btn-secondary" type="button" onClick={handleExport}>Export Data</button>
+            </div>
+          )}
+          <Button onClick={() => setSelectedStudent(null)} className="back-button" variant="ghost">
+            Back to Class Overview
+          </Button>
 
-        <div className="stats-grid stats-grid--compact">
+          <div className="student-detail-header">
+            <div>
+              <h1>{selectedStudent.student_name}</h1>
+              <p className="student-email">{selectedStudent.student_email}</p>
+            </div>
+          </div>
+
+          <div className="stats-grid stats-grid--compact">
           <div className="stat-card">
             <div>
               <h3>Questions</h3>
@@ -236,11 +302,11 @@ export default function InstructorDashboard({ classId, className }: { classId: n
               <p className="stat-detail">Topics completed</p>
             </div>
           </div>
-        </div>
+          </div>
 
-        <section className="dashboard-section">
-          <h2>Topic Performance</h2>
-          <div className="topics-grid">
+          <section className="dashboard-section">
+            <h2>Topic Performance</h2>
+            <div className="topics-grid">
             {selectedStudent.topic_breakdown.map((topic) => (
               <div key={topic.topic} className="topic-detail-card">
                 <div className="topic-detail-card__header">
@@ -273,30 +339,31 @@ export default function InstructorDashboard({ classId, className }: { classId: n
                 </div>
               </div>
             ))}
-          </div>
-        </section>
+            </div>
+          </section>
 
-        {selectedStudent.struggling_subtopics &&
-          selectedStudent.struggling_subtopics.length > 0 && (
-            <section className="dashboard-section">
-              <h2>Areas for Improvement</h2>
-              <div className="struggling-topics">
-                {selectedStudent.struggling_subtopics.map((subtopic, index) => (
-                  <div key={`${subtopic.topic}-${subtopic.subtopic_type}-${index}`} className="struggling-card">
-                    <h4>
-                      {subtopic.topic} · {subtopic.subtopic_type}
-                    </h4>
-                    <div className="struggling-stats">
-                      <span>{subtopic.attempts} attempts</span>
-                      <span className="accuracy-low">
-                        {subtopic.accuracy.toFixed(0)}% accuracy
-                      </span>
+          {selectedStudent.struggling_subtopics &&
+            selectedStudent.struggling_subtopics.length > 0 && (
+              <section className="dashboard-section">
+                <h2>Areas for Improvement</h2>
+                <div className="struggling-topics">
+                  {selectedStudent.struggling_subtopics.map((subtopic, index) => (
+                    <div key={`${subtopic.topic}-${subtopic.subtopic_type}-${index}`} className="struggling-card">
+                      <h4>
+                        {subtopic.topic} · {subtopic.subtopic_type}
+                      </h4>
+                      <div className="struggling-stats">
+                        <span>{subtopic.attempts} attempts</span>
+                        <span className="accuracy-low">
+                          {subtopic.accuracy.toFixed(0)}% accuracy
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
+                  ))}
+                </div>
+              </section>
+            )}
+        </div>
       </div>
     );
   }
@@ -524,16 +591,37 @@ export default function InstructorDashboard({ classId, className }: { classId: n
 
       <header className="dashboard-header">
         <div className="dashboard-header__content">
-          <h1>{className ? `${className} Analytics` : 'All Class Analytics'}</h1>
-          <p className="dashboard-subtitle">
-            Comprehensive overview of student progress and performance
-          </p>
+          <h1>{pageTitle}</h1>
+          <p className="dashboard-subtitle">{pageSubtitle}</p>
         </div>
-        <div className="dashboard-header__actions">
-          <button className="btn-secondary" onClick={handleExport}>Export Data</button>
+        <div className="dashboard-header__actions dashboard-header__actions--tabs">
+          <button className={`dashboard-tab ${activeTab === 'analytics' ? 'is-active' : ''}`} onClick={() => onTabChange?.('analytics')}>
+            <FontAwesomeIcon icon={faGaugeHigh} aria-hidden="true" />
+            <span className="dashboard-tab__label">Analytics</span>
+          </button>
+          <button className={`dashboard-tab ${activeTab === 'roster' ? 'is-active' : ''}`} onClick={() => onTabChange?.('roster')}>
+            <FontAwesomeIcon icon={faUsers} aria-hidden="true" />
+            <span className="dashboard-tab__label">Roster</span>
+          </button>
+          <button className={`dashboard-tab ${activeTab === 'topics' ? 'is-active' : ''}`} onClick={() => onTabChange?.('topics')}>
+            <FontAwesomeIcon icon={faBook} aria-hidden="true" />
+            <span className="dashboard-tab__label">Topics</span>
+          </button>
         </div>
       </header>
+      <div className="dashboard-scroll-content">
+        {activeTab === 'analytics' && (
+          <div className="dashboard-toolbar">
+            <button className="btn-secondary" type="button" onClick={handleExport}>Export Data</button>
+          </div>
+        )}
 
+        {activeTab === 'roster' ? (
+          <RosterPage classId={classId} />
+        ) : activeTab === 'topics' ? (
+          <TopicSettingsPage classId={classId} />
+        ) : (
+          <>
       <section className="dashboard-overview">
         <div className="overview-stats">
           <div
@@ -683,6 +771,9 @@ export default function InstructorDashboard({ classId, className }: { classId: n
       </section>
 
       <section className="dashboard-section dashboard-section--spacer" aria-hidden="true" />
+          </>
+        )}
+      </div>
     </div>
   );
 }

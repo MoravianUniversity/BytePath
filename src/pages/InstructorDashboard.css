@@ -1,6 +1,55 @@
+.instructor-dashboard.app-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.dashboard-scroll-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
 .dashboard-header__actions {
   display: flex;
   gap: 1rem;
+}
+
+.dashboard-header__actions--tabs {
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.dashboard-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-dashboard-card);
+  border: 1px solid var(--border-dashboard-card);
+  color: var(--text-dashboard);
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.dashboard-tab:hover {
+  background: var(--bg-dashboard-card-hover);
+}
+
+.dashboard-tab.is-active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.dashboard-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
 }
 
 .btn-secondary {
@@ -1065,14 +1114,29 @@
     width: 100%;
   }
 
+  .dashboard-header__actions--tabs {
+    gap: 0.5rem;
+  }
+
+  .dashboard-tab {
+    flex: 1;
+    justify-content: center;
+  }
+
   .btn-secondary {
-    width: 100%;
+    width: auto;
     text-align: center;
   }
 
   .student-detail-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+@media (max-width: 760px) {
+  .dashboard-tab__label {
+    display: none;
   }
 }
 

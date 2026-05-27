@@ -8,8 +8,6 @@ import QuestionScreen from './components/QuestionScreen.tsx';
 import TopicCompletionScreen from './components/TopicCompletionScreen.tsx';
 import LockedTopicScreen from './components/LockedTopicScreen.tsx';
 import { getPythonLoadPromise } from './python.ts';
-import StudentsPage from './pages/StudentsPage.tsx';
-import TopicSettingsPage from './pages/TopicSettingsPage.tsx';
 import ClassSelector from './components/ClassSelector.tsx';
 import './App.css';
 import LoginScreen from './components/LoginScreen';
@@ -23,11 +21,32 @@ import InstructorDashboard from './pages/InstructorDashboard';
 import StudentDashboard from './pages/StudentDashboard';
 import { toggleTheme, getThemePreference } from './utils/theme';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBook, faPlayCircle, faRightFromBracket, faTachographDigital, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { faPlayCircle, faRightFromBracket, faTachographDigital } from '@fortawesome/free-solid-svg-icons';
 import { classTopicSettingsService } from './services/classTopicSettings';
 import { buildAvailabilityMap, filterTopicsByAvailability, isTopicEnabled, type TopicAvailabilityMap } from './utils/topicAvailability';
 
 export const SKIPPED = Symbol('(skipped)');
+
+type AppScreen = 'welcome' | 'question' | 'locked-topic' | 'roster' | 'topics' | 'dashboard';
+type DashboardTab = 'analytics' | 'roster' | 'topics';
+
+const getScreenFromPath = (path: string): AppScreen | null => {
+  if (
+    path === '/dashboard' ||
+    path === '/dashboard/analytics' ||
+    path === '/dashboard/roster' ||
+    path === '/dashboard/topics'
+  ) {
+    return 'dashboard';
+  }
+  return null;
+};
+
+const getDashboardTabFromPath = (path: string): DashboardTab => {
+  if (path === '/dashboard/roster') return 'roster';
+  if (path === '/dashboard/topics') return 'topics';
+  return 'analytics';
+};
 
 const getAllTopics = (): Topic[] => {
   const topics: Topic[] = [];
@@ -46,10 +65,16 @@ const getAllTopics = (): Topic[] => {
 
 
 function App() {
-  const [currentScreen, setCurrentScreen] = useState<'welcome' | 'question' | 'locked-topic' | 'students' | 'topics' | 'dashboard'>(() => {
+  const [currentScreen, setCurrentScreen] = useState<AppScreen>(() => {
+    const routeScreen = getScreenFromPath(window.location.pathname);
+    if (routeScreen) {
+      return routeScreen;
+    }
     const saved = localStorage.getItem('currentScreen');
-    return (saved as 'welcome' | 'question' | 'locked-topic' | 'students' | 'topics' | 'dashboard') ?? 'welcome';
+    const normalizedSaved = saved === 'students' ? 'roster' : saved;
+    return (normalizedSaved as AppScreen) ?? 'welcome';
   });
+  const [instructorDashboardTab, setInstructorDashboardTab] = useState<DashboardTab>(() => getDashboardTabFromPath(window.location.pathname));
   useEffect(() => { localStorage.setItem('currentScreen', currentScreen); }, [currentScreen]);
   let [isLoading, setIsLoading] = useState(true);
   const [loadingError, setLoadingError] = useState<string | null>(null);
@@ -83,6 +108,7 @@ function App() {
   const [topicAvailability, setTopicAvailability] = useState<TopicAvailabilityMap>(new Map());
   const canBypassAvailability = isInstructor && instructorPractice;
   const [studentClasses, setStudentClasses] = useState<Class[]>([]);
+  const hasMountedRef = useRef(false);
   const [currentClass, setCurrentClass] = useState<Class | null>(() => {
     const saved = localStorage.getItem('currentClass');
     return saved ? JSON.parse(saved) as Class : null;
@@ -110,6 +136,18 @@ function App() {
   const clearUrlHash = () => {
     const { pathname, search } = window.location;
     window.history.replaceState(null, '', `${pathname}${search}`);
+  };
+
+  const syncPathForScreen = (screen: AppScreen, dashboardTab: DashboardTab, options?: { replace?: boolean }) => {
+    const route = screen === 'dashboard'
+      ? (dashboardTab === 'analytics' ? '/dashboard' : `/dashboard/${dashboardTab}`)
+      : '/';
+    if (window.location.pathname === route) return;
+    if (options?.replace) {
+      window.history.replaceState(null, '', route);
+      return;
+    }
+    window.history.pushState(null, '', route);
   };
 
   // Load Python interpreter
@@ -222,11 +260,13 @@ function App() {
       });
   }, [currentUser, currentClass]);
 
-  // Instructors default to the dashboard, but respect a previously saved screen.
+  // Instructors default to the dashboard.
   useEffect(() => {
-    if (isInstructor && currentScreen !== 'dashboard' && currentScreen !== 'students' && currentScreen !== 'topics') {
+    if (isInstructor && currentScreen !== 'dashboard') {
       setCurrentScreen('dashboard');
       setInstructorPractice(false);
+      setInstructorDashboardTab('analytics');
+      syncPathForScreen('dashboard', 'analytics', { replace: true });
     }
   }, [isInstructor]);
 
@@ -235,14 +275,43 @@ function App() {
     if (!isInstructor) return;
 
     const allowedScreens = instructorPractice
-      ? new Set(['dashboard', 'students', 'topics', 'welcome', 'question', 'locked-topic'])
-      : new Set(['dashboard', 'students', 'topics']);
+      ? new Set(['dashboard', 'welcome', 'question', 'locked-topic'])
+      : new Set(['dashboard']);
 
     if (!allowedScreens.has(currentScreen)) {
       setCurrentScreen('dashboard');
+      setInstructorDashboardTab('analytics');
+      syncPathForScreen('dashboard', 'analytics', { replace: true });
       clearUrlHash();
     }
   }, [isInstructor, currentScreen, instructorPractice]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const routeScreen = getScreenFromPath(window.location.pathname);
+      if (routeScreen) {
+        setCurrentScreen(routeScreen);
+        if (routeScreen === 'dashboard') {
+          setInstructorDashboardTab(getDashboardTabFromPath(window.location.pathname));
+        }
+        return;
+      }
+      if (window.location.pathname === '/') {
+        setCurrentScreen('welcome');
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      syncPathForScreen(currentScreen, instructorDashboardTab, { replace: true });
+      return;
+    }
+    syncPathForScreen(currentScreen, instructorDashboardTab);
+  }, [currentScreen, instructorDashboardTab]);
 
   const resetState = () => {
     setCurrentScreen('welcome');
@@ -527,7 +596,7 @@ function App() {
           <tr><td className="subtitle">Learning with Small Python Snippets</td></tr>
         </tbody></table>
         <div className="header-actions">
-          {(!isInstructor || (instructorPractice && currentScreen !== 'students' && currentScreen !== 'topics')) && (
+          {(!isInstructor || (instructorPractice && currentScreen !== 'dashboard')) && (
             <div className="mode-toggle">
               <button 
                 className={`toggle-button ${mode === 'learning' ? 'active' : ''}`}
@@ -552,28 +621,10 @@ function App() {
                   setInstructorPractice(true);
                   setCurrentScreen('welcome');
                 }}
-                className={`dashboard-button ${instructorPractice && currentScreen !== 'dashboard' && currentScreen !== 'students' && currentScreen !== 'topics' ? 'active' : ''}`}
+                className={`dashboard-button ${instructorPractice && currentScreen !== 'dashboard' ? 'active' : ''}`}
               >
                 <FontAwesomeIcon icon={faPlayCircle} aria-hidden="true" />
                 <span className="dashboard-button-label">Practice</span>
-              </button>
-            )}
-            {isInstructor && (
-              <button
-                onClick={() => setCurrentScreen('students')}
-                className={`dashboard-button ${currentScreen === 'students' ? 'active' : ''}`}
-              >
-                <FontAwesomeIcon icon={faUsers} aria-hidden="true" />
-                <span className="dashboard-button-label">Students</span>
-              </button>
-            )}
-            {isInstructor && (
-              <button
-                onClick={() => setCurrentScreen('topics')}
-                className={`dashboard-button ${currentScreen === 'topics' ? 'active' : ''}`}
-              >
-                <FontAwesomeIcon icon={faBook} aria-hidden="true" />
-                <span className="dashboard-button-label">Topics</span>
               </button>
             )}
             <button
@@ -584,6 +635,7 @@ function App() {
                   setCurrentScreen('dashboard');
                   if (isInstructor) {
                     setInstructorPractice(false);
+                    setInstructorDashboardTab('analytics');
                     clearUrlHash();
                   }
                 }
@@ -648,7 +700,12 @@ function App() {
       <main className="App-main">
         {currentScreen === 'dashboard' ? (
           currentUser.role === 'instructor' ? (
-            <InstructorDashboard classId={currentClass?.id ?? null} className={currentClass?.class_name ?? null} />
+            <InstructorDashboard
+              classId={currentClass?.id ?? null}
+              className={currentClass?.class_name ?? null}
+              activeTab={instructorDashboardTab}
+              onTabChange={setInstructorDashboardTab}
+            />
           ) : (
             <StudentDashboard user={currentUser} currentClassId={currentClass?.id ?? null} />
           )
@@ -665,14 +722,6 @@ function App() {
                 </>
               )}
             </div>
-          </div>
-        ) : currentScreen === 'students' ? (
-          <div className="content-area app-page" ref={contentAreaRef}>
-            <StudentsPage classId={currentClass?.id ?? null} className={currentClass?.class_name ?? null} />
-          </div>
-        ) : currentScreen === 'topics' ? (
-          <div className="content-area app-page" ref={contentAreaRef}>
-            <TopicSettingsPage classId={currentClass?.id ?? null} className={currentClass?.class_name ?? null} />
           </div>
         ) : (
           <>

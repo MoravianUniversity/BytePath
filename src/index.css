@@ -246,7 +246,7 @@
 
   /* Dashboard & modal */
   --bg-dashboard-card: #ffffffd9;
-  --bg-dashboard-card-hover: #fffffff2;
+  --bg-dashboard-card-hover: #0000000d;
   --border-dashboard-card: rgba(var(--color-primary-rgb), 0.25);
   --text-dashboard: var(--text-primary);
   --bg-modal: #fffffffa;

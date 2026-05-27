@@ -54,13 +54,7 @@ function getTimezoneLabel(): string {
   return `${zone} (UTC${sign}${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")})`;
 }
 
-export default function TopicSettingsPage({
-  classId,
-  className,
-}: {
-  classId: number | null;
-  className: string | null;
-}) {
+export default function TopicSettingsPage({ classId }: { classId: number | null }) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [drafts, setDrafts] = useState<Record<string, TopicDraft>>({});
   const [loading, setLoading] = useState(false);
@@ -206,12 +200,8 @@ export default function TopicSettingsPage({
 
   return (
     <div className="topic-settings-page">
-      <div className="topic-settings-header">
-        <div>
-          <h2>Topic availability</h2>
-          {className && <p className="topic-settings-subtitle">{className}</p>}
-          <p className="topic-settings-timezone">Times shown in local timezone: {timezoneLabel}</p>
-        </div>
+      <div className="topic-settings-header topic-settings-header--compact">
+        <p className="topic-settings-timezone">Times in local timezone: {timezoneLabel}</p>
         <div className="topic-settings-actions">
           {dirty && <span className="topic-settings-dirty">Unsaved changes</span>}
           <button
