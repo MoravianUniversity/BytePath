@@ -341,71 +341,75 @@ export default function StudentsPage({ classId, className }: { classId: number |
         </thead>
         <tbody>
           {showManualForm ? (
-            <tr>
-              <td>
-                <input
-                  type="email"
-                  value={manualForm.email}
-                  onChange={e => setManualForm(f => ({ ...f, email: e.target.value }))}
-                  placeholder="email@school.edu"
-                  autoFocus
-                  className="inline-edit-input"
-                />
-              </td>
-              <td>
-                <input
-                  type="text"
-                  value={manualForm.first_name}
-                  onChange={e => setManualForm(f => ({ ...f, first_name: e.target.value }))}
-                  placeholder="First name"
-                  className="inline-edit-input"
-                />
-              </td>
-              <td>
-                <input
-                  type="text"
-                  value={manualForm.last_name}
-                  onChange={e => setManualForm(f => ({ ...f, last_name: e.target.value }))}
-                  placeholder="Last name"
-                  className="inline-edit-input"
-                />
-              </td>
-              <td>
-                <input
-                  type="text"
-                  value={manualForm.notes}
-                  onChange={e => setManualForm(f => ({ ...f, notes: e.target.value }))}
-                  placeholder="Notes (optional)"
-                  className="inline-edit-input"
-                />
-              </td>
-              <td>
-                <button
-                  onClick={handleManualSubmit}
-                  className="search-button"
-                  disabled={manualSaving || !manualForm.email || !manualForm.first_name || !manualForm.last_name}
-                >
-                  {manualSaving ? "Saving…" : "Save"}
-                </button>
-              </td><td>
-                <button
-                  onClick={() => {
-                    setShowManualForm(false);
-                    setManualForm({ first_name: "", last_name: "", email: "", notes: "" });
-                    setManualError(null);
-                  }}
-                  className="delete-button"
-                  title="Cancel"
-                >
-                  ✕
-                </button>
-                {/* {manualError && (
-                  <span style={{ color: "var(--color-error-bright)", fontSize: "0.85em", marginLeft: 8 }}>
+            <>
+              <tr>
+                <td>
+                  <input
+                    type="email"
+                    value={manualForm.email}
+                    onChange={e => setManualForm(f => ({ ...f, email: e.target.value }))}
+                    placeholder="email@school.edu"
+                    autoFocus
+                    className="inline-edit-input"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    value={manualForm.first_name}
+                    onChange={e => setManualForm(f => ({ ...f, first_name: e.target.value }))}
+                    placeholder="First name"
+                    className="inline-edit-input"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    value={manualForm.last_name}
+                    onChange={e => setManualForm(f => ({ ...f, last_name: e.target.value }))}
+                    placeholder="Last name"
+                    className="inline-edit-input"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    value={manualForm.notes}
+                    onChange={e => setManualForm(f => ({ ...f, notes: e.target.value }))}
+                    placeholder="Notes (optional)"
+                    className="inline-edit-input"
+                  />
+                </td>
+                <td>
+                  <button
+                    onClick={handleManualSubmit}
+                    className="search-button"
+                    disabled={manualSaving || !manualForm.email || !manualForm.first_name || !manualForm.last_name}
+                  >
+                    {manualSaving ? "Saving…" : "Save"}
+                  </button>
+                </td><td>
+                  <button
+                    onClick={() => {
+                      setShowManualForm(false);
+                      setManualForm({ first_name: "", last_name: "", email: "", notes: "" });
+                      setManualError(null);
+                    }}
+                    className="delete-button"
+                    title="Cancel"
+                  >
+                    ✕
+                  </button>
+                </td>
+              </tr>
+              {manualError && (
+                <tr>
+                  <td colSpan={6} className="manual-error">
                     {manualError}
-                  </span>
-                )} */}
-              </td>
-            </tr>
+                  </td>
+                </tr>
+              )}
+            </>
           ) : (
             <tr
               style={{ cursor: "pointer", opacity: 0.5 }}
