@@ -39,7 +39,7 @@
   border-radius: 10px;
   padding: 1rem;
   border: 1px solid var(--border-dashboard-card);
-  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+  transition: box-shadow 0.2s, background 0.2s;
   color: var(--text-dashboard);
 }
 
@@ -341,7 +341,7 @@
   color: var(--text-dashboard);
   cursor: pointer;
   text-align: left;
-  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+  transition: box-shadow 0.2s, background 0.2s;
 }
 
 .roster-lookup-card:hover {
@@ -680,7 +680,7 @@
   padding: 0.45rem 0.85rem;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
+  transition: background 0.2s;
 }
 
 .roster-modal__close:hover {
@@ -793,7 +793,7 @@
   padding: 0.45rem 0.85rem;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
+  transition: background 0.2s;
 }
 
 .topic-analytics-modal__close:hover {
@@ -863,7 +863,7 @@
   border: 1px solid var(--border-dashboard-card);
   background: var(--bg-dashboard-card);
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: box-shadow 0.2s;
 }
 
 .analytics-list-row:hover {
@@ -906,7 +906,7 @@
   border: 1px solid var(--border-dashboard-card);
   background: var(--bg-dashboard-card);
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: box-shadow 0.2s;
 }
 
 .ranked-subtopic-row:hover {
@@ -1019,7 +1019,7 @@
   padding: 0.45rem 0.85rem;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
+  transition: background 0.2s;
 }
 
 .question-modal__close:hover {
