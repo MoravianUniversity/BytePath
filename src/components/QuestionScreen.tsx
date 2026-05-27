@@ -8,6 +8,7 @@ import '../code.css';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-python';
 import confetti from 'canvas-confetti';
+import { HelpMarkdown } from './HelpMarkdown';
 
 interface QuestionScreenProps {
   question: Question;
@@ -15,6 +16,7 @@ interface QuestionScreenProps {
   onAnswerSelect: (answer: Answer | undefined, question: Question) => void;
   isQuiz: boolean;
   canSkip: boolean;
+  helpMessage?: string;
 }
 
 const QuestionScreen: React.FC<QuestionScreenProps> = ({
@@ -22,7 +24,8 @@ const QuestionScreen: React.FC<QuestionScreenProps> = ({
   userAnswer,
   onAnswerSelect,
   isQuiz,
-  canSkip
+  canSkip,
+  helpMessage,
 }) => {
   const isCompleted = userAnswer !== undefined;
   const isCorrect = isCompleted && isAnswerCorrect(userAnswer, question);
@@ -132,11 +135,21 @@ const QuestionScreen: React.FC<QuestionScreenProps> = ({
         {!isCompleted && canSkip && (
           <button className="skip-button" onClick={() => onSubmit(null, undefined)}>Skip</button>
         )}
-        {question.usesOutput ? (
-          <div className="question-type">What is the <em>output to the user</em>?</div>
-        ) : (
-          <div className="question-type">What is the value of the final line of code?</div>
-        )}
+        <div className="question-type-row">
+          {question.usesOutput ? (
+            <div className="question-type">What is the <em>output to the user</em>?</div>
+          ) : (
+            <div className="question-type">What is the value of the final line of code?</div>
+          )}
+          {helpMessage && (
+            <span className="question-help" tabIndex={0}>
+              <span className="question-help-icon" aria-hidden="true">?</span>
+              <span className="question-help-tooltip" role="tooltip">
+                <HelpMarkdown content={helpMessage} />
+              </span>
+            </span>
+          )}
+        </div>
 
 
         {isQuiz ? (

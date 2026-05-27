@@ -373,10 +373,20 @@ function App() {
         });
 
         // Restore subtopic-level completion based on the latest response per subtopic.
+        const responsesBySubtopic = new Map<string, typeof responses>();
+        responses.forEach((response) => {
+          const key = `${response.topic}::${response.subtopic_type}`;
+          const list = responsesBySubtopic.get(key) ?? [];
+          list.push(response);
+          responsesBySubtopic.set(key, list);
+        });
+
         allTopics.forEach((topic) => {
           topic.subtopics.forEach((subtopic) => {
             const key = `${topic.id}::${subtopic.constructor.name}`;
             const response = latestBySubtopic.get(key);
+            const history = responsesBySubtopic.get(key) ?? [];
+            subtopic.failedAttempts = history.filter(r => !r.is_correct).length;
             if (response) {
               subtopic.completed = response.is_correct;
               subtopic.incorrectLastTime = !response.is_correct;
@@ -545,6 +555,13 @@ function App() {
       if (currentSubtopic) {
         currentSubtopic.completed = currentSubtopic.incorrectLastTime ? false : isCorrect;
         currentSubtopic.incorrectLastTime = !isCorrect;
+        if (!skipped) {
+          if (!isCorrect) {
+            currentSubtopic.failedAttempts += 1;
+          } else {
+            currentSubtopic.failedAttempts = 0;
+          }
+        }
       }
 
       // Check if all subtopics in the topic are completed
@@ -946,6 +963,13 @@ function App() {
                       onAnswerSelect={handleAnswerSelect}
                       isQuiz={mode === 'quiz' || currentTopic!.forceQuiz || question.forceQuiz}
                       canSkip={completedTopics.has(currentTopic?.id || '')}
+                      helpMessage={
+                        questionAnswers[index] === undefined &&
+                        index === questionList.length - 1 &&
+                        currentSubtopic
+                          ? currentSubtopic.getActiveHelpMessage()
+                          : undefined
+                      }
                     />
                   )
                 )}

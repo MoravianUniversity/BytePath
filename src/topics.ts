@@ -37,6 +37,31 @@ export interface Question {
   input?: string[] | string; // user input for the question
 }
 
+/** One tier of progressive help, unlocked after enough failed attempts on this question type. */
+export interface QuestionHelpTier {
+  afterFailedAttempts: number;
+  message: string;
+}
+
+/** Progressive help for a question type (defined on the Subtopic). */
+export type QuestionHelp = QuestionHelpTier[];
+
+/** Highest-tier help message that applies, or undefined if help should stay hidden. */
+export function getActiveHelpMessage(
+  help: QuestionHelp | undefined,
+  failedAttempts: number,
+): string | undefined {
+  if (!help?.length) { return undefined; }
+  const tiers = [...help].sort((a, b) => a.afterFailedAttempts - b.afterFailedAttempts);
+  let message: string | undefined;
+  for (const tier of tiers) {
+    if (failedAttempts >= tier.afterFailedAttempts) {
+      message = tier.message;
+    }
+  }
+  return message;
+}
+
 // Check if an answer is correct for a question
 export function isAnswerCorrect(answer: Answer, question: Question): boolean {
   return isAnswerSame(answer, question.correct);
@@ -88,6 +113,15 @@ export function formatAnswer(answer: Answer): string {
 export abstract class Subtopic {
   completed: boolean = false;
   incorrectLastTime: boolean = false;
+  /** Incorrect answers on this question type (used for progressive help). */
+  failedAttempts: number = 0;
+  /** Optional progressive help; hidden on first show, then unlocked by failed attempts. */
+  readonly help?: QuestionHelp;
+
+  getActiveHelpMessage(): string | undefined {
+    return getActiveHelpMessage(this.help, this.failedAttempts);
+  }
+
   abstract generateQuestion(): Question;
 }
 
@@ -159,6 +193,7 @@ export class Topic {
     this.subtopics.forEach(subtopic => {
       subtopic.completed = false;
       subtopic.incorrectLastTime = false;
+      subtopic.failedAttempts = 0;
     });
   }
 }
