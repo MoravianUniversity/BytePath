@@ -234,6 +234,8 @@ export class TopicGroup {
   }
 }
 
+const MAX_OPTIONS = 10;
+
 // Create a question
 export function createQuestion(
   code: string,
@@ -260,11 +262,17 @@ export function createQuestion(
   }
   // TODO: don't use toFixed() for numbers?
   let opts = deduplicateAnswers([answer as Answer, ...options.filter(o => o !== undefined).map(o => typeof o === 'number' ? +o.toFixed(5) : o)]);
+  opts = shuffle(opts).slice(0, Math.min(MAX_OPTIONS, opts.length));
+  if (!opts.includes(answer as Answer)) {
+    opts.push(answer as Answer);
+    opts = shuffle(opts);
+  }
   forceQuiz = forceQuiz ?? (opts.length === 1);
+  
   return {
     code,
     correct: answer as Answer,
-    options: shuffle(opts),
+    options: opts,
     usesOutput,
     input,
     forceQuiz,
