@@ -1,6 +1,8 @@
 import os
 from typing import Optional, Type, Union
 
+from dotenv import load_dotenv
+load_dotenv()
 
 class Config:
     """Base configuration shared across environments."""
@@ -29,6 +31,7 @@ class Config:
         os.path.join(BASE_DIR, "credentials", "client_secret.json"),
     )
     FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173")
+    FLASK_RUN_PORT = int(os.environ.get("FLASK_RUN_PORT", 5000))
 
 
 class DevelopmentConfig(Config):

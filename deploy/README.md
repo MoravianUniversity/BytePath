@@ -32,6 +32,7 @@ Setup your Google OAuth credentials and download the client secrets JSON file fr
 
 ```env
 FLASK_RUN_PORT=5005
+FLASK_DEBUG=0
 VITE_API_BASE=https://bytepath.moravian.dev/api
 CORS_ORIGINS=https://bytepath.moravian.dev
 FRONTEND_URL=https://bytepath.moravian.dev
