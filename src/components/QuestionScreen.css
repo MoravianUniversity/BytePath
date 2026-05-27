@@ -77,17 +77,17 @@
   animation-iteration-count: 1;
 }
 .skip-button {
-  background: var(--syntax-hint-bg);
-  outline-color: var(--syntax-hint-outline);
-  color: var(--syntax-hint-outline);
+  background: var(--button-skip-bg);
+  outline-color: var(--button-skip-color);
+  color: var(--button-skip-color);
   margin-left: auto;
   float: right;
   padding: 0.1em 0.75em;
 }
 .skip-button:hover:not(:disabled) {
-  background: var(--syntax-hint-bg-active);
-  outline-color: var(--syntax-hint-outline-active);
-  color: var(--syntax-hint-outline-active);
+  background: var(--button-skip-bg-active);
+  outline-color: var(--button-skip-color-active);
+  color: var(--button-skip-color-active);
 }
 
 .quiz-input-container {

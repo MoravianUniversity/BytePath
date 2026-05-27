@@ -212,7 +212,7 @@ export default function InstructorDashboard({ classId, className }: { classId: n
         <header className="dashboard-header">
           <div className="dashboard-header__content">
             <h1>{className ? `${className} Analytics` : 'All Class Analytics'}</h1>
-            <div className="dashboard-loading">Loading dashboard…</div>
+            <div className="dashboard-subtitle">Loading dashboard…</div>
           </div>
         </header>
       </div>
@@ -574,13 +574,9 @@ export default function InstructorDashboard({ classId, className }: { classId: n
         </div>
         <div className="dashboard-header__actions">
           {classId && (
-            <button className="btn-secondary" onClick={() => setShowCoInstructors(true)}>
-              Co-Instructors
-            </button>
+            <button className="btn-secondary" onClick={() => setShowCoInstructors(true)}>Co-Instructors</button>
           )}
-          <button className="btn-secondary" onClick={handleExport}>
-            Export Data
-          </button>
+          <button className="btn-secondary" onClick={handleExport}>Export Data</button>
         </div>
       </header>
 

@@ -7,7 +7,7 @@
 }
 
 .completion-content {
-  background: var(--overlay-on-gradient-10);
+  background: var(--bg-gradient);
   border-radius: 20px;
   padding: 3rem;
   text-align: center;

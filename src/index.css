@@ -98,6 +98,12 @@
   --shadow-question-panel-correct: var(--shadow-success-glow);
   --bg-modal-tooltip: rgba(15, 23, 42, 0.85);
 
+  /* -- Buttons -- */
+  --button-skip-bg: rgba(255, 255, 0, 0.2);
+  --button-skip-color: rgb(128, 128, 36);
+  --button-skip-bg-active: rgba(255, 255, 0, 0.4);
+  --button-skip-color-active: rgb(100, 100, 20);
+
   /* App pages (dashboard, students): shared scroll + content width */
   --app-page-content-max: 1150px;
   --app-page-padding-block: 1.5rem;
@@ -124,7 +130,6 @@
   --overlay-on-gradient-text-50: rgba(var(--color-white-rgb), 0.5);
   --overlay-on-gradient-text-70: rgba(var(--color-white-rgb), 0.7);
   --overlay-scrim: rgba(var(--color-black-rgb), 0.55);
-  --overlay-scrim-strong: rgba(var(--color-black-rgb), 0.65);
   --overlay-dark-25: rgba(var(--color-black-rgb), 0.25);
   --overlay-dark-30: rgba(var(--color-black-rgb), 0.3);
   /* ── Semantic tinted overlays ── */
@@ -265,10 +270,6 @@
   --syntax-outline-strong: rgba(212, 212, 212, 0.7);
   --syntax-success-bg: rgba(42, 79, 55, 0.7);
   --syntax-error-bg: rgba(83, 40, 40, 0.7);
-  --syntax-hint-bg: rgba(255, 255, 0, 0.2);
-  --syntax-hint-outline: rgba(255, 255, 0, 0.7);
-  --syntax-hint-bg-active: rgba(255, 255, 0, 0.4);
-  --syntax-hint-outline-active: rgba(255, 255, 0, 1);
 }
 
 [data-theme="dark"] {
@@ -307,9 +308,12 @@
   --border-dashboard-card: rgba(var(--color-white-rgb), 0.2);
   --text-dashboard: var(--palette-white);
 
-  --bg-modal: #0f172af2;
+  --bg-modal: #1e293bf2;
   --border-modal: rgba(148, 163, 184, 0.35);
   --shadow-modal: 0 24px 48px #0000008c;
+
+  --button-skip-color: rgba(255, 255, 0, 0.7);
+  --button-skip-color-active: rgb(255, 255, 0);
 }
 
 /* Focus states for accessibility */
