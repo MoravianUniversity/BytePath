@@ -233,17 +233,16 @@ select.dashboard-button option {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
   gap: 2rem;
   flex-wrap: wrap;
 }
 
 .app-page-header h1,
 .app-page-header h2,
-.dashboard-header__content h1,
-.students-header h1,
-.students-header h2 {
-  margin: 0 0 0.5rem 0;
+.dashboard-header h1,
+.students-header h1 {
+  margin: 0 0 0.25rem 0;
   font-size: 2rem;
   color: var(--text-dashboard);
 }

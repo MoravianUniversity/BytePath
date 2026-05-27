@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
-import { studentsService, type Student, type UploadHistory } from "../services/students";
-import Button from "../components/ui/Button";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { studentsService, type Student } from "../services/students";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUpload } from '@fortawesome/free-solid-svg-icons';
 import "./StudentsPage.css";
 
 type EditingState = {
@@ -10,50 +11,84 @@ type EditingState = {
 };
 
 export default function StudentsPage({ classId, className }: { classId: number | null; className: string | null }) {
+  type SortField = "email" | "first_name" | "last_name" | "notes" | "created_at";
+  const PAGE_SIZE = 10;
+
   const [students, setStudents] = useState<Student[]>([]);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(50);
-  const [totalPages, setTotalPages] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
   const [total, setTotal] = useState(0);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loadingInitial, setLoadingInitial] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState<Array<{ line: number; email?: string; reason: string }>>([]);
   const [uploadSummary, setUploadSummary] = useState<any>(null);
-  const [showHistory, setShowHistory] = useState(false);
-  const [uploadHistory, setUploadHistory] = useState<UploadHistory[]>([]);
-  const [historyPage, setHistoryPage] = useState(1);
-  const [selectedUpload, setSelectedUpload] = useState<UploadHistory | null>(null);
+
+  const [sortBy, setSortBy] = useState<SortField>("email");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const requestIdRef = useRef(0);
+  const filtersRef = useRef<{
+    classId: number | null;
+    searchQuery: string;
+    sortBy: SortField;
+    sortOrder: "asc" | "desc";
+  }>({ classId, searchQuery, sortBy, sortOrder });
+
   const [editing, setEditing] = useState<EditingState | null>(null);
-  const [selectedStudents, setSelectedStudents] = useState<Set<number>>(new Set());
   const [showManualForm, setShowManualForm] = useState(false);
   const [manualForm, setManualForm] = useState({ first_name: "", last_name: "", email: "", notes: "" });
   const [manualError, setManualError] = useState<string | null>(null);
   const [manualSaving, setManualSaving] = useState(false);
 
-  const load = async () => {
-    setLoading(true);
+  // Keep the current filter context for "load more" without re-creating effects.
+  useEffect(() => {
+    filtersRef.current = { classId, searchQuery, sortBy, sortOrder };
+  }, [classId, searchQuery, sortBy, sortOrder]);
+
+  const reloadFirstPage = useCallback(async () => {
+    requestIdRef.current += 1;
+    const reqId = requestIdRef.current;
+
+    setLoadingInitial(true);
+    setLoadingMore(false);
+    setStudents([]);
+    setHasMore(false);
+    setTotal(0);
+    setPage(1);
+    setEditing(null);
+
     try {
-      const data = await studentsService.list(page, pageSize, search, false, classId ?? undefined);
+      const data = await studentsService.list(
+        1,
+        PAGE_SIZE,
+        searchQuery,
+        false,
+        classId ?? undefined,
+        sortBy,
+        sortOrder,
+      );
+      if (reqId !== requestIdRef.current) return;
       setStudents(data.items);
-      setTotalPages(data.total_pages);
       setTotal(data.total);
+      setHasMore(data.page < data.total_pages && data.items.length > 0);
     } catch (e) {
       alert(`Failed to load students: ${e}`);
     } finally {
-      setLoading(false);
+      if (reqId === requestIdRef.current) setLoadingInitial(false);
     }
-  };
+  }, [classId, searchQuery, sortBy, sortOrder]);
 
   useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, pageSize, classId]);
+    reloadFirstPage();
+  }, [reloadFirstPage]);
 
-  const doSearch = async (e: React.FormEvent) => {
+  const doSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setPage(1);
-    await load();
+    setSearchQuery(searchInput.trim());
   };
 
   const handleFile = async (file: File | null) => {
@@ -65,8 +100,7 @@ export default function StudentsPage({ classId, className }: { classId: number |
       const res = await studentsService.addFromCsv(file, classId);
       setUploadSummary(res.summary);
       setErrors(res.errors);
-      await load();
-      if (showHistory) loadHistory();
+      await reloadFirstPage();
     } catch (e) {
       alert(String(e));
     } finally {
@@ -74,19 +108,68 @@ export default function StudentsPage({ classId, className }: { classId: number |
     }
   };
 
-  const loadHistory = async () => {
-    try {
-      const data = await studentsService.getUploadHistory(historyPage, 10);
-      setUploadHistory(data.uploads);
-    } catch (e) {
-      alert(`Failed to load history: ${e}`);
-    }
-  };
+  const loadMore = useCallback(() => {
+    if (loadingInitial || loadingMore) return;
+    if (!hasMore) return;
+    setPage(p => p + 1);
+  }, [hasMore, loadingInitial, loadingMore]);
 
+  // Fetch subsequent pages for infinite scroll.
   useEffect(() => {
-    if (showHistory) loadHistory();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showHistory, historyPage]);
+    if (page === 1) return;
+    const reqId = requestIdRef.current;
+    const { classId: currentClassId, searchQuery: currentSearchQuery, sortBy: currentSortBy, sortOrder: currentSortOrder } = filtersRef.current;
+
+    setLoadingMore(true);
+    (async () => {
+      try {
+        const data = await studentsService.list(
+          page,
+          PAGE_SIZE,
+          currentSearchQuery,
+          false,
+          currentClassId ?? undefined,
+          currentSortBy,
+          currentSortOrder,
+        );
+        if (reqId !== requestIdRef.current) return;
+        setStudents(prev => [...prev, ...data.items]);
+        setTotal(data.total);
+        setHasMore(page < data.total_pages && data.items.length > 0);
+      } catch (e) {
+        alert(`Failed to load more students: ${e}`);
+      } finally {
+        if (reqId === requestIdRef.current) setLoadingMore(false);
+      }
+    })();
+  }, [page]);
+
+  // Trigger loading more as the user scrolls.
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        const first = entries[0];
+        if (!first?.isIntersecting) return;
+        loadMore();
+      },
+      { root: null, rootMargin: "600px", threshold: 0.01 },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [loadMore]);
+
+  const handleSort = (field: SortField) => {
+    if (sortBy === field) {
+      setSortOrder(o => (o === "asc" ? "desc" : "asc"));
+      return;
+    }
+    setSortBy(field);
+    setSortOrder("asc");
+  };
 
   const handleInlineEdit = async (student: Student, field: EditingState['field'], newValue: string) => {
     if (newValue === (student[field] || '')) {
@@ -107,31 +190,9 @@ export default function StudentsPage({ classId, className }: { classId: number |
     if (!confirm('Are you sure you want to remove this student?')) return;
     try {
       await studentsService.delete(id);
-      await load();
+      await reloadFirstPage();
     } catch (e) {
       alert(`Failed to delete: ${e}`);
-    }
-  };
-
-  const handleBulkDelete = async () => {
-    if (selectedStudents.size === 0) return;
-    if (!confirm(`Remove ${selectedStudents.size} student(s)?`)) return;
-    try {
-      await studentsService.bulkDelete(Array.from(selectedStudents));
-      setSelectedStudents(new Set());
-      await load();
-    } catch (e) {
-      alert(`Failed to delete: ${e}`);
-    }
-  };
-
-  const pageSizes = useMemo(() => [10, 20, 50, 100], []);
-
-  const downloadTemplate = async () => {
-    try {
-      await studentsService.downloadTemplate();
-    } catch (error) {
-      alert(`Failed to download template: ${error}`);
     }
   };
 
@@ -149,7 +210,7 @@ export default function StudentsPage({ classId, className }: { classId: number |
       });
       setManualForm({ first_name: "", last_name: "", email: "", notes: "" });
       setShowManualForm(false);
-      await load();
+      await reloadFirstPage();
     } catch (err) {
       setManualError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -157,137 +218,30 @@ export default function StudentsPage({ classId, className }: { classId: number |
     }
   };
 
-  if (selectedUpload) {
-    return (
-      <div className="students-page">
-        <Button onClick={() => setSelectedUpload(null)} className="back-button" variant="ghost">
-          ← Back to History
-        </Button>
-        <div className="upload-details">
-          <h2>Upload Details: {selectedUpload.filename}</h2>
-          <div className="upload-meta app-page-panel">
-            <p><strong>Uploaded:</strong> {new Date(selectedUpload.uploaded_at).toLocaleString()}</p>
-            <p><strong>Action:</strong> {selectedUpload.action}</p>
-            <p><strong>Summary:</strong></p>
-            <ul>
-              {selectedUpload.summary.added > 0 && <li>+{selectedUpload.summary.added} added</li>}
-              {selectedUpload.summary.updated > 0 && <li>{selectedUpload.summary.updated} updated</li>}
-              {selectedUpload.summary.removed > 0 && <li>-{selectedUpload.summary.removed} removed</li>}
-              {selectedUpload.summary.restored > 0 && <li>{selectedUpload.summary.restored} restored</li>}
-              {selectedUpload.summary.skipped > 0 && <li>{selectedUpload.summary.skipped} skipped</li>}
-              {selectedUpload.summary.not_found > 0 && <li>{selectedUpload.summary.not_found} not found</li>}
-            </ul>
-          </div>
-          <div className="change-log app-page-panel">
-            <h3>Change Log</h3>
-            <div className="change-list">
-              {selectedUpload.changes.map((change, i) => (
-                <div key={i} className={`change-item change-${change.type}`}>
-                  <span className="change-action">{change.action}</span>
-                  <span className="change-email">{change.email}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (showHistory) {
-    return (
-      <div className="students-page">
-        <div className="students-header">
-          <Button onClick={() => setShowHistory(false)} className="back-button" variant="ghost">
-            ← Back to Students
-          </Button>
-          <h2>Upload History</h2>
-        </div>
-        <div className="history-list">
-          {uploadHistory.map((upload) => (
-            <div
-              key={upload.id}
-              className="history-item app-page-panel"
-              onClick={() => setSelectedUpload(upload)}
-            >
-              <div className="history-item-header">
-                <span className="history-filename">{upload.filename}</span>
-                <span className={`history-action history-action-${upload.action}`}>
-                  {upload.action}
-                </span>
-              </div>
-              <div className="history-item-meta">
-                <span>{new Date(upload.uploaded_at).toLocaleString()}</span>
-                <span className="history-summary">
-                  {upload.summary.added > 0 && `+${upload.summary.added} `}
-                  {upload.summary.removed > 0 && `-${upload.summary.removed} `}
-                  {upload.summary.restored > 0 && `↻${upload.summary.restored} `}
-                  {upload.summary.skipped > 0 && `⊘${upload.summary.skipped}`}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="pagination">
-          <button onClick={() => setHistoryPage(p => Math.max(1, p - 1))} disabled={historyPage <= 1}>
-            Prev
-          </button>
-          <span>Page {historyPage}</span>
-          <button onClick={() => setHistoryPage(p => p + 1)} disabled={uploadHistory.length < 10}>
-            Next
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="students-page">
       <div className="students-header">
-        <h1>{className ? `${className} Student Bank` : 'Student Bank'}</h1>
-        <button onClick={() => setShowHistory(true)} className="history-button">
-          📋 Upload History
-        </button>
-      </div>
-
-      <p className="students-description app-page-lead">
-        Manage your student roster. Add students via CSV upload, edit inline, or remove students.
-      </p>
-
-      <div className="students-controls app-page-panel">
-        <form onSubmit={doSearch} className="search-form">
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search name or email…"
-            className="search-input"
-          />
-          <button type="submit" className="search-button">Search</button>
-        </form>
-
-        <div className="upload-buttons">
-          <label className="upload-button upload-button-add">
-            <span>📥 Add Students</span>
-            <input
-              type="file"
-              accept=".csv,text/csv"
-              onChange={e => {
-                const file = e.target.files?.[0];
-                if (file) handleFile(file);
-                e.target.value = '';
-              }}
-              disabled={uploading}
-            />
-          </label>
-          <button
-            onClick={downloadTemplate}
-            className="upload-button upload-button-add"
-            type="button"
-          >
-            📄 Template
-          </button>
+        <div className="students-header__content">
+          <h1>{className ? `${className} Students` : 'Students'}</h1>
+          <p className="students-description app-page-lead">
+            Add students via CSV upload (first name, last name, email), add or edit inline, or remove students
+          </p>
         </div>
+        <label className="upload-button">
+          <span><FontAwesomeIcon icon={faUpload} /> Upload CSV File</span>
+          <input
+            type="file"
+            accept=".csv,text/csv"
+            onChange={e => {
+              const file = e.target.files?.[0];
+              if (file) handleFile(file);
+              e.target.value = '';
+            }}
+            disabled={uploading}
+          />
+        </label>
       </div>
+
 
       {uploading && (
         <div className="upload-status">
@@ -320,275 +274,285 @@ export default function StudentsPage({ classId, className }: { classId: number |
         </div>
       )}
 
-      {selectedStudents.size > 0 && (
-        <div className="bulk-actions app-page-panel">
-          <span>{selectedStudents.size} selected</span>
-          <button onClick={handleBulkDelete} className="bulk-delete-button">
-            Remove Selected
-          </button>
-        </div>
-      )}
-
-      <div className="pagination-controls">
-        <span>Rows per page</span>
-        <select
-          value={pageSize}
-          onChange={e => setPageSize(Number(e.target.value))}
-          className="page-size-select"
-        >
-          {pageSizes.map(n => (
-            <option key={n} value={n}>{n}</option>
-          ))}
-        </select>
-        <div className="pagination-buttons">
-          <button
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={loading || page <= 1}
-          >
-            Prev
-          </button>
-          <span>Page {totalPages ? page : 1} / {totalPages || 1}</span>
-          <button
-            onClick={() => setPage(p => (totalPages ? Math.min(totalPages, p + 1) : p + 1))}
-            disabled={loading || (totalPages > 0 && page >= totalPages)}
-          >
-            Next
-          </button>
-          <span className="total-count">Total: {total}</span>
+      <div className="students-controls app-page-panel">
+        <form onSubmit={doSearch} className="search-form">
+          <input
+            value={searchInput}
+            onChange={e => setSearchInput(e.target.value)}
+            placeholder="Search name or email…"
+            className="search-input"
+          />
+          <button type="submit" className="search-button">Search</button>
+        </form>
+        <div className="total-count">
+          Total students: {total.toLocaleString()}
         </div>
       </div>
 
-      <div className="students-table-container">
-        <table className="students-table">
-          <thead>
-            <tr>
-              <th>
-                <input
-                  type="checkbox"
-                  checked={selectedStudents.size === students.length && students.length > 0}
-                  onChange={e => {
-                    if (e.target.checked) {
-                      setSelectedStudents(new Set(students.map(s => s.id)));
-                    } else {
-                      setSelectedStudents(new Set());
-                    }
-                  }}
-                />
-              </th>
-              <th>Email</th>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Notes</th>
-              <th>Added</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {showManualForm ? (
-              <tr style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-                <td />
-                <td>
-                  <input
-                    type="email"
-                    value={manualForm.email}
-                    onChange={e => setManualForm(f => ({ ...f, email: e.target.value }))}
-                    placeholder="email@school.edu"
-                    autoFocus
-                    className="inline-edit-input"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    value={manualForm.first_name}
-                    onChange={e => setManualForm(f => ({ ...f, first_name: e.target.value }))}
-                    placeholder="First name"
-                    className="inline-edit-input"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    value={manualForm.last_name}
-                    onChange={e => setManualForm(f => ({ ...f, last_name: e.target.value }))}
-                    placeholder="Last name"
-                    className="inline-edit-input"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    value={manualForm.notes}
-                    onChange={e => setManualForm(f => ({ ...f, notes: e.target.value }))}
-                    placeholder="Notes (optional)"
-                    className="inline-edit-input"
-                  />
-                </td>
-                <td colSpan={2} style={{ whiteSpace: "nowrap" }}>
-                  <button
-                    onClick={handleManualSubmit}
-                    className="search-button"
-                    disabled={manualSaving || !manualForm.email || !manualForm.first_name || !manualForm.last_name}
-                    style={{ marginRight: 6 }}
-                  >
-                    {manualSaving ? "Saving…" : "Save"}
-                  </button>
-                  <button
-                    onClick={() => { setShowManualForm(false); setManualForm({ first_name: "", last_name: "", email: "", notes: "" }); setManualError(null); }}
-                    className="delete-button"
-                    title="Cancel"
-                  >
-                    ✕
-                  </button>
-                  {manualError && <span style={{ color: "var(--color-error-bright)", fontSize: "0.85em", marginLeft: 8 }}>{manualError}</span>}
-                </td>
-              </tr>
-            ) : (
-              <tr
-                style={{ cursor: "pointer", opacity: 0.5 }}
-                onClick={() => { setShowManualForm(true); setManualError(null); }}
-                title="Add a student"
+      <table className="students-table">
+        <thead>
+          <tr>
+            <th>
+              <button type="button" className="students-table-sort-button" onClick={() => handleSort("email")}>
+                Email{" "}
+                {sortBy === "email" && (
+                  <span className="students-table-sort-indicator">{sortOrder === "asc" ? "▲" : "▼"}</span>
+                )}
+              </button>
+            </th>
+            <th>
+              <button
+                type="button"
+                className="students-table-sort-button"
+                onClick={() => handleSort("first_name")}
               >
-                <td />
-                <td colSpan={6} style={{ padding: "0.5rem 0.6rem", fontSize: "1.2em", letterSpacing: 1 }}>+</td>
-              </tr>
-            )}
-            {loading ? (
-              <tr>
-                <td colSpan={7} className="loading-cell">Loading…</td>
-              </tr>
-            ) : students.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="empty-cell">No students</td>
-              </tr>
-            ) : (
-              students.map(s => (
-                <tr key={s.id}>
-                  <td>
+                First Name{" "}
+                {sortBy === "first_name" && (
+                  <span className="students-table-sort-indicator">{sortOrder === "asc" ? "▲" : "▼"}</span>
+                )}
+              </button>
+            </th>
+            <th>
+              <button type="button" className="students-table-sort-button" onClick={() => handleSort("last_name")}>
+                Last Name{" "}
+                {sortBy === "last_name" && (
+                  <span className="students-table-sort-indicator">{sortOrder === "asc" ? "▲" : "▼"}</span>
+                )}
+              </button>
+            </th>
+            <th>
+              <button type="button" className="students-table-sort-button" onClick={() => handleSort("notes")}>
+                Notes{" "}
+                {sortBy === "notes" && (
+                  <span className="students-table-sort-indicator">{sortOrder === "asc" ? "▲" : "▼"}</span>
+                )}
+              </button>
+            </th>
+            <th>
+              <button type="button" className="students-table-sort-button" onClick={() => handleSort("created_at")}>
+                Added{" "}
+                {sortBy === "created_at" && (
+                  <span className="students-table-sort-indicator">{sortOrder === "asc" ? "▲" : "▼"}</span>
+                )}
+              </button>
+            </th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {showManualForm ? (
+            <tr>
+              <td>
+                <input
+                  type="email"
+                  value={manualForm.email}
+                  onChange={e => setManualForm(f => ({ ...f, email: e.target.value }))}
+                  placeholder="email@school.edu"
+                  autoFocus
+                  className="inline-edit-input"
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  value={manualForm.first_name}
+                  onChange={e => setManualForm(f => ({ ...f, first_name: e.target.value }))}
+                  placeholder="First name"
+                  className="inline-edit-input"
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  value={manualForm.last_name}
+                  onChange={e => setManualForm(f => ({ ...f, last_name: e.target.value }))}
+                  placeholder="Last name"
+                  className="inline-edit-input"
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  value={manualForm.notes}
+                  onChange={e => setManualForm(f => ({ ...f, notes: e.target.value }))}
+                  placeholder="Notes (optional)"
+                  className="inline-edit-input"
+                />
+              </td>
+              <td>
+                <button
+                  onClick={handleManualSubmit}
+                  className="search-button"
+                  disabled={manualSaving || !manualForm.email || !manualForm.first_name || !manualForm.last_name}
+                >
+                  {manualSaving ? "Saving…" : "Save"}
+                </button>
+              </td><td>
+                <button
+                  onClick={() => {
+                    setShowManualForm(false);
+                    setManualForm({ first_name: "", last_name: "", email: "", notes: "" });
+                    setManualError(null);
+                  }}
+                  className="delete-button"
+                  title="Cancel"
+                >
+                  ✕
+                </button>
+                {/* {manualError && (
+                  <span style={{ color: "var(--color-error-bright)", fontSize: "0.85em", marginLeft: 8 }}>
+                    {manualError}
+                  </span>
+                )} */}
+              </td>
+            </tr>
+          ) : (
+            <tr
+              style={{ cursor: "pointer", opacity: 0.5 }}
+              onClick={() => {
+                setShowManualForm(true);
+                setManualError(null);
+              }}
+              title="Add a student"
+            >
+              <td colSpan={6} style={{ padding: "0", letterSpacing: 1, textAlign: "center", fontWeight: "bold", lineHeight: "2.0em" }}>
+                <span style={{ fontSize: "1.75em", color: "var(--color-primary)", verticalAlign: "middle" }}>+</span><span style={{ fontSize: "1.0em", color: "var(--text-dashboard)", verticalAlign: "middle" }}> {" "}Add Student</span>
+              </td>
+            </tr>
+          )}
+
+          {loadingInitial ? (
+            <tr>
+              <td colSpan={6} className="loading-cell">
+                Loading…
+              </td>
+            </tr>
+          ) : students.length === 0 ? (
+            <tr>
+              <td colSpan={6} className="empty-cell">
+                No students
+              </td>
+            </tr>
+          ) : (
+            students.map(s => (
+              <tr key={s.id}>
+                <td>
+                  {editing?.id === s.id && editing.field === "email" ? (
                     <input
-                      type="checkbox"
-                      checked={selectedStudents.has(s.id)}
-                      onChange={e => {
-                        const newSet = new Set(selectedStudents);
-                        if (e.target.checked) {
-                          newSet.add(s.id);
-                        } else {
-                          newSet.delete(s.id);
-                        }
-                        setSelectedStudents(newSet);
+                      type="email"
+                      value={editing.value}
+                      onChange={e => setEditing({ ...editing, value: e.target.value })}
+                      onBlur={() => handleInlineEdit(s, "email", editing.value)}
+                      onKeyDown={e => {
+                        if (e.key === "Enter") handleInlineEdit(s, "email", editing.value);
+                        if (e.key === "Escape") setEditing(null);
                       }}
+                      autoFocus
+                      className="inline-edit-input"
                     />
-                  </td>
-                  <td>
-                    {editing?.id === s.id && editing.field === 'email' ? (
-                      <input
-                        type="email"
-                        value={editing.value}
-                        onChange={e => setEditing({ ...editing, value: e.target.value })}
-                        onBlur={() => handleInlineEdit(s, 'email', editing.value)}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter') handleInlineEdit(s, 'email', editing.value);
-                          if (e.key === 'Escape') setEditing(null);
-                        }}
-                        autoFocus
-                        className="inline-edit-input"
-                      />
-                    ) : (
-                      <span
-                        onClick={() => setEditing({ id: s.id, field: 'email', value: s.email })}
-                        className="editable-cell"
-                      >
-                        {s.email}
-                      </span>
-                    )}
-                  </td>
-                  <td>
-                    {editing?.id === s.id && editing.field === 'first_name' ? (
-                      <input
-                        type="text"
-                        value={editing.value}
-                        onChange={e => setEditing({ ...editing, value: e.target.value })}
-                        onBlur={() => handleInlineEdit(s, 'first_name', editing.value)}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter') handleInlineEdit(s, 'first_name', editing.value);
-                          if (e.key === 'Escape') setEditing(null);
-                        }}
-                        autoFocus
-                        className="inline-edit-input"
-                      />
-                    ) : (
-                      <span
-                        onClick={() => setEditing({ id: s.id, field: 'first_name', value: s.first_name })}
-                        className="editable-cell"
-                      >
-                        {s.first_name}
-                      </span>
-                    )}
-                  </td>
-                  <td>
-                    {editing?.id === s.id && editing.field === 'last_name' ? (
-                      <input
-                        type="text"
-                        value={editing.value}
-                        onChange={e => setEditing({ ...editing, value: e.target.value })}
-                        onBlur={() => handleInlineEdit(s, 'last_name', editing.value)}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter') handleInlineEdit(s, 'last_name', editing.value);
-                          if (e.key === 'Escape') setEditing(null);
-                        }}
-                        autoFocus
-                        className="inline-edit-input"
-                      />
-                    ) : (
-                      <span
-                        onClick={() => setEditing({ id: s.id, field: 'last_name', value: s.last_name })}
-                        className="editable-cell"
-                      >
-                        {s.last_name}
-                      </span>
-                    )}
-                  </td>
-                  <td>
-                    {editing?.id === s.id && editing.field === 'notes' ? (
-                      <input
-                        type="text"
-                        value={editing.value || ''}
-                        onChange={e => setEditing({ ...editing, value: e.target.value })}
-                        onBlur={() => handleInlineEdit(s, 'notes', editing.value)}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter') handleInlineEdit(s, 'notes', editing.value);
-                          if (e.key === 'Escape') setEditing(null);
-                        }}
-                        placeholder="Add notes..."
-                        autoFocus
-                        className="inline-edit-input"
-                      />
-                    ) : (
-                      <span
-                        onClick={() => setEditing({ id: s.id, field: 'notes', value: s.notes || '' })}
-                        className="editable-cell editable-cell-notes"
-                        title={s.notes || 'Click to add notes'}
-                      >
-                        {s.notes || '—'}
-                      </span>
-                    )}
-                  </td>
-                  <td>{new Date(s.created_at).toLocaleDateString()}</td>
-                  <td>
-                    <button
-                      onClick={() => handleDelete(s.id)}
-                      className="delete-button"
-                      title="Remove student"
+                  ) : (
+                    <span
+                      onClick={() => setEditing({ id: s.id, field: "email", value: s.email })}
+                      className="editable-cell"
                     >
-                      🗑️
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+                      {s.email}
+                    </span>
+                  )}
+                </td>
+                <td>
+                  {editing?.id === s.id && editing.field === "first_name" ? (
+                    <input
+                      type="text"
+                      value={editing.value}
+                      onChange={e => setEditing({ ...editing, value: e.target.value })}
+                      onBlur={() => handleInlineEdit(s, "first_name", editing.value)}
+                      onKeyDown={e => {
+                        if (e.key === "Enter") handleInlineEdit(s, "first_name", editing.value);
+                        if (e.key === "Escape") setEditing(null);
+                      }}
+                      autoFocus
+                      className="inline-edit-input"
+                    />
+                  ) : (
+                    <span
+                      onClick={() => setEditing({ id: s.id, field: "first_name", value: s.first_name })}
+                      className="editable-cell"
+                    >
+                      {s.first_name}
+                    </span>
+                  )}
+                </td>
+                <td>
+                  {editing?.id === s.id && editing.field === "last_name" ? (
+                    <input
+                      type="text"
+                      value={editing.value}
+                      onChange={e => setEditing({ ...editing, value: e.target.value })}
+                      onBlur={() => handleInlineEdit(s, "last_name", editing.value)}
+                      onKeyDown={e => {
+                        if (e.key === "Enter") handleInlineEdit(s, "last_name", editing.value);
+                        if (e.key === "Escape") setEditing(null);
+                      }}
+                      autoFocus
+                      className="inline-edit-input"
+                    />
+                  ) : (
+                    <span
+                      onClick={() => setEditing({ id: s.id, field: "last_name", value: s.last_name })}
+                      className="editable-cell"
+                    >
+                      {s.last_name}
+                    </span>
+                  )}
+                </td>
+                <td>
+                  {editing?.id === s.id && editing.field === "notes" ? (
+                    <input
+                      type="text"
+                      value={editing.value || ""}
+                      onChange={e => setEditing({ ...editing, value: e.target.value })}
+                      onBlur={() => handleInlineEdit(s, "notes", editing.value)}
+                      onKeyDown={e => {
+                        if (e.key === "Enter") handleInlineEdit(s, "notes", editing.value);
+                        if (e.key === "Escape") setEditing(null);
+                      }}
+                      placeholder="Add notes..."
+                      autoFocus
+                      className="inline-edit-input"
+                    />
+                  ) : (
+                    <span
+                      onClick={() =>
+                        setEditing({ id: s.id, field: "notes", value: s.notes || "" })
+                      }
+                      className="editable-cell editable-cell-notes"
+                      title={s.notes || "Click to add notes"}
+                    >
+                      {s.notes || "—"}
+                    </span>
+                  )}
+                </td>
+                <td>{new Date(s.created_at).toLocaleDateString()}</td>
+                <td>
+                  <button onClick={() => handleDelete(s.id)} className="delete-button" title="Remove student">
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+            ))
+          )}
+
+          {loadingMore && students.length > 0 && (
+            <tr>
+              <td colSpan={6} className="loading-cell">
+                Loading more…
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+
+      <div ref={sentinelRef} className="students-infinite-sentinel" />
     </div>
   );
 }

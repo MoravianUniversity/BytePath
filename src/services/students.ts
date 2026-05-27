@@ -70,8 +70,8 @@ export const studentsService = {
     search = '',
     includeDeleted = false,
     classId?: number,
-    sortBy = 'created_at',
-    sortOrder: 'asc' | 'desc' = 'desc',
+    sortBy = 'email',
+    sortOrder: 'asc' | 'desc' = 'asc',
   ): Promise<Paginated<Student>> {
     const params = new URLSearchParams({
       page: String(page),
@@ -219,23 +219,5 @@ export const studentsService = {
     const res = await fetch(`${API_BASE}/students/upload-history/${id}`);
     if (!res.ok) throw new Error(`Failed to fetch upload details (${res.status})`);
     return res.json();
-  },
-
-  async downloadTemplate(): Promise<void> {
-    const res = await fetch(`${API_BASE}/students/template`, {
-      method: 'GET',
-      credentials: 'include',
-    });
-    if (!res.ok) throw new Error(`Failed to download template (${res.status})`);
-
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'students_template.csv';
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
   },
 };
