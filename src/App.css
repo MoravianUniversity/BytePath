@@ -225,9 +225,7 @@ select.dashboard-button option {
   );
 }
 
-.app-page-header,
-.dashboard-header,
-.students-header {
+.dashboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -236,18 +234,13 @@ select.dashboard-button option {
   flex-wrap: wrap;
 }
 
-.app-page-header h1,
-.app-page-header h2,
-.dashboard-header h1,
-.students-header h1 {
+.dashboard-header h1 {
   margin: 0 0 0.25rem 0;
   font-size: 2rem;
   color: var(--text-dashboard);
 }
 
-.app-page-lead,
-.dashboard-subtitle,
-.students-description {
+.dashboard-subtitle {
   margin: 0 0 1rem 0;
   opacity: 0.65;
   font-size: 1rem;
@@ -261,51 +254,6 @@ select.dashboard-button option {
   border: 1px solid var(--border-dashboard-card);
   margin-bottom: 1rem;
   color: var(--text-dashboard);
-}
-
-.app-page-input {
-  padding: 0.5rem 0.75rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-dashboard-card);
-  background: var(--bg-dashboard-card);
-  color: var(--text-dashboard);
-  font-size: 0.9rem;
-}
-
-.app-page-input:focus {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 1px;
-}
-
-.app-page-btn {
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-dashboard-card);
-  background: var(--bg-dashboard-card);
-  color: var(--text-dashboard);
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: background 0.2s, border-color 0.2s;
-}
-
-.app-page-btn:hover:not(:disabled) {
-  background: var(--bg-dashboard-card-hover);
-}
-
-.app-page-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.app-page-btn--primary {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--text-on-primary-btn);
-}
-
-.app-page-btn--primary:hover:not(:disabled) {
-  background: var(--color-primary-light);
 }
 
 .sidebar {

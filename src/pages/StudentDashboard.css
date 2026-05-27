@@ -244,28 +244,6 @@
   border-top: 1px solid var(--border-dashboard-card);
 }
 
-.activity-timeline {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.activity-item {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  background: var(--bg-dashboard-card);
-  padding: 0.9rem 1rem;
-  border-radius: 12px;
-  border: 1px solid var(--border-dashboard-card);
-  transition: background 0.2s;
-  color: var(--text-dashboard);
-}
-
-.activity-item:hover {
-  background: var(--bg-dashboard-card-hover);
-}
-
 .activity-item__indicator {
   width: 34px;
   height: 34px;
@@ -293,97 +271,6 @@
   background: var(--overlay-neutral-18);
   color: var(--color-neutral);
   border: 2px solid var(--overlay-neutral-70);
-}
-
-.activity-item__content {
-  flex: 1;
-  min-width: 0;
-}
-
-.activity-item__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.25rem;
-}
-
-.activity-item__topic {
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
-.activity-item__time {
-  font-size: 0.8rem;
-  opacity: 0.6;
-  white-space: nowrap;
-}
-
-.activity-item__details {
-  font-size: 0.85rem;
-  opacity: 0.7;
-}
-
-.completed-topics-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.completed-topic-item {
-  background: var(--bg-dashboard-card);
-  border-radius: 14px;
-  border: 1px solid var(--border-dashboard-card);
-  overflow: hidden;
-}
-
-.completed-topic-item__header {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.25rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-dashboard);
-  text-align: left;
-  transition: background 0.2s;
-}
-
-.completed-topic-item__header:hover {
-  background: var(--bg-dashboard-card-hover);
-}
-
-.completed-topic-item__title {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-weight: 600;
-  font-size: 1rem;
-}
-
-.completed-topic-item__meta {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  font-size: 0.85rem;
-  opacity: 0.75;
-  white-space: nowrap;
-}
-
-.completed-topic-item__chevron {
-  font-size: 0.7rem;
-  opacity: 0.6;
-}
-
-.completed-topic-item__responses {
-  border-top: 1px solid var(--border-dashboard-card);
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  padding: 0.75rem 1rem;
 }
 
 .completed-topic-item__empty {

@@ -154,11 +154,6 @@
   opacity: 0.8;
 }
 
-.co-instructor-empty {
-  margin-top: 0.75rem;
-  opacity: 0.8;
-}
-
 .co-instructor-error {
   margin-bottom: 0.75rem;
   color: var(--color-error);
