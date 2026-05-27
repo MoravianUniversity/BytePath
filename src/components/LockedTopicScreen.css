@@ -180,6 +180,71 @@
   opacity: 0.8;
 }
 
+.undertake-section {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-subtle);
+  text-align: right;
+}
+
+.undertake-button {
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--border-on-gradient);
+  border-radius: 10px;
+  background: var(--overlay-on-gradient-10);
+  color: var(--text-on-gradient);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  font-size: 0.75rem;
+}
+
+.undertake-button:hover {
+  background: var(--overlay-on-gradient-20);
+  border-color: var(--overlay-on-gradient-30);
+}
+
+.undertake-confirm-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.undertake-confirm-modal__content {
+  max-width: 420px;
+  width: 100%;
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: var(--bg-modal);
+  border: 1px solid var(--border-modal);
+  box-shadow: var(--shadow-modal);
+}
+
+.undertake-confirm-modal__content h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+}
+
+.undertake-confirm-modal__content p {
+  margin: 0 0 1.25rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.undertake-confirm-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
 :root:not([data-theme="dark"]) .locked-topic-content {
   background: var(--bg-card);
   border-color: var(--border-card);
@@ -224,6 +289,21 @@
 
 :root:not([data-theme="dark"]) .progress-bar {
   background: var(--black-10);
+}
+
+:root:not([data-theme="dark"]) .undertake-section {
+  border-top-color: var(--border-card);
+}
+
+:root:not([data-theme="dark"]) .undertake-button {
+  background: var(--bg-sidebar-item);
+  border-color: var(--border-card);
+  color: var(--text-primary);
+}
+
+:root:not([data-theme="dark"]) .undertake-button:hover {
+  background: var(--bg-sidebar-item-active);
+  border-color: var(--border-hover);
 }
 
 /* Responsive design */

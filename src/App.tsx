@@ -93,15 +93,23 @@ function App() {
     saved = saved?.replaceAll('_', '-') || null; // convert old format to new format
     return new Set<string>(saved ? JSON.parse(saved) : []);
   });
+  const [undertakenTopics, setUndertakenTopics] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem('undertakenTopics');
+    return new Set<string>(saved ? JSON.parse(saved) : []);
+  });
   const [currentUser, setCurrentUser] = useState<User | null>(() => authService.getCurrentUser());
   useEffect(() => {
     localStorage.setItem('completedTopics', JSON.stringify(Array.from(completedTopics)));
   }, [completedTopics]);
+  useEffect(() => {
+    localStorage.setItem('undertakenTopics', JSON.stringify(Array.from(undertakenTopics)));
+  }, [undertakenTopics]);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set<string>());
   const [questionList, setQuestionList] = useState<(Question | null)[]>([]);
   const [questionAnswers, setQuestionAnswers] = useState<(Answer | typeof SKIPPED)[]>([]);
   const [questionStartTime, setQuestionStartTime] = useState<number>(Date.now());
   const contentAreaRef = useRef<HTMLDivElement>(null);
+  const selectTopicRef = useRef<(topic: Topic) => void>(() => {});
   const [theme, setThemeState] = useState<'light' | 'dark'>(getThemePreference());
   const isInstructor = currentUser?.role === 'instructor';
   const [instructorPractice, setInstructorPractice] = useState(false);
@@ -142,12 +150,14 @@ function App() {
     const route = screen === 'dashboard'
       ? (dashboardTab === 'analytics' ? '/dashboard' : `/dashboard/${dashboardTab}`)
       : '/';
-    if (window.location.pathname === route) return;
+    const hash = screen === 'dashboard' ? '' : window.location.hash;
+    const target = `${route}${hash}`;
+    if (`${window.location.pathname}${window.location.hash}` === target) return;
     if (options?.replace) {
-      window.history.replaceState(null, '', route);
+      window.history.replaceState(null, '', target);
       return;
     }
-    window.history.pushState(null, '', route);
+    window.history.pushState(null, '', target);
   };
 
   // Load Python interpreter
@@ -157,56 +167,56 @@ function App() {
         setIsLoading(false);
         isLoading = false; // since the selectTopic function uses isLoading, we need to update it here
         if (topicToSelectAfterLoading) {
-          selectTopic(topicToSelectAfterLoading);
+          selectTopicRef.current(topicToSelectAfterLoading);
           setTopicToSelectAfterLoading(null);
         }
       })
       .catch((error) => { setLoadingError(error.message); });
   }, []);
 
-  // Handle URL hash and auto-expand logic
+  // Sync topic selection from URL hash (e.g. back/forward, shared links).
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash.slice(1); // Remove the #
-      if (hash) {
-        // Find the topic by ID
-        const topic = allTopics.find(t => t.id === hash);
-        
-        if (topic) {
-          // Find which group contains this topic and expand it
-          for (const item of TOPICS) {
-            if (item instanceof TopicGroup && item.topics.includes(topic)) {
-              setExpandedGroups(prev => new Set([...prev, item.id]));
-              break;
-            }
-          }
-          
-          // Select the topic (will show lock screen if not accessible)
-          selectTopic(topic);
+      const hash = window.location.hash.slice(1);
+      if (!hash) return;
+
+      const topic = allTopics.find(t => t.id === hash);
+      if (!topic) return;
+
+      for (const item of TOPICS) {
+        if (item instanceof TopicGroup && item.topics.includes(topic)) {
+          setExpandedGroups(prev => new Set([...prev, item.id]));
+          break;
         }
-      } else if (expandedGroups.size === 0) {
-        // Auto-expand first incomplete group on first load if no hash
-        for (const item of TOPICS) {
-          if (item instanceof TopicGroup) {
-            const firstIncomplete = item.getFirstIncompleteTopic(completedTopics);
-            if (firstIncomplete) {
-              setExpandedGroups(new Set([item.id]));
-              break;
-            }
+      }
+
+      selectTopicRef.current(topic);
+    };
+
+    if (window.location.hash) {
+      handleHashChange();
+    }
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [allTopics]);
+
+  // Auto-expand the first incomplete group when there is no topic hash.
+  useEffect(() => {
+    if (window.location.hash) return;
+
+    setExpandedGroups(prev => {
+      if (prev.size > 0) return prev;
+      for (const item of TOPICS) {
+        if (item instanceof TopicGroup) {
+          const firstIncomplete = item.getFirstIncompleteTopic(completedTopics);
+          if (firstIncomplete) {
+            return new Set([item.id]);
           }
         }
       }
-    };
-
-    // Handle initial hash
-    handleHashChange();
-    
-    // Listen for hash changes
-    window.addEventListener('hashchange', handleHashChange);
-    
-    return () => {
-      window.removeEventListener('hashchange', handleHashChange);
-    };
+      return prev;
+    });
   }, [completedTopics]);
 
   // Syntax highlighting for shared code
@@ -321,6 +331,7 @@ function App() {
     setQuestionList([]);
     setQuestionAnswers([]);
     setCompletedTopics(new Set());
+    setUndertakenTopics(new Set());
     setExpandedGroups(new Set());
     setMode('learning');
   };
@@ -328,6 +339,7 @@ function App() {
   const handleLogout = async () => {
     await authService.logout();
     localStorage.removeItem('completedTopics');
+    localStorage.removeItem('undertakenTopics');
     localStorage.removeItem('currentClass');
     localStorage.removeItem('currentScreen');
     resetState();
@@ -400,41 +412,70 @@ function App() {
     return <LoginScreen onLogin={(user) => setCurrentUser(user)} />;
   }
 
-  function selectTopic(topic: Topic) {
-    if (isLoading) {
-      setTopicToSelectAfterLoading(topic);
-      topicToSelectAfterLoading = topic; // just in case loading is done this iteration
-      return;
-    }
-    
-    const canBypassLocks = isInstructor;
+  function canAccessTopic(topic: Topic): boolean {
+    if (isInstructor) return true;
+    if (topic.isAccessible(completedTopics)) return true;
+    if (completedTopics.has(topic.id)) return true;
+    if (undertakenTopics.has(topic.id)) return true;
+    return topic.numCompletedSubtopics > 0;
+  }
+
+  function navigateToTopic(topic: Topic, options?: { startQuestions?: boolean }) {
+    const startQuestions = options?.startQuestions ?? true;
+
+    setCurrentTopic(topic);
+    window.location.hash = topic.id;
 
     if (!canBypassAvailability && currentClass && !isTopicEnabled(topic.id, topicAvailability)) {
       return;
     }
 
-    // Check if topic is accessible
-    if (!canBypassLocks && !topic.isAccessible(completedTopics)) {
-      // Show locked topic screen
-      setCurrentTopic(topic);
+    if (!canAccessTopic(topic)) {
       setCurrentScreen('locked-topic');
-          window.location.hash = topic.id;
-          return;
-        }
-    
-    // If we're already on this topic and in question mode, don't restart
+      return;
+    }
+
+    setCurrentScreen('question');
+
+    if (startQuestions) {
+      currentTopic = topic;
+      startTopic();
+    }
+  }
+
+  function undertakeTopicAnyway(topic: Topic) {
+    setUndertakenTopics(prev => new Set([...prev, topic.id]));
     if (currentTopic?.id === topic.id && currentScreen === 'question') {
       return;
     }
-    
-    setCurrentScreen('question');
-    setCurrentTopic(topic);
-    currentTopic = topic; // setCurrentTopic updates it for the next render, we also need it now though
-    startTopic();
-    
-    // Update URL hash
-    window.location.hash = topic.id;
+    navigateToTopic(topic);
   }
+
+  function selectTopic(topic: Topic) {
+    if (isLoading) {
+      setTopicToSelectAfterLoading(topic);
+      topicToSelectAfterLoading = topic;
+      navigateToTopic(topic, { startQuestions: false });
+      return;
+    }
+
+    if (!canBypassAvailability && currentClass && !isTopicEnabled(topic.id, topicAvailability)) {
+      return;
+    }
+
+    if (!canAccessTopic(topic)) {
+      navigateToTopic(topic, { startQuestions: false });
+      return;
+    }
+
+    if (currentTopic?.id === topic.id && currentScreen === 'question') {
+      return;
+    }
+
+    navigateToTopic(topic);
+  }
+
+  selectTopicRef.current = selectTopic;
 
   const toggleGroup = (groupId: string) => {
     setExpandedGroups(prev => {
@@ -756,7 +797,7 @@ function App() {
                             const completedSubtopics = subtopics.filter(subtopic => subtopic.completed).length;
                             const percentage = Math.round((completedSubtopics / subtopics.length) * 100);
                             
-                            const accessible = isInstructor || subItem.isAccessible(completedTopics);
+                            const accessible = canAccessTopic(subItem);
                             const status = completedTopics.has(subItem.id) ? 'completed' : 
                                           completedSubtopics > 0 ? 'in-progress' : 
                                           accessible ? 'available' : 'locked';
@@ -798,7 +839,7 @@ function App() {
                 const completedSubtopics = subtopics.filter(subtopic => subtopic.completed).length;
                 const percentage = Math.round((completedSubtopics / subtopics.length) * 100);
                 
-                const accessible = isInstructor || item.isAccessible(completedTopics);
+                const accessible = canAccessTopic(item);
                 const status = completedTopics.has(item.id) ? 'completed' : 
                               completedSubtopics > 0 ? 'in-progress' : 
                               accessible ? 'available' : 'locked';
@@ -873,6 +914,7 @@ function App() {
                   topic={currentTopic}
                   completedTopics={completedTopics}
                   onTopicSelect={selectTopic}
+                  onUndertakeAnyway={() => undertakeTopicAnyway(currentTopic!)}
                 />
               )}
 

@@ -1,18 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Topic } from '../topics';
+import Button from './ui/Button';
 import './LockedTopicScreen.css';
 
 interface LockedTopicScreenProps {
   topic: Topic;
   completedTopics: Set<string>;
   onTopicSelect: (topic: Topic) => void;
+  onUndertakeAnyway: () => void;
 }
 
 const LockedTopicScreen: React.FC<LockedTopicScreenProps> = ({
   topic,
   completedTopics,
-  onTopicSelect
+  onTopicSelect,
+  onUndertakeAnyway,
 }) => {
+  const [showUndertakeConfirm, setShowUndertakeConfirm] = useState(false);
+
   // Get all required topics (dependencies) for this topic
   const getRequiredTopics = (): Topic[] => {
     let requiredTopics: Topic[] = [];
@@ -108,7 +113,45 @@ const LockedTopicScreen: React.FC<LockedTopicScreenProps> = ({
             </div>
           )}
         </div>
+
+        <div className="undertake-section">
+          <button type="button" className="undertake-button" onClick={() => setShowUndertakeConfirm(true)}>
+            🔑 Undertake anyways?
+          </button>
+        </div>
       </div>
+
+      {showUndertakeConfirm && (
+        <div
+          className="undertake-confirm-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="undertake-confirm-title"
+          onClick={() => setShowUndertakeConfirm(false)}
+        >
+          <div className="undertake-confirm-modal__content" onClick={(e) => e.stopPropagation()}>
+            <h3 id="undertake-confirm-title">Jump ahead?</h3>
+            <p>
+              You have not finished the expected prerequisite topics for <strong>{topic.name}</strong>.
+              You can still try it now, but you may struggle without the prerequisite knowledge.
+            </p>
+            <div className="undertake-confirm-modal__actions">
+              <Button variant="ghost" onClick={() => setShowUndertakeConfirm(false)}>
+                Go back
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  setShowUndertakeConfirm(false);
+                  onUndertakeAnyway();
+                }}
+              >
+                Undertake anyways
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
