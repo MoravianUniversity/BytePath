@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-python';
 import './code.css';
@@ -9,6 +9,7 @@ import TopicCompletionScreen from './components/TopicCompletionScreen.tsx';
 import LockedTopicScreen from './components/LockedTopicScreen.tsx';
 import { getPythonLoadPromise } from './python.ts';
 import StudentsPage from './pages/StudentsPage.tsx';
+import TopicSettingsPage from './pages/TopicSettingsPage.tsx';
 import ClassSelector from './components/ClassSelector.tsx';
 import './App.css';
 import LoginScreen from './components/LoginScreen';
@@ -22,7 +23,9 @@ import InstructorDashboard from './pages/InstructorDashboard';
 import StudentDashboard from './pages/StudentDashboard';
 import { toggleTheme, getThemePreference } from './utils/theme';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlayCircle, faRightFromBracket, faTachographDigital, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { faBook, faPlayCircle, faRightFromBracket, faTachographDigital, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { classTopicSettingsService } from './services/classTopicSettings';
+import { buildAvailabilityMap, filterTopicsByAvailability, isTopicEnabled, type TopicAvailabilityMap } from './utils/topicAvailability';
 
 export const SKIPPED = Symbol('(skipped)');
 
@@ -43,9 +46,9 @@ const getAllTopics = (): Topic[] => {
 
 
 function App() {
-  const [currentScreen, setCurrentScreen] = useState<'welcome' | 'question' | 'locked-topic' | 'students' | 'dashboard'>(() => {
+  const [currentScreen, setCurrentScreen] = useState<'welcome' | 'question' | 'locked-topic' | 'students' | 'topics' | 'dashboard'>(() => {
     const saved = localStorage.getItem('currentScreen');
-    return (saved as 'welcome' | 'question' | 'locked-topic' | 'students' | 'dashboard') ?? 'welcome';
+    return (saved as 'welcome' | 'question' | 'locked-topic' | 'students' | 'topics' | 'dashboard') ?? 'welcome';
   });
   useEffect(() => { localStorage.setItem('currentScreen', currentScreen); }, [currentScreen]);
   let [isLoading, setIsLoading] = useState(true);
@@ -77,6 +80,8 @@ function App() {
   const [theme, setThemeState] = useState<'light' | 'dark'>(getThemePreference());
   const isInstructor = currentUser?.role === 'instructor';
   const [instructorPractice, setInstructorPractice] = useState(false);
+  const [topicAvailability, setTopicAvailability] = useState<TopicAvailabilityMap>(new Map());
+  const canBypassAvailability = isInstructor && instructorPractice;
   const [studentClasses, setStudentClasses] = useState<Class[]>([]);
   const [currentClass, setCurrentClass] = useState<Class | null>(() => {
     const saved = localStorage.getItem('currentClass');
@@ -200,9 +205,26 @@ function App() {
     });
   }, []);
 
+
+  useEffect(() => {
+    if (!currentUser || !currentClass) {
+      setTopicAvailability(new Map());
+      return;
+    }
+
+    classTopicSettingsService
+      .getSettings(currentClass.id)
+      .then((settings) => {
+        setTopicAvailability(buildAvailabilityMap(settings));
+      })
+      .catch(() => {
+        setTopicAvailability(new Map());
+      });
+  }, [currentUser, currentClass]);
+
   // Instructors default to the dashboard, but respect a previously saved screen.
   useEffect(() => {
-    if (isInstructor && currentScreen !== 'dashboard' && currentScreen !== 'students') {
+    if (isInstructor && currentScreen !== 'dashboard' && currentScreen !== 'students' && currentScreen !== 'topics') {
       setCurrentScreen('dashboard');
       setInstructorPractice(false);
     }
@@ -213,8 +235,8 @@ function App() {
     if (!isInstructor) return;
 
     const allowedScreens = instructorPractice
-      ? new Set(['dashboard', 'students', 'welcome', 'question', 'locked-topic'])
-      : new Set(['dashboard', 'students']);
+      ? new Set(['dashboard', 'students', 'topics', 'welcome', 'question', 'locked-topic'])
+      : new Set(['dashboard', 'students', 'topics']);
 
     if (!allowedScreens.has(currentScreen)) {
       setCurrentScreen('dashboard');
@@ -298,6 +320,13 @@ function App() {
     })();
   }, [currentUser, currentClass, allTopics]);
 
+  const visibleTopics = useMemo(() => {
+    if (canBypassAvailability || topicAvailability.size === 0) {
+      return TOPICS;
+    }
+    return filterTopicsByAvailability(TOPICS, topicAvailability);
+  }, [canBypassAvailability, topicAvailability]);
+
   if (!currentUser) {
     return <LoginScreen onLogin={(user) => setCurrentUser(user)} />;
   }
@@ -310,6 +339,10 @@ function App() {
     }
     
     const canBypassLocks = isInstructor;
+
+    if (!canBypassAvailability && currentClass && !isTopicEnabled(topic.id, topicAvailability)) {
+      return;
+    }
 
     // Check if topic is accessible
     if (!canBypassLocks && !topic.isAccessible(completedTopics)) {
@@ -455,9 +488,12 @@ function App() {
   };
 
   const getNextTopic = (): Topic | null => {
+    const isReleased = (topic: Topic) =>
+      canBypassAvailability || !currentClass || isTopicEnabled(topic.id, topicAvailability);
+
     const curIdx = allTopics.findIndex(topic => topic.id === currentTopic?.id);
-    const beforeCurrent = allTopics.filter((topic, i) => topic.isAccessible(completedTopics) && !completedTopics.has(topic.id) && i < curIdx);
-    const afterCurrent = allTopics.filter((topic, i) => topic.isAccessible(completedTopics) && !completedTopics.has(topic.id) && i > curIdx);
+    const beforeCurrent = allTopics.filter((topic, i) => isReleased(topic) && topic.isAccessible(completedTopics) && !completedTopics.has(topic.id) && i < curIdx);
+    const afterCurrent = allTopics.filter((topic, i) => isReleased(topic) && topic.isAccessible(completedTopics) && !completedTopics.has(topic.id) && i > curIdx);
     return afterCurrent[0] ?? beforeCurrent[0];
   };
 
@@ -491,7 +527,7 @@ function App() {
           <tr><td className="subtitle">Learning with Small Python Snippets</td></tr>
         </tbody></table>
         <div className="header-actions">
-          {(!isInstructor || (instructorPractice && currentScreen !== 'students')) && (
+          {(!isInstructor || (instructorPractice && currentScreen !== 'students' && currentScreen !== 'topics')) && (
             <div className="mode-toggle">
               <button 
                 className={`toggle-button ${mode === 'learning' ? 'active' : ''}`}
@@ -499,14 +535,14 @@ function App() {
                   setMode('learning');
                   if (currentScreen === 'dashboard') setCurrentScreen('welcome');
                 }}
-              >📚 Learning</button>
+              >📚<span className="dashboard-button-label"> Learning</span></button>
               <button 
                 className={`toggle-button ${mode === 'quiz' ? 'active' : ''}`}
                 onClick={() => {
                   setMode('quiz');
                   if (currentScreen === 'dashboard') setCurrentScreen('welcome');
                 }}
-              >✏️ Quiz</button>
+              >✏️<span className="dashboard-button-label"> Quiz</span></button>
             </div>
           )}
           <div className="header-buttons">
@@ -516,7 +552,7 @@ function App() {
                   setInstructorPractice(true);
                   setCurrentScreen('welcome');
                 }}
-                className={`dashboard-button ${instructorPractice && currentScreen !== 'dashboard' && currentScreen !== 'students' ? 'active' : ''}`}
+                className={`dashboard-button ${instructorPractice && currentScreen !== 'dashboard' && currentScreen !== 'students' && currentScreen !== 'topics' ? 'active' : ''}`}
               >
                 <FontAwesomeIcon icon={faPlayCircle} aria-hidden="true" />
                 <span className="dashboard-button-label">Practice</span>
@@ -529,6 +565,15 @@ function App() {
               >
                 <FontAwesomeIcon icon={faUsers} aria-hidden="true" />
                 <span className="dashboard-button-label">Students</span>
+              </button>
+            )}
+            {isInstructor && (
+              <button
+                onClick={() => setCurrentScreen('topics')}
+                className={`dashboard-button ${currentScreen === 'topics' ? 'active' : ''}`}
+              >
+                <FontAwesomeIcon icon={faBook} aria-hidden="true" />
+                <span className="dashboard-button-label">Topics</span>
               </button>
             )}
             <button
@@ -557,7 +602,6 @@ function App() {
                   setCompletedTopics(new Set());
                 }}
                 className="dashboard-button"
-                style={{ cursor: 'pointer' }}
               >
                 <option value="" disabled>Select class</option>
                 {studentClasses.map(cls => (
@@ -566,9 +610,9 @@ function App() {
               </select>
             )}
             {!isInstructor && studentClasses.length === 1 && currentClass && (
-              <span className="dashboard-button" style={{ cursor: 'default', opacity: 0.8 }}>
+              <div className="dashboard-button dashboard-button-label" style={{ cursor: 'default' }}>
                 {currentClass.class_name}
-              </span>
+              </div>
             )}
             {isInstructor && (
               <ClassSelector
@@ -626,11 +670,15 @@ function App() {
           <div className="content-area app-page" ref={contentAreaRef}>
             <StudentsPage classId={currentClass?.id ?? null} className={currentClass?.class_name ?? null} />
           </div>
+        ) : currentScreen === 'topics' ? (
+          <div className="content-area app-page" ref={contentAreaRef}>
+            <TopicSettingsPage classId={currentClass?.id ?? null} className={currentClass?.class_name ?? null} />
+          </div>
         ) : (
           <>
             <div className="sidebar">
           <div className="sidebar-content">
-            {TOPICS.map((item) => {
+            {visibleTopics.map((item) => {
               if (item instanceof TopicGroup) {
                 const isExpanded = expandedGroups.has(item.id);
                 const groupStatus = item.isCompleted(completedTopics) ? 'completed' : 
@@ -771,7 +819,7 @@ function App() {
             )
           )}
 
-              {currentScreen === 'locked-topic' && currentTopic && (
+              {currentScreen === 'locked-topic' && currentTopic && !isInstructor && (
                 <LockedTopicScreen
                   topic={currentTopic}
                   completedTopics={completedTopics}

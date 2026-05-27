@@ -106,6 +106,19 @@ class Topic(db.Model):
         }
 
 
+class ClassTopicSetting(db.Model):
+    __tablename__ = "class_topic_settings"
+
+    id = db.Column(db.Integer, primary_key=True)
+    class_id = db.Column(db.Integer, db.ForeignKey("classes.id"), nullable=False)
+    topic_id = db.Column(db.String(100), db.ForeignKey("topics.id"), nullable=False)
+    is_enabled = db.Column(db.Boolean, default=True, nullable=False)
+    available_at = db.Column(db.DateTime, nullable=True)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    __table_args__ = (db.UniqueConstraint("class_id", "topic_id", name="_class_topic_uc"),)
+
+
 class StudentResponse(db.Model):
     __tablename__ = "student_responses"
 

@@ -124,6 +124,23 @@ with app.app_context():
             conn.commit()
             print("instructors table recreated.")
 
+    # ── class_topic_settings table ───────────────────────────────────────────
+    if not inspector.has_table('class_topic_settings'):
+        print('Creating class_topic_settings table...')
+        with db.engine.connect() as conn:
+            conn.execute(db.text("""
+                CREATE TABLE class_topic_settings (
+                    id INTEGER NOT NULL PRIMARY KEY,
+                    class_id INTEGER NOT NULL REFERENCES classes(id),
+                    topic_id VARCHAR(100) NOT NULL REFERENCES topics(id),
+                    is_enabled BOOLEAN NOT NULL DEFAULT 1,
+                    available_at DATETIME,
+                    updated_at DATETIME,
+                    UNIQUE (class_id, topic_id)
+                )
+            """))
+            conn.commit()
+
     # ── create any new tables (classes, upload_history, etc.) ────────────────
     db.create_all()
 

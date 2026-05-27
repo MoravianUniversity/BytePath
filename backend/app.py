@@ -14,7 +14,7 @@ except ModuleNotFoundError:  # pragma: no cover
         return None
 
 from backend.config import get_config
-from backend.models import db, Class, RosterStudent, Topic, UploadHistory  # Import models so SQLAlchemy discovers them
+from backend.models import db, Class, ClassTopicSetting, RosterStudent, Topic, UploadHistory  # Import models so SQLAlchemy discovers them
 from backend.topic_definitions import TOPIC_DEFINITIONS
 from backend.routes import (
     auth_bp,

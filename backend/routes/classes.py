@@ -9,8 +9,31 @@ from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
 from backend.models import Class, Instructor, RosterStudent, User, db
+from backend.services.class_topic_settings_service import ClassTopicSettingsService
 
 classes_bp = Blueprint("classes", __name__, url_prefix="/api/classes")
+
+
+def _can_manage_class(class_id: int, user_id: int) -> bool:
+    klass = db.session.get(Class, class_id)
+    if not klass:
+        return False
+    if klass.instructor_id == user_id:
+        return True
+    return Instructor.query.filter_by(class_id=class_id, user_id=user_id).first() is not None
+
+
+def _can_view_class(class_id: int, user_id: int) -> bool:
+    if _can_manage_class(class_id, user_id):
+        return True
+    user = db.session.get(User, user_id)
+    if not user:
+        return False
+    return RosterStudent.query.filter(
+        RosterStudent.class_id == class_id,
+        RosterStudent.deleted_at.is_(None),
+        func.lower(RosterStudent.email) == func.lower(user.email),
+    ).first() is not None
 
 
 @classes_bp.get("")
@@ -211,3 +234,58 @@ def remove_class_instructor(id: int, user_id: int):
     db.session.delete(entry)
     db.session.commit()
     return "", 204
+
+
+@classes_bp.get("/<int:id>/topic-settings")
+def get_class_topic_settings(id: int):
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"error": "Not authenticated"}), 401
+    if not _can_view_class(id, user_id):
+        return jsonify({"error": "Forbidden"}), 403
+    return jsonify({"settings": ClassTopicSettingsService.list_settings(id)}), 200
+
+
+@classes_bp.put("/<int:id>/topic-settings")
+def put_class_topic_settings(id: int):
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"error": "Not authenticated"}), 401
+    if not _can_manage_class(id, user_id):
+        return jsonify({"error": "Forbidden"}), 403
+
+    payload = request.get_json(silent=True) or {}
+    settings = payload.get("settings")
+    if not isinstance(settings, list):
+        return jsonify({"error": "settings must be an array"}), 400
+
+    for i, row in enumerate(settings):
+        if not isinstance(row, dict) or not row.get("topic_id"):
+            return jsonify({"error": f"settings[{i}].topic_id is required"}), 400
+        if "is_enabled" in row and not isinstance(row["is_enabled"], bool):
+            return jsonify({"error": f"settings[{i}].is_enabled must be a boolean"}), 400
+
+    try:
+        saved = ClassTopicSettingsService.bulk_upsert(id, settings)
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    return jsonify({"settings": saved}), 200
+
+
+@classes_bp.patch("/<int:id>/topic-settings/<string:topic_id>")
+def patch_class_topic_settings(id: int, topic_id: str):
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({"error": "Not authenticated"}), 401
+    if not _can_manage_class(id, user_id):
+        return jsonify({"error": "Forbidden"}), 403
+
+    payload = request.get_json(silent=True) or {}
+    if "is_enabled" in payload and not isinstance(payload["is_enabled"], bool):
+        return jsonify({"error": "is_enabled must be a boolean"}), 400
+
+    try:
+        saved = ClassTopicSettingsService.update_one(id, topic_id, payload)
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    return jsonify({"setting": saved}), 200
