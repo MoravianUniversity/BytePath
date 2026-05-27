@@ -7,7 +7,6 @@ import {
   type TopicReport,
   type QuestionAnalyticsResponse,
 } from '../services/reports';
-import { classesService, type CoInstructor } from '../services/classes';
 import './InstructorDashboard.css';
 
 type DifficultyLevel = 'very-hard' | 'hard' | 'medium' | 'easy';
@@ -42,17 +41,11 @@ export default function InstructorDashboard({ classId, className }: { classId: n
   const [topicError, setTopicError] = useState<string | null>(null);
   const [selectedQuestion, setSelectedQuestion] = useState<QuestionAnalyticsResponse['analytics'][number] | null>(null);
   const [selectedSubtopic, setSelectedSubtopic] = useState<string | null>(null);
-  const [showCoInstructors, setShowCoInstructors] = useState(false);
-  const [coInstructors, setCoInstructors] = useState<CoInstructor[]>([]);
-  const [coInstructorEmail, setCoInstructorEmail] = useState('');
-  const [coInstructorError, setCoInstructorError] = useState<string | null>(null);
-  const [coInstructorSaving, setCoInstructorSaving] = useState(false);
 
   useEffect(() => {
     setSelectedStudent(null);
     setLookupError(null);
     setShowRoster(false);
-    setShowCoInstructors(false);
     setSelectedTopic(null);
     setTopicReport(null);
     setTopicQuestionAnalytics(null);
@@ -62,7 +55,6 @@ export default function InstructorDashboard({ classId, className }: { classId: n
     setSelectedSubtopic(null);
     setLoading(true);
     loadClassOverview();
-    if (classId) loadCoInstructors();
   }, [classId]);
 
   const loadClassOverview = async () => {
@@ -84,41 +76,6 @@ export default function InstructorDashboard({ classId, className }: { classId: n
     } catch (error) {
       console.error('Failed to load student report:', error);
       setLookupError('Unable to load analytics for this student right now.');
-    }
-  };
-
-  const loadCoInstructors = async () => {
-    if (!classId) return;
-    try {
-      const data = await classesService.listCoInstructors(classId);
-      setCoInstructors(data);
-    } catch {
-      // non-critical — silently ignore
-    }
-  };
-
-  const handleAddCoInstructor = async () => {
-    if (!classId || !coInstructorEmail.trim()) return;
-    setCoInstructorSaving(true);
-    setCoInstructorError(null);
-    try {
-      const entry = await classesService.addCoInstructor(classId, coInstructorEmail.trim());
-      setCoInstructors((prev) => [...prev, entry]);
-      setCoInstructorEmail('');
-    } catch (err) {
-      setCoInstructorError(err instanceof Error ? err.message : 'Failed to add co-instructor');
-    } finally {
-      setCoInstructorSaving(false);
-    }
-  };
-
-  const handleRemoveCoInstructor = async (userId: number) => {
-    if (!classId) return;
-    try {
-      await classesService.removeCoInstructor(classId, userId);
-      setCoInstructors((prev) => prev.filter((i) => i.user_id !== userId));
-    } catch (err) {
-      setCoInstructorError(err instanceof Error ? err.message : 'Failed to remove co-instructor');
     }
   };
 
@@ -573,88 +530,9 @@ export default function InstructorDashboard({ classId, className }: { classId: n
           </p>
         </div>
         <div className="dashboard-header__actions">
-          {classId && (
-            <button className="btn-secondary" onClick={() => setShowCoInstructors(true)}>Co-Instructors</button>
-          )}
           <button className="btn-secondary" onClick={handleExport}>Export Data</button>
         </div>
       </header>
-
-      {showCoInstructors && classId && (
-        <div
-          className="roster-modal"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Manage co-instructors"
-          onClick={() => { setShowCoInstructors(false); setCoInstructorError(null); }}
-        >
-          <div className="roster-modal__content" onClick={(e) => e.stopPropagation()}>
-            <div className="roster-modal__header">
-              <div>
-                <p className="roster-modal__label">Co-Instructors</p>
-                <h2>{coInstructors.length} Added</h2>
-              </div>
-              <Button
-                className="roster-modal__close"
-                variant="muted"
-                size="small"
-                onClick={() => { setShowCoInstructors(false); setCoInstructorError(null); }}
-              >
-                Close
-              </Button>
-            </div>
-
-            <div className="roster-list">
-              {coInstructors.length === 0 ? (
-                <div className="roster-empty">No co-instructors added yet.</div>
-              ) : (
-                coInstructors.map((ci) => (
-                  <div key={ci.user_id} className="roster-row">
-                    <div className="roster-avatar">{ci.name.charAt(0).toUpperCase()}</div>
-                    <div className="roster-info">
-                      <div className="roster-name"><strong>{ci.name}</strong></div>
-                      <div className="roster-email">{ci.email}</div>
-                    </div>
-                    <Button
-                      variant="muted"
-                      size="small"
-                      onClick={() => handleRemoveCoInstructor(ci.user_id)}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <div style={{ padding: '1rem', borderTop: '1px solid var(--border-card)' }}>
-              {coInstructorError && (
-                <p style={{ color: 'var(--color-error)', marginBottom: '0.5rem', fontSize: '0.875rem' }}>
-                  {coInstructorError}
-                </p>
-              )}
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <input
-                  type="email"
-                  placeholder="professor@university.edu"
-                  value={coInstructorEmail}
-                  onChange={(e) => setCoInstructorEmail(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAddCoInstructor()}
-                  style={{ flex: 1, padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid var(--border-card)', fontSize: '0.875rem' }}
-                />
-                <Button
-                  variant="primary"
-                  size="small"
-                  onClick={handleAddCoInstructor}
-                  disabled={coInstructorSaving || !coInstructorEmail.trim()}
-                >
-                  {coInstructorSaving ? 'Adding…' : 'Add'}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       <section className="dashboard-overview">
         <div className="overview-stats">

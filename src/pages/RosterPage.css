@@ -8,16 +8,9 @@
 
 .students-controls {
   display: flex;
-  gap: 1rem;
-  align-items: center;
+  flex-direction: column;
+  align-items: start;
   flex-wrap: wrap;
-  width: fit-content;
-}
-
-.search-form {
-  display: flex;
-  gap: 8px;
-  align-items: center;
 }
 
 .search-input,
@@ -55,6 +48,7 @@
 .upload-button {
   display: inline-block;
   padding: 0.5rem 1rem;
+  margin-right: 1rem;
   border-radius: 8px;
   border: 1px solid var(--border-dashboard-card);
   background: var(--bg-dashboard-card);
@@ -104,6 +98,70 @@
 
 .upload-errors ul {
   margin: 6px 0 0 1rem;
+}
+
+.co-instructors-panel, .students-controls {
+  margin-top: 12px;
+}
+
+.co-instructors-panel__header, .students-controls__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.co-instructors-panel__header h2, .students-controls__header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.co-instructor-add {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.co-instructor-add .search-input {
+  flex: 1;
+}
+
+.co-instructor-list {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.co-instructor-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-dashboard-card);
+  background: var(--bg-dashboard-card);
+}
+
+.co-instructor-name {
+  font-weight: 600;
+}
+
+.co-instructor-email {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.co-instructor-empty {
+  margin-top: 0.75rem;
+  opacity: 0.8;
+}
+
+.co-instructor-error {
+  margin-bottom: 0.75rem;
+  color: var(--color-error);
 }
 
 .total-count {

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { studentsService, type Student } from "../services/students";
+import { classesService, type CoInstructor } from "../services/classes";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload } from '@fortawesome/free-solid-svg-icons';
 import "./StudentsPage.css";
@@ -18,8 +19,6 @@ export default function StudentsPage({ classId, className }: { classId: number |
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [total, setTotal] = useState(0);
-  const [searchInput, setSearchInput] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
   const [loadingInitial, setLoadingInitial] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -33,21 +32,24 @@ export default function StudentsPage({ classId, className }: { classId: number |
   const requestIdRef = useRef(0);
   const filtersRef = useRef<{
     classId: number | null;
-    searchQuery: string;
     sortBy: SortField;
     sortOrder: "asc" | "desc";
-  }>({ classId, searchQuery, sortBy, sortOrder });
+  }>({ classId, sortBy, sortOrder });
 
   const [editing, setEditing] = useState<EditingState | null>(null);
   const [showManualForm, setShowManualForm] = useState(false);
   const [manualForm, setManualForm] = useState({ first_name: "", last_name: "", email: "", notes: "" });
   const [manualError, setManualError] = useState<string | null>(null);
   const [manualSaving, setManualSaving] = useState(false);
+  const [coInstructors, setCoInstructors] = useState<CoInstructor[]>([]);
+  const [coInstructorEmail, setCoInstructorEmail] = useState("");
+  const [coInstructorError, setCoInstructorError] = useState<string | null>(null);
+  const [coInstructorSaving, setCoInstructorSaving] = useState(false);
 
   // Keep the current filter context for "load more" without re-creating effects.
   useEffect(() => {
-    filtersRef.current = { classId, searchQuery, sortBy, sortOrder };
-  }, [classId, searchQuery, sortBy, sortOrder]);
+    filtersRef.current = { classId, sortBy, sortOrder };
+  }, [classId, sortBy, sortOrder]);
 
   const reloadFirstPage = useCallback(async () => {
     requestIdRef.current += 1;
@@ -65,7 +67,7 @@ export default function StudentsPage({ classId, className }: { classId: number |
       const data = await studentsService.list(
         1,
         PAGE_SIZE,
-        searchQuery,
+        "",
         false,
         classId ?? undefined,
         sortBy,
@@ -80,16 +82,24 @@ export default function StudentsPage({ classId, className }: { classId: number |
     } finally {
       if (reqId === requestIdRef.current) setLoadingInitial(false);
     }
-  }, [classId, searchQuery, sortBy, sortOrder]);
+  }, [classId, "", sortBy, sortOrder]);
 
   useEffect(() => {
     reloadFirstPage();
   }, [reloadFirstPage]);
 
-  const doSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSearchQuery(searchInput.trim());
-  };
+  useEffect(() => {
+    setCoInstructorError(null);
+    setCoInstructorEmail("");
+    if (!classId) {
+      setCoInstructors([]);
+      return;
+    }
+    classesService
+      .listCoInstructors(classId)
+      .then(setCoInstructors)
+      .catch(() => setCoInstructors([]));
+  }, [classId]);
 
   const handleFile = async (file: File | null) => {
     if (!file) return;
@@ -118,7 +128,7 @@ export default function StudentsPage({ classId, className }: { classId: number |
   useEffect(() => {
     if (page === 1) return;
     const reqId = requestIdRef.current;
-    const { classId: currentClassId, searchQuery: currentSearchQuery, sortBy: currentSortBy, sortOrder: currentSortOrder } = filtersRef.current;
+    const { classId: currentClassId, sortBy: currentSortBy, sortOrder: currentSortOrder } = filtersRef.current;
 
     setLoadingMore(true);
     (async () => {
@@ -126,7 +136,7 @@ export default function StudentsPage({ classId, className }: { classId: number |
         const data = await studentsService.list(
           page,
           PAGE_SIZE,
-          currentSearchQuery,
+          "",
           false,
           currentClassId ?? undefined,
           currentSortBy,
@@ -218,75 +228,144 @@ export default function StudentsPage({ classId, className }: { classId: number |
     }
   };
 
+  const handleAddCoInstructor = async () => {
+    if (!classId || !coInstructorEmail.trim()) return;
+    setCoInstructorSaving(true);
+    setCoInstructorError(null);
+    try {
+      const entry = await classesService.addCoInstructor(classId, coInstructorEmail.trim());
+      setCoInstructors((prev) => [...prev, entry]);
+      setCoInstructorEmail("");
+    } catch (err) {
+      setCoInstructorError(err instanceof Error ? err.message : "Failed to add co-instructor");
+    } finally {
+      setCoInstructorSaving(false);
+    }
+  };
+
+  const handleRemoveCoInstructor = async (userId: number) => {
+    if (!classId) return;
+    setCoInstructorError(null);
+    try {
+      await classesService.removeCoInstructor(classId, userId);
+      setCoInstructors((prev) => prev.filter((instructor) => instructor.user_id !== userId));
+    } catch (err) {
+      setCoInstructorError(err instanceof Error ? err.message : "Failed to remove co-instructor");
+    }
+  };
+
   return (
     <div className="students-page">
       <div className="students-header">
         <div className="students-header__content">
-          <h1>{className ? `${className} Students` : 'Students'}</h1>
+          <h1>{className ? `${className} Roster` : 'Class Roster'}</h1>
           <p className="students-description app-page-lead">
-            Add students via CSV upload (first name, last name, email), add or edit inline, or remove students
+            Manage co-instructors and the class roster.
           </p>
         </div>
-        <label className="upload-button">
-          <span><FontAwesomeIcon icon={faUpload} /> Upload CSV File</span>
-          <input
-            type="file"
-            accept=".csv,text/csv"
-            onChange={e => {
-              const file = e.target.files?.[0];
-              if (file) handleFile(file);
-              e.target.value = '';
-            }}
-            disabled={uploading}
-          />
-        </label>
       </div>
 
-
-      {uploading && (
-        <div className="upload-status">
-          Adding students...
-        </div>
-      )}
-
-      {uploadSummary && (
-        <div className="upload-summary app-page-panel">
-          <strong>Upload Summary:</strong>{" "}
-          <>
-            {uploadSummary.added > 0 && <span>+{uploadSummary.added} added</span>}
-            {uploadSummary.restored > 0 && <span>, {uploadSummary.restored} restored</span>}
-            {uploadSummary.skipped > 0 && <span>, {uploadSummary.skipped} skipped</span>}
-          </>
-          {" "}(processed {uploadSummary.total_processed})
-        </div>
-      )}
-
-      {errors.length > 0 && (
-        <div className="upload-errors">
-          <strong>Errors:</strong>
-          <ul>
-            {errors.map((er, i) => (
-              <li key={i}>
-                Line {er.line}{er.email && ` (${er.email})`}: {er.reason}
-              </li>
-            ))}
-          </ul>
-        </div>
+      {classId && (
+        <section className="co-instructors-panel app-page-panel">
+          <div className="co-instructors-panel__header">
+            <h2>Co-Instructors</h2>
+          </div>
+          {coInstructorError && <div className="co-instructor-error">{coInstructorError}</div>}
+          <div className="co-instructor-add">
+            <input
+              type="email"
+              value={coInstructorEmail}
+              onChange={(e) => setCoInstructorEmail(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAddCoInstructor()}
+              placeholder="professor@school.edu"
+              className="search-input"
+            />
+            <button
+              type="button"
+              className="search-button"
+              onClick={handleAddCoInstructor}
+              disabled={coInstructorSaving || !coInstructorEmail.trim()}
+            >
+              {coInstructorSaving ? "Adding..." : "Add"}
+            </button>
+          </div>
+          {coInstructors.length !== 0 && (
+            <div className="co-instructor-list">
+              {coInstructors.map((instructor) => (
+                <div key={instructor.user_id} className="co-instructor-row">
+                  <div>
+                    <div className="co-instructor-name">{instructor.name}</div>
+                    <div className="co-instructor-email">{instructor.email}</div>
+                  </div>
+                  <button
+                    type="button"
+                    className="delete-button"
+                    onClick={() => handleRemoveCoInstructor(instructor.user_id)}
+                    title="Remove co-instructor"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
       )}
 
       <div className="students-controls app-page-panel">
-        <form onSubmit={doSearch} className="search-form">
-          <input
-            value={searchInput}
-            onChange={e => setSearchInput(e.target.value)}
-            placeholder="Search name or email…"
-            className="search-input"
-          />
-          <button type="submit" className="search-button">Search</button>
-        </form>
-        <div className="total-count">
-          Total students: {total.toLocaleString()}
+        <div className="students-controls__header">
+          <h2>Student Roster</h2>
+          <div className="total-count">
+            Total students: {total.toLocaleString()}
+          </div>
         </div>
+        <div>
+          <label className="upload-button">
+            <span><FontAwesomeIcon icon={faUpload} /> Upload CSV File</span>
+            <input
+              type="file"
+              accept=".csv,text/csv"
+              onChange={e => {
+                const file = e.target.files?.[0];
+                if (file) handleFile(file);
+                e.target.value = '';
+              }}
+              disabled={uploading}
+            />
+          </label>
+          Must have the columns first_name, last_name, email.
+        </div>
+        
+        {uploading && (
+          <div className="upload-status">
+            Adding students...
+          </div>
+        )}
+
+        {uploadSummary && (
+          <div className="upload-summary app-page-panel">
+            <strong>Upload Summary:</strong>{" "}
+            <>
+              {uploadSummary.added > 0 && <span>+{uploadSummary.added} added</span>}
+              {uploadSummary.restored > 0 && <span>, {uploadSummary.restored} restored</span>}
+              {uploadSummary.skipped > 0 && <span>, {uploadSummary.skipped} skipped</span>}
+            </>
+            {" "}(processed {uploadSummary.total_processed})
+          </div>
+        )}
+
+        {errors.length > 0 && (
+          <div className="upload-errors">
+            <strong>Errors:</strong>
+            <ul>
+              {errors.map((er, i) => (
+                <li key={i}>
+                  Line {er.line}{er.email && ` (${er.email})`}: {er.reason}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
       <table className="students-table">
@@ -348,7 +427,7 @@ export default function StudentsPage({ classId, className }: { classId: number |
                     type="email"
                     value={manualForm.email}
                     onChange={e => setManualForm(f => ({ ...f, email: e.target.value }))}
-                    placeholder="email@school.edu"
+                    placeholder="student@school.edu"
                     autoFocus
                     className="inline-edit-input"
                   />
