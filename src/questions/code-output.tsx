@@ -1,7 +1,7 @@
 import React from 'react';
-import type { CodeOutputQuestion, UserAnswerFor } from '../types';
-import type { QuestionTypeDef, QuestionViewProps } from '../registry';
-import { QuestionAnswerOptions, QuestionCodeBlock, QuestionHelp, QuestionInput, QuestionQuizInputAnswerDisplay, QuestionQuizInputMultiLine, QuestionSkipButton } from '../QuestionComponents.tsx';
+import type { CodeOutputQuestion, UserAnswerFor } from './types.ts';
+import type { QuestionTypeDef, QuestionViewProps } from './registry.ts';
+import { QuestionAnswerOptions, QuestionCodeBlock, QuestionHelp, QuestionInput, QuestionQuizInputAnswerDisplay, QuestionQuizInputMultiLine, QuestionSkipButton } from './QuestionComponents.tsx';
 
 function parseQuizAnswer(raw: string): string | undefined {
   const trimmed = raw.trim();

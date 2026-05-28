@@ -9,7 +9,7 @@ export type { Question, QuestionKind, GenerateContext };
 export {
   buildCodeQuestion,
   createQuestion,
-} from './questions/python/buildCodeQuestion';
+} from './questions/buildCodeQuestion';
 
 // Special case for raw contents that aren't parsed like normal types
 export type RawAnswer = {

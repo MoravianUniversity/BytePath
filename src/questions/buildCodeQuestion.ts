@@ -1,16 +1,16 @@
 import dedent from 'dedent-js';
-import { runLastLine, runGrabOutput, setInput, getInput } from '../../python';
-import { shuffle } from '../../util';
+import { runLastLine, runGrabOutput, setInput, getInput } from '../python';
+import { shuffle } from '../util';
 import {
   type Answer,
   deduplicateAnswers,
   isAnswerSame,
-} from '../../topics';
+} from '../topics';
 import type {
   CodeOutputQuestion,
   EvalLastLineQuestion,
   GenerateContext,
-} from '../types';
+} from './types';
 
 const MAX_OPTIONS = 10;
 

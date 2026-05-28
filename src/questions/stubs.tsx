@@ -1,6 +1,6 @@
 import React from 'react';
-import type { QuestionKind, QuestionFor, UserAnswerFor } from '../types';
-import type { QuestionTypeDef, QuestionViewProps } from '../registry';
+import type { QuestionKind, QuestionFor, UserAnswerFor } from './types';
+import type { QuestionTypeDef, QuestionViewProps } from './registry';
 
 function notImplementedView(kind: string): React.FC<QuestionViewProps<QuestionKind>> {
   return function StubView() {

@@ -6,9 +6,9 @@ import type {
   UserAnswer,
   UserAnswerFor,
 } from './types';
-import { evalLastLineDef } from './kinds/eval-last-line';
-import { codeOutputDef } from './kinds/code-output';
-import { codeEditDef, traceOrderDef, conceptualDef } from './kinds/stubs';
+import { evalLastLineDef } from './eval-last-line';
+import { codeOutputDef } from './code-output';
+import { codeEditDef, traceOrderDef, conceptualDef } from './stubs';
 import { SKIPPED } from '../App';
 
 export interface SerializedResponse {

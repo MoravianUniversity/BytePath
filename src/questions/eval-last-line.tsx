@@ -1,10 +1,10 @@
 import React from 'react';
-import type { Answer } from '../../topics';
-import { formatAnswer, isAnswerSame } from '../../topics';
-import { parsePyAtom, createException } from '../../python';
-import type { EvalLastLineQuestion, UserAnswerFor } from '../types';
-import type { QuestionTypeDef, QuestionViewProps } from '../registry';
-import { QuestionAnswerOptions, QuestionCodeBlock, QuestionHelp, QuestionInput, QuestionQuizInputAnswerDisplay, QuestionSkipButton, QuestionQuizInputSingleLine } from '../QuestionComponents.tsx';
+import type { Answer } from '../topics.ts';
+import { formatAnswer, isAnswerSame } from '../topics.ts';
+import { parsePyAtom, createException } from '../python.ts';
+import type { EvalLastLineQuestion, UserAnswerFor } from './types.ts';
+import type { QuestionTypeDef, QuestionViewProps } from './registry.ts';
+import { QuestionAnswerOptions, QuestionCodeBlock, QuestionHelp, QuestionInput, QuestionQuizInputAnswerDisplay, QuestionSkipButton, QuestionQuizInputSingleLine } from './QuestionComponents.tsx';
 
 function parseQuizAnswer(raw: string): Answer | undefined {
   let answer = raw.trim();
