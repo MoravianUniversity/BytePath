@@ -1,4 +1,4 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, CodeOutputSubtopic, GenerateContext } from '../topics';
 import { randChoice, randChoices, randBool, randVars, randInt, randInts, randIntNum, shuffle, capitalize, ASCII_LETTERS, ASCII_LOWER, DIGITS } from '../util';
 import { toPyStr } from '../python';
 import dedent from 'dedent-js';
@@ -88,7 +88,7 @@ class StringsMastery extends Topic {
   }
 }
 
-abstract class StringsMasteryBase extends Subtopic {
+abstract class StringsMasteryBase extends EvalLastLineSubtopic {
   vars: string[];
   vals: [bigint, bigint, string];
   values: {start: bigint, stop: bigint, word: string};
@@ -96,9 +96,9 @@ abstract class StringsMasteryBase extends Subtopic {
   constructor(vars: string[], vals: [bigint, bigint, string], values: {start: bigint, stop: bigint, word: string}, sharedCode: string) {
     super(); this.vars = vars; this.vals = vals; this.values = values; this.sharedCode = sharedCode;
   }
-  generateQuestion(): Question {
+  generateQuestion(ctx: GenerateContext) {
     const code = this.genCode();
-    return createQuestion(code, [], {sharedCode: this.sharedCode});
+    return createQuestion(code, [], {sharedCode: this.sharedCode}, ctx);
   }
   abstract genCode(): string
 }
@@ -167,8 +167,8 @@ class StringsMastery_12 extends StringsMasteryBase {
   }
 }
 
-class StringsMastery_Long_1 extends Subtopic {
-  generateQuestion(): Question {
+class StringsMastery_Long_1 extends CodeOutputSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const sep = randChoice([...":-_.=+/"]);
     const [var1, var2] = randVars(2);
     const animals = randChoices(ANIMALS, randIntNum(2, 4));
@@ -185,12 +185,12 @@ class StringsMastery_Long_1 extends Subtopic {
         ${var2} = ${var1}.find(${toPyStr(sep)})
         print(f${opp_quote}{${var2}}\\n\\${quote}{${sliced}}\\${quote}${opp_quote})
     `;
-    return createQuestion(code, [], {usesOutput: true});
+    return createQuestion(code, [], {usesOutput: true}, ctx);
   }
 }
 
-class StringsMastery_Long_2 extends Subtopic {
-  generateQuestion(): Question {
+class StringsMastery_Long_2 extends CodeOutputSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [sep1, sep2] = randChoices([...":-_.=+/"], 2);
     const [var1, var2, var3, var4] = randVars(4);
     const animals = ANIMALS.map(animal => capitalize(animal));
@@ -206,7 +206,7 @@ class StringsMastery_Long_2 extends Subtopic {
         ${var4} = ${var3}.split(${toPyStr(randChoice([sep1, sep2]))})
         print(len(${var4}), ${var3})
     `;
-    return createQuestion(code, [], {usesOutput: true});
+    return createQuestion(code, [], {usesOutput: true}, ctx);
   }
 }
 

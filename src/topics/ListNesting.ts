@@ -1,4 +1,4 @@
-import { Question, Subtopic, Topic, createQuestion } from "../topics";
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randInts, randVariable, randIntNum, range } from "../util";
 import { toPyAtom } from "../python";
 import { LIST_BASICS } from "./ListBasics";
@@ -8,74 +8,71 @@ function makeNestedLists(length: number = randIntNum(3, 5)): any[] {
   return lists.map(() => randInts(1n, 10n, randIntNum(2, 5)));
 }
 
-export class ListNestingLen extends Subtopic {
-  generateQuestion(): Question {
+export class ListNestingLen extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const lists = makeNestedLists();
     const lengths = lists.map(list => BigInt(list.length));
     const lengthsNum = lengths.map(length => Number(length));
     const total = lengths.reduce((a, b) => a+b, 0n);
     return createQuestion(`${x} = ${toPyAtom(lists, true)}
-len(${x})`, [...lengths, total, total + 1n, total + BigInt(lists.length), BigInt(Math.max(...lengthsNum)), BigInt(Math.min(...lengthsNum))]);
+len(${x})`, [...lengths, total, total + 1n, total + BigInt(lists.length), BigInt(Math.max(...lengthsNum)), BigInt(Math.min(...lengthsNum))], {}, ctx);
   }
 }
 
-export class ListNestingLenNoPretty extends Subtopic {
-  generateQuestion(): Question {
+export class ListNestingLenNoPretty extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const lists = makeNestedLists(2);
     const lengths = lists.map(list => BigInt(list.length));
     const lengthsNum = lengths.map(length => Number(length));
     const total = lengths.reduce((a, b) => a+b, 0n);
     return createQuestion(`${x} = ${toPyAtom(lists)}\nlen(${x})`,
-      [...lengths, total, total + 1n, total + BigInt(lists.length), BigInt(Math.max(...lengthsNum)), BigInt(Math.min(...lengthsNum))]
-    );
+      [...lengths, total, total + 1n, total + BigInt(lists.length), BigInt(Math.max(...lengthsNum)), BigInt(Math.min(...lengthsNum))], {}, ctx);
   }
 }
 
-export class ListNestingIndex extends Subtopic {
-  generateQuestion(): Question {
+export class ListNestingIndex extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const lists = makeNestedLists();
     const i = randIntNum(1, lists.length-1);
     return createQuestion(`${x} = ${toPyAtom(lists, true)}\n${x}[${i}]`,
-      [lists[i][0], lists[0][i], lists[i][i], lists[i-1], lists[i+1], lists.slice(i, i+1), lists.slice(i-1, i)]
-    );
+      [lists[i][0], lists[0][i], lists[i][i], lists[i-1], lists[i+1], lists.slice(i, i+1), lists.slice(i-1, i)], {}, ctx);
   }
 }
 
-export class ListNestingIndexNoPretty extends Subtopic {
-  generateQuestion(): Question {
+export class ListNestingIndexNoPretty extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const lists = makeNestedLists(2);
     const i = randIntNum(0, 1);
     return createQuestion(`${x} = ${toPyAtom(lists)}\n${x}[${i}]`,
-      [lists[i][0], lists[0][i], lists[i][i], lists[i-1], lists[i+1], lists.slice(i, i+1), lists.slice(i-1, i)]
-    );
+      [lists[i][0], lists[0][i], lists[i][i], lists[i-1], lists[i+1], lists.slice(i, i+1), lists.slice(i-1, i)], {}, ctx);
   }
 }
 
-export class ListNestingIndexLength extends Subtopic {
-  generateQuestion(): Question {
+export class ListNestingIndexLength extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const lists = makeNestedLists();
     const i = randIntNum(0, lists.length-1);
-    return createQuestion(`${x} = ${toPyAtom(lists, true)}\nlen(${x}[${i}])`, range(0n, 6n));
+    return createQuestion(`${x} = ${toPyAtom(lists, true)}\nlen(${x}[${i}])`, range(0n, 6n), {}, ctx);
   }
 }
 
-export class ListNestingIndexLengthNoPretty extends Subtopic {
-  generateQuestion(): Question {
+export class ListNestingIndexLengthNoPretty extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const lists = makeNestedLists(2);
     const i = randIntNum(0, lists.length-1);
-    return createQuestion(`${x} = ${toPyAtom(lists)}\nlen(${x}[${i}])`, range(0n, 6n));
+    return createQuestion(`${x} = ${toPyAtom(lists)}\nlen(${x}[${i}])`, range(0n, 6n), {}, ctx);
   }
 }
 
 
-export class ListNestingIndexNested extends Subtopic {
-  generateQuestion(): Question {
+export class ListNestingIndexNested extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const lists = makeNestedLists();
     const i = randIntNum(0, lists.length-1);
@@ -93,13 +90,12 @@ export class ListNestingIndexNested extends Subtopic {
         j < lists.length ? [...lists[j], ...lists[i]] : [],
         [flat[i], flat[j]], [flat[j], flat[i]],
         flat.slice(i, j), flat.slice(j, i),
-      ]
-    );
+      ], {}, ctx);
   }
 }
 
-export class ListNestingIndexNestedNoPretty extends Subtopic {
-  generateQuestion(): Question {
+export class ListNestingIndexNestedNoPretty extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const lists = makeNestedLists(2);
     const i = randIntNum(0, 1);
@@ -117,8 +113,7 @@ export class ListNestingIndexNestedNoPretty extends Subtopic {
         j < lists.length ? [...lists[j], ...lists[i]] : [],
         [flat[i], flat[j]], [flat[j], flat[i]],
         flat.slice(i, j), flat.slice(j, i),
-      ]
-    );
+      ], {}, ctx);
   }
 }
 

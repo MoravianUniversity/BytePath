@@ -1,4 +1,4 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randInt, randInts, randChoice, randVariable, randVars, math } from '../util';
 import { BASIC_ARITHMETIC } from './BasicArithmetic';
 
@@ -6,18 +6,17 @@ export const OPS = ['+', '-'];
 
 export function randOperation(): string { return randChoice(OPS); }
 
-export class VariableAssignment extends Subtopic {
-  generateQuestion(): Question {
+export class VariableAssignment extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const correct = randInt(1n, 10n); 
     const variable = randVariable();
     return createQuestion(`
         ${variable} = ${correct}
-        ${variable}`, [correct, variable, Symbol(variable)], {correct}
-    );
+        ${variable}`, [correct, variable, Symbol(variable)], {correct}, ctx);
   }
 }
-export class VariableOp extends Subtopic {
-  generateQuestion(): Question {
+export class VariableOp extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b] = randInts(1n, 10n, 2);
     const op = randOperation();
     const variable = randVariable();
@@ -31,12 +30,11 @@ export class VariableOp extends Subtopic {
         a, b, a + b, a - b, b - a,
         variable, Symbol(variable),
       ],
-      {correct},
-    );
+      {correct}, ctx);
   }     
 }
-export class TwoVariableOp extends Subtopic {
-  generateQuestion(): Question {
+export class TwoVariableOp extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 10n, 2);
     const op = randOperation();
@@ -54,13 +52,12 @@ export class TwoVariableOp extends Subtopic {
         a, b, a + b, a - b, b - a,
         x, y, x+y, Symbol(x), Symbol(y), Symbol(x+y),
       ],
-      {correct},
-    );
+      {correct}, ctx);
   }
 }
 
-export class TwoVariableOpBackwards extends Subtopic {
-  generateQuestion(): Question {
+export class TwoVariableOpBackwards extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 10n, 2);
     const op = randOperation();
@@ -78,13 +75,12 @@ export class TwoVariableOpBackwards extends Subtopic {
         a, b, a + b, a - b, b - a,
         x, y, x+y, Symbol(x), Symbol(y), Symbol(x+y),
       ],
-      {correct},
-    );
+      {correct}, ctx);
   }
 }
 
-export class VariableReassignment extends Subtopic {
-  generateQuestion(): Question {
+export class VariableReassignment extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const [a, b, c] = randInts(1n, 10n, 3);
     const op = randOperation();
@@ -102,13 +98,12 @@ export class VariableReassignment extends Subtopic {
         a, b, c, a + b, a - b, b - a, a + c, a - c, c - a, b + c, b - c, c - b,
         x, Symbol(x),
       ],
-      {correct},
-    );
+      {correct}, ctx);
   }
 }
 
-export class VariableReassignmentBackwards extends Subtopic {
-  generateQuestion(): Question {
+export class VariableReassignmentBackwards extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const [a, b, c] = randInts(1n, 10n, 3);
     const op = randOperation();
@@ -126,13 +121,12 @@ export class VariableReassignmentBackwards extends Subtopic {
         a, b, c, a + b, a - b, b - a, a + c, a - c, c - a, b + c, b - c, c - b,
         x, Symbol(x),
       ],
-      {correct},
-    );
+      {correct}, ctx);
   }
 }
 
-export class VariableReassignmentOp extends Subtopic {
-  generateQuestion(): Question {
+export class VariableReassignmentOp extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const [a, b, c] = randInts(1n, 6n, 3);
     const op = randOperation();
@@ -151,13 +145,12 @@ export class VariableReassignmentOp extends Subtopic {
         a, b, c, a + b + c, a - b + c, a + b - c, a - b - c,
         x, Symbol(x),
       ],
-      {correct},
-    );
+      {correct}, ctx);
   }
 }
 
-export class VariableReassignmentOpBackwards extends Subtopic {
-  generateQuestion(): Question {
+export class VariableReassignmentOpBackwards extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const [a, b, c] = randInts(1n, 6n, 3);
     const op = randOperation();
@@ -176,13 +169,12 @@ export class VariableReassignmentOpBackwards extends Subtopic {
         a, b, c, a + b + c, a - b + c, a + b - c, a - b - c,
         x, Symbol(x),
       ],
-      {correct},
-    );
+      {correct}, ctx);
   }
 }
 
-export class TwoVariableReassignmentOp extends Subtopic {
-  generateQuestion(): Question {
+export class TwoVariableReassignmentOp extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c] = randInts(1n, 6n, 3);
     const op = randOperation();
@@ -210,8 +202,7 @@ export class TwoVariableReassignmentOp extends Subtopic {
         a - c - a - c - b,
         x, y, x+y, Symbol(x), Symbol(y), Symbol(x+y),
       ],
-      {correct},
-    );
+      {correct}, ctx);
   }
 }
 

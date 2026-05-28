@@ -1,108 +1,108 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randBool, randBools } from '../util';
 import { toPyBool } from '../python';
 import { BASIC_ARITHMETIC } from './BasicArithmetic';
 
-export class BooleanOperator extends Subtopic {
+export class BooleanOperator extends EvalLastLineSubtopic {
   op: string;
   constructor(op: string) { super(); this.op = op; }
-  generateQuestion(): Question {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b] = randBools(2);
     return createQuestion(`
-      ${toPyBool(a)} ${this.op} ${toPyBool(b)}`, [true, false]);
+      ${toPyBool(a)} ${this.op} ${toPyBool(b)}`, [true, false], {}, ctx);
   }
 }
 
-export class AndOperator_True_True extends Subtopic {
-  generateQuestion(): Question {
+export class AndOperator_True_True extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const a = true;
     const b = true;
     return createQuestion(`
-      ${toPyBool(a)} and ${toPyBool(b)}`, [true, false]);
+      ${toPyBool(a)} and ${toPyBool(b)}`, [true, false], {}, ctx);
   }
 }
 
-export class AndOperator_True_False extends Subtopic {
-  generateQuestion(): Question {
+export class AndOperator_True_False extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const a = true;
     const b = false;
     return createQuestion(`
-      ${toPyBool(a)} and ${toPyBool(b)}`, [true, false]);
+      ${toPyBool(a)} and ${toPyBool(b)}`, [true, false], {}, ctx);
   }
 }
 
-export class AndOperator_False_True extends Subtopic {
-  generateQuestion(): Question {
+export class AndOperator_False_True extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const a = false;
     const b = true;
     return createQuestion(`
-      ${toPyBool(a)} and ${toPyBool(b)}`, [true, false]);
+      ${toPyBool(a)} and ${toPyBool(b)}`, [true, false], {}, ctx);
   }
 }
 
-export class AndOperator_False_False extends Subtopic {
-  generateQuestion(): Question {
+export class AndOperator_False_False extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const a = false;
     const b = false;
     return createQuestion(`
-      ${toPyBool(a)} and ${toPyBool(b)}`, [true, false]);
+      ${toPyBool(a)} and ${toPyBool(b)}`, [true, false], {}, ctx);
   }
 }
 
-export class OrOperator_True_True extends Subtopic {
-  generateQuestion(): Question {
+export class OrOperator_True_True extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const a = true;
     const b = true;
     return createQuestion(`
-      ${toPyBool(a)} or ${toPyBool(b)}`, [true, false]);
+      ${toPyBool(a)} or ${toPyBool(b)}`, [true, false], {}, ctx);
   }
 }
 
-export class OrOperator_True_False extends Subtopic {
-  generateQuestion(): Question {
+export class OrOperator_True_False extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const a = true;
     const b = false;
     return createQuestion(`
-      ${toPyBool(a)} or ${toPyBool(b)}`, [true, false]);
+      ${toPyBool(a)} or ${toPyBool(b)}`, [true, false], {}, ctx);
   }
 }
 
-export class OrOperator_False_True extends Subtopic {
-  generateQuestion(): Question {
+export class OrOperator_False_True extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const a = false;
     const b = true;
     return createQuestion(`
-      ${toPyBool(a)} or ${toPyBool(b)}`, [true, false]);
+      ${toPyBool(a)} or ${toPyBool(b)}`, [true, false], {}, ctx);
   }
 }
 
-export class OrOperator_False_False extends Subtopic {
-  generateQuestion(): Question {
+export class OrOperator_False_False extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const a = false;
     const b = false;
     return createQuestion(`
-      ${toPyBool(a)} or ${toPyBool(b)}`, [true, false]);
+      ${toPyBool(a)} or ${toPyBool(b)}`, [true, false], {}, ctx);
   }
 }
 
-export class NotOperator extends Subtopic {
-  generateQuestion(): Question {
+export class NotOperator extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const a = randBool();
-    return createQuestion(`not ${toPyBool(a)}`, [true, false]);
+    return createQuestion(`not ${toPyBool(a)}`, [true, false], {}, ctx);
   }
 }
 
-export class NotOperator_True extends Subtopic {
-  generateQuestion(): Question {
+export class NotOperator_True extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const a = true;
-    return createQuestion(`not ${toPyBool(a)}`, [true, false]);
+    return createQuestion(`not ${toPyBool(a)}`, [true, false], {}, ctx);
   }
 }
 
-export class NotOperator_False extends Subtopic {
-  generateQuestion(): Question {
+export class NotOperator_False extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const a = false;
-    return createQuestion(`not ${toPyBool(a)}`, [true, false]);
+    return createQuestion(`not ${toPyBool(a)}`, [true, false], {}, ctx);
   }
 }
 

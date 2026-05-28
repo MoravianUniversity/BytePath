@@ -1,48 +1,45 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randInt, randInts, randVariable, randVars, randFunc, math } from '../util';
 import { BASIC_ARITHMETIC } from './BasicArithmetic';
 import { BASIC_VARIABLES, randOperation } from './BasicVariables';
 
-export class FuncNoArgs extends Subtopic {
-  generateQuestion(): Question {
+export class FuncNoArgs extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const a = randInt(1n, 10n);
     const func = randFunc();
     return createQuestion(`
       def ${func}():
           return ${a}
-      ${func}()`, [func, Symbol(func), `${func}()`, 0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n]
-    );
+      ${func}()`, [func, Symbol(func), `${func}()`, 0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n], {}, ctx);
   }
 }
 
-export class FuncArg extends Subtopic {
-  generateQuestion(): Question {
+export class FuncArg extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const a = randInt(1n, 10n);
     const arg = randVariable();
     const func = randFunc();
     return createQuestion(`
       def ${func}(${arg}):
           return ${arg}
-      ${func}(${a})`, [arg, Symbol(arg), `${func}(${a})`, 0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n]
-    );
+      ${func}(${a})`, [arg, Symbol(arg), `${func}(${a})`, 0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n], {}, ctx);
   }
 }
 
-export class FuncArgUnused extends Subtopic {
-  generateQuestion(): Question {
+export class FuncArgUnused extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b] = randInts(1n, 10n, 2);
     const arg = randVariable();
     const func = randFunc();
     return createQuestion(`
       def ${func}(${arg}):
           return ${a}
-      ${func}(${b})`, [arg, Symbol(arg), `${func}(${b})`, 0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n]
-    );
+      ${func}(${b})`, [arg, Symbol(arg), `${func}(${b})`, 0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n], {}, ctx);
   }
 }
 
-export class FuncArgWithMath extends Subtopic {
-  generateQuestion(): Question {
+export class FuncArgWithMath extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b] = randInts(1n, 5n, 2);
     const op = randOperation();
     const arg = randVariable();
@@ -50,52 +47,48 @@ export class FuncArgWithMath extends Subtopic {
     return createQuestion(`
       def ${func}(${arg}):
           return ${arg} ${op} ${a}
-      ${func}(${b})`, [arg, Symbol(arg), `${func}(${b})`, 0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n]
-    );
+      ${func}(${b})`, [arg, Symbol(arg), `${func}(${b})`, 0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n], {}, ctx);
   }
 }
 
-export class FuncArgWithMathRepeated extends Subtopic {
-  generateQuestion(): Question {
+export class FuncArgWithMathRepeated extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const a = randInt(1n, 5n);
     const arg = randVariable();
     const func = randFunc();
     return createQuestion(`
       def ${func}(${arg}):
           return ${arg} + ${arg}
-      ${func}(${a})`, [arg, Symbol(arg), `${func}(${a})`, 0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n]
-    );
+      ${func}(${a})`, [arg, Symbol(arg), `${func}(${a})`, 0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n], {}, ctx);
   }
 }
 
-export class FuncWithMathAfter extends Subtopic {
-  generateQuestion(): Question {
+export class FuncWithMathAfter extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b] = randInts(1n, 5n, 2);
     const op = randOperation();
     const func = randFunc();
     return createQuestion(`
       def ${func}():
           return ${a}
-      ${func}() ${op} ${b}`, [0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n]
-    );
+      ${func}() ${op} ${b}`, [0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n], {}, ctx);
   }
 }
 
-export class FuncWithMathBefore extends Subtopic {
-  generateQuestion(): Question {
+export class FuncWithMathBefore extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b] = randInts(1n, 5n, 2);
     const op = randOperation();
     const func = randFunc();
     return createQuestion(`
       def ${func}():
           return ${a}
-      ${b} ${op} ${func}()`, [0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n]
-    );
+      ${b} ${op} ${func}()`, [0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n], {}, ctx);
   }
 }
 
-export class FuncArgWithMathAfter extends Subtopic {
-  generateQuestion(): Question {
+export class FuncArgWithMathAfter extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b] = randInts(1n, 5n, 2);
     const op = randOperation();
     const arg = randVariable();
@@ -103,13 +96,12 @@ export class FuncArgWithMathAfter extends Subtopic {
     return createQuestion(`
       def ${func}(${arg}):
           return ${arg}
-      ${func}(${a}) ${op} ${b}`, [0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n]
-    );
+      ${func}(${a}) ${op} ${b}`, [0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n], {}, ctx);
   }
 }
 
-export class FuncArgWithMathInAndOutside extends Subtopic {
-  generateQuestion(): Question {
+export class FuncArgWithMathInAndOutside extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b, c] = randInts(1n, 5n, 3);
     const op1 = randOperation();
     const op2 = randOperation();
@@ -119,13 +111,12 @@ export class FuncArgWithMathInAndOutside extends Subtopic {
     return createQuestion(`
       def ${func}(${arg}):
           return ${arg} ${op1} ${a}
-      ${func}(${b}) ${op2} ${c}`, [0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n, correct+1n, correct-1n, correct+2n, correct-2n, correct+3n, correct-3n], {correct}
-    );
+      ${func}(${b}) ${op2} ${c}`, [0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n, correct+1n, correct-1n, correct+2n, correct-2n, correct+3n, correct-3n], {correct}, ctx);
   }
 }
 
-export class FuncArgAndSaveResult extends Subtopic {
-  generateQuestion(): Question {
+export class FuncArgAndSaveResult extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const a = randInt(1n, 10n);
     const [arg, x] = randVars(2);
     const func = randFunc();
@@ -133,13 +124,12 @@ export class FuncArgAndSaveResult extends Subtopic {
       def ${func}(${arg}):
           return ${arg}
       ${x} = ${func}(${a})
-      ${x}`, [x, Symbol(x), arg, Symbol(arg), `${func}(${a})`, 0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n]
-    );
+      ${x}`, [x, Symbol(x), arg, Symbol(arg), `${func}(${a})`, 0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n], {}, ctx);
   }
 }
 
-export class FuncArgAndSaveResultMath extends Subtopic {
-  generateQuestion(): Question {
+export class FuncArgAndSaveResultMath extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b] = randInts(1n, 5n, 2);
     const op = randOperation();
     const [arg, x] = randVars(2);
@@ -149,13 +139,12 @@ export class FuncArgAndSaveResultMath extends Subtopic {
       def ${func}(${arg}):
           return ${arg}
       ${x} = ${func}(${a})
-      ${x} ${op} ${b}`, [0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n, correct+1n, correct-1n, correct+2n, correct-2n, correct+3n, correct-3n], {correct}
-    );
+      ${x} ${op} ${b}`, [0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n, correct+1n, correct-1n, correct+2n, correct-2n, correct+3n, correct-3n], {correct}, ctx);
   }
 }
 
-export class FuncArgAndSaveResultMath2 extends Subtopic {
-  generateQuestion(): Question {
+export class FuncArgAndSaveResultMath2 extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b] = randInts(1n, 5n, 2);
     const op = randOperation();
     const [arg, x] = randVars(2);
@@ -165,13 +154,12 @@ export class FuncArgAndSaveResultMath2 extends Subtopic {
       def ${func}(${arg}):
           return ${arg}
       ${x} = ${func}(${a}) ${op} ${b}
-      ${x}`, [0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n, correct+1n, correct-1n, correct+2n, correct-2n, correct+3n, correct-3n], {correct}
-    );
+      ${x}`, [0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n, correct+1n, correct-1n, correct+2n, correct-2n, correct+3n, correct-3n], {correct}, ctx);
   }
 }
 
-export class FuncArgAndSaveResultMath3 extends Subtopic {
-  generateQuestion(): Question {
+export class FuncArgAndSaveResultMath3 extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b, c, d] = randInts(1n, 5n, 4);
     const op1 = randOperation();
     const op2 = randOperation();
@@ -183,13 +171,12 @@ export class FuncArgAndSaveResultMath3 extends Subtopic {
       def ${func}(${arg}):
           return ${arg} ${op1} ${b}
       ${x} = ${func}(${a}) ${op2} ${c}
-      ${x} ${op3} ${d}`, [0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n, correct+1n, correct-1n, correct+2n, correct-2n, correct+3n, correct-3n], {correct}
-    );
+      ${x} ${op3} ${d}`, [0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n, correct+1n, correct-1n, correct+2n, correct-2n, correct+3n, correct-3n], {correct}, ctx);
   }
 }
 
-export class FuncArgVarInAndOutside extends Subtopic {
-  generateQuestion(): Question {
+export class FuncArgVarInAndOutside extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b] = randInts(1n, 5n, 2);
     const op = randOperation();
     const [arg, x, y] = randVars(3);
@@ -200,8 +187,7 @@ export class FuncArgVarInAndOutside extends Subtopic {
           ${y} = ${arg} ${op} ${b}
           return ${y}
       ${x} = ${func}(${a})
-      ${x}`, [0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n, correct+1n, correct-1n, correct+2n, correct-2n, correct+3n, correct-3n], {correct}
-    );
+      ${x}`, [0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n, 10n, correct+1n, correct-1n, correct+2n, correct-2n, correct+3n, correct-3n], {correct}, ctx);
   }
 }
 

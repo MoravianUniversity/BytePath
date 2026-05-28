@@ -1,4 +1,4 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randInts, randIntNum, randChoices, randVars, range, shuffle, randBool, ASCII_LOWER, ASCII_UPPER } from '../util';
 import { toPyStr, toPyAtom } from '../python.ts';
 
@@ -66,7 +66,7 @@ class DictMastery extends Topic {
   }
 }
 
-abstract class DictMasteryBase extends Subtopic {
+abstract class DictMasteryBase extends EvalLastLineSubtopic {
   vars: string[];
   ints: [bigint, bigint];
   strs: [string, string];
@@ -74,9 +74,9 @@ abstract class DictMasteryBase extends Subtopic {
   constructor(vars: string[], ints: [bigint, bigint], strs: [string, string], sharedCode: string) {
     super(); this.vars = vars; this.ints = ints; this.strs = strs; this.sharedCode = sharedCode;
   }
-  generateQuestion(): Question {
+  generateQuestion(ctx: GenerateContext) {
     const code = this.genCode();
-    return createQuestion(code, [], {sharedCode: this.sharedCode});
+    return createQuestion(code, [], {sharedCode: this.sharedCode}, ctx);
   }
   abstract genCode(): string
 }
@@ -116,8 +116,8 @@ function sample_with_repeats<T>(data: T[],
   return shuffle([...data, ...randChoices(repeats, randIntNum(min_repeat, max_repeat), false)]);
 }
 
-class DictMastery_Long extends Subtopic {
-  generateQuestion(): Question {
+class DictMastery_Long extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [var1, var2, i] = randVars(3);
     const elem1 = `${var1}[${i}]`;
     const elem2 = `${var2}[${i}]`;
@@ -179,7 +179,7 @@ ${var2} = {}
 for ${i} in ${var1}:
     ${code}
 ${var2}`;
-    return createQuestion(code, []);
+    return createQuestion(code, [], {}, ctx);
   }
 }
 

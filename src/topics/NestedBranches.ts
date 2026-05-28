@@ -1,4 +1,4 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randInts, randVars, evalRelOp } from '../util';
 import { toPyStr } from '../python';
 import { CHAINED_BRANCHES, randOp, getTrueOp, getFalseOp } from './ChainedBranches';
@@ -14,8 +14,8 @@ function combos(letters: string[]): string[] {
   return combinations;
 }
 
-export class ChainedBranches extends Subtopic {
-  generateQuestion(): Question {
+export class ChainedBranches extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 5n, 4);
     let op1 = randOp();
@@ -30,12 +30,12 @@ export class ChainedBranches extends Subtopic {
       elif ${y} ${op2} ${d}:
           print(${toPyStr(letters[i++])})
       print(${toPyStr(letters[i++])})
-    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))]);
+    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {}, ctx);
   }
 }
 
-export class NestedBranches1 extends Subtopic {
-  generateQuestion(): Question {
+export class NestedBranches1 extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 5n, 4);
     let op1 = getTrueOp(a, c);
@@ -51,12 +51,12 @@ export class NestedBranches1 extends Subtopic {
       else:
           print(${toPyStr(letters[i++])})
       print(${toPyStr(letters[i++])})
-    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))]);
+    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {}, ctx);
   }
 }
 
-export class NestedBranches2 extends Subtopic {
-  generateQuestion(): Question {
+export class NestedBranches2 extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 5n, 4);
     let op1 = getFalseOp(a, c);
@@ -72,12 +72,12 @@ export class NestedBranches2 extends Subtopic {
       else:
           print(${toPyStr(letters[i++])})
       print(${toPyStr(letters[i++])})
-    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))]);
+    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {}, ctx);
   }
 }
 
-export class NestedBranches3 extends Subtopic {
-  generateQuestion(): Question {
+export class NestedBranches3 extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 5n, 4);
     let op1 = getTrueOp(a, c);
@@ -95,12 +95,12 @@ export class NestedBranches3 extends Subtopic {
       else:
           print(${toPyStr(letters[i++])})
       print(${toPyStr(letters[i++])})
-    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))]);
+    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {}, ctx);
   }
 }
 
-export class NestedBranches4 extends Subtopic {
-  generateQuestion(): Question {
+export class NestedBranches4 extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 5n, 4);
     let op1 = getFalseOp(a, c);
@@ -118,12 +118,12 @@ export class NestedBranches4 extends Subtopic {
       else:
           print(${toPyStr(letters[i++])})
       print(${toPyStr(letters[i++])})
-    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))]);
+    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {}, ctx);
   }
 }
 
-export class NestedBranches5 extends Subtopic {
-  generateQuestion(): Question {
+export class NestedBranches5 extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 5n, 4);
     let op1 = getTrueOp(a, c);
@@ -141,12 +141,12 @@ export class NestedBranches5 extends Subtopic {
       else:
           print(${toPyStr(letters[i++])})
       print(${toPyStr(letters[i++])})
-    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))]);
+    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {}, ctx);
   }
 }
 
-export class NestedBranches6 extends Subtopic {
-  generateQuestion(): Question {
+export class NestedBranches6 extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c, d, e] = randInts(1n, 5n, 5);
     let op1 = getTrueOp(a, c);
@@ -165,12 +165,12 @@ export class NestedBranches6 extends Subtopic {
       elif ${x} ${op3} ${e}:
           print(${toPyStr(letters[i++])})
       print(${toPyStr(letters[i++])})
-    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))]);
+    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {}, ctx);
   }
 }
 
-export class NestedBranches7 extends Subtopic {
-  generateQuestion(): Question {
+export class NestedBranches7 extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c, d, e] = randInts(1n, 5n, 5);
     let op1 = getFalseOp(a, c);
@@ -189,11 +189,11 @@ export class NestedBranches7 extends Subtopic {
       elif ${x} ${op3} ${e}:
           print(${toPyStr(letters[i++])})
       print(${toPyStr(letters[i++])})
-    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))]);
+    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {}, ctx);
   }
 }
-export class NestedBranches8 extends Subtopic {
-  generateQuestion(): Question {
+export class NestedBranches8 extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c, d, e] = randInts(1n, 5n, 5);
     let op1 = getTrueOp(a, c);
@@ -212,7 +212,7 @@ export class NestedBranches8 extends Subtopic {
       if ${x} ${op3} ${e}:
           print(${toPyStr(letters[i++])})
       print(${toPyStr(letters[i++])})
-    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))]);
+    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {}, ctx);
   }
 }
 export const NESTED_BRANCHES = new Topic('nested-branches', 'Nested Branches', [

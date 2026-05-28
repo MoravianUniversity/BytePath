@@ -1,4 +1,4 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randInt, randVars, randInts, randVariable, randChoice, STRINGS } from '../util';
 import { BASIC_ARITHMETIC, Addition, AdditionWithNegative } from './BasicArithmetic';
 import { BASIC_VARIABLES, VariableAssignment, VariableOp, TwoVariableOp, TwoVariableOpBackwards } from './BasicVariables';
@@ -6,119 +6,119 @@ import { STRING_CONCAT, StringConcat, StringConcatBackwards, StringConcat_1IntLi
 import { STRING_LENGTH, StringLen, StringLenVar, StringLenMultiVar } from './StringLength';
 import { BASIC_PRINTS, PrintString, PrintStringMulti, PrintStringVar, PrintStringVar2, PrintStringMultiVar } from './BasicPrints';
 
-export class ConvertString extends Subtopic {
-  generateQuestion(): Question {
+export class ConvertString extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const a = randInt(1n, 10n);
     return createQuestion(`
       ${x} = ${a}
       str(${x})
-    `, [a, `${a}`, x, Symbol(x), 0n, 1n, 2n, null]);
+    `, [a, `${a}`, x, Symbol(x), 0n, 1n, 2n, null], {}, ctx);
   }
 }
 
-export class ConvertStringAdd extends Subtopic {
-  generateQuestion(): Question {
+export class ConvertStringAdd extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 10n, 2);
     return createQuestion(`
       ${x} = ${a}
       ${y} = ${b}
       str(${x} + ${y})
-    `, [a, b, x+y, a+b, `${a}`, `${b}`, `${a}${b}`, x, y, Symbol(x), Symbol(y), Symbol(x+y), 0n, 1n, 2n, null]);
+    `, [a, b, x+y, a+b, `${a}`, `${b}`, `${a}${b}`, x, y, Symbol(x), Symbol(y), Symbol(x+y), 0n, 1n, 2n, null], {}, ctx);
   }
 }
 
-export class ConvertStringConcat extends Subtopic {
-  generateQuestion(): Question {
+export class ConvertStringConcat extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 10n, 2);
     return createQuestion(`
       ${x} = ${a}
       ${y} = ${b}
       str(${x}) + str(${y})
-    `, [a, b, x+y, `${a}`, `${b}`, `${a}${b}`, x, y, Symbol(x), Symbol(y), Symbol(x+y), 0n, 1n, 2n, null]);
+    `, [a, b, x+y, `${a}`, `${b}`, `${a}${b}`, x, y, Symbol(x), Symbol(y), Symbol(x+y), 0n, 1n, 2n, null], {}, ctx);
   }
 }
 
-export class ConvertInt extends Subtopic {
-  generateQuestion(): Question {
+export class ConvertInt extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const a = randInt(1n, 10n);
     return createQuestion(`
       ${x} = "${a}"
       int(${x})
-    `, [a, `${a}`, x, Symbol(x), 0n, 1n, 2n, null]);
+    `, [a, `${a}`, x, Symbol(x), 0n, 1n, 2n, null], {}, ctx);
   }
 }
 
-export class ConvertIntAdd extends Subtopic {
-  generateQuestion(): Question {
+export class ConvertIntAdd extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 10n, 2);
     return createQuestion(`
       ${x} = "${a}"
       ${y} = "${b}"
       int(${x}) + int(${y})
-    `, [a, b, x+y, `${a}`, `${b}`, `${a}${b}`, x, y, Symbol(x), Symbol(y), Symbol(x+y), 0n, 1n, 2n, null]);
+    `, [a, b, x+y, `${a}`, `${b}`, `${a}${b}`, x, y, Symbol(x), Symbol(y), Symbol(x+y), 0n, 1n, 2n, null], {}, ctx);
   }
 }
 
-export class ConvertIntConcat extends Subtopic {
-  generateQuestion(): Question {
+export class ConvertIntConcat extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 10n, 2);
     return createQuestion(`
       ${x} = "${a}"
       ${y} = "${b}"
       int(${x}) + int(${y})
-    `, [a, b, x+y, `${a}`, `${b}`, `${a}${b}`, x, y, Symbol(x), Symbol(y), Symbol(x+y), 0n, 1n, 2n, null]);
+    `, [a, b, x+y, `${a}`, `${b}`, `${a}${b}`, x, y, Symbol(x), Symbol(y), Symbol(x+y), 0n, 1n, 2n, null], {}, ctx);
   }
 }
 
-class Input extends Subtopic {
-  generateQuestion(): Question {
+class Input extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const a = randChoice(STRINGS);
     return createQuestion(`
       ${x} = input()
       ${x}
-    `, [a, x, Symbol(x)], {input: a});
+    `, [a, x, Symbol(x)], {input: a}, ctx);
   }
 }
 
-class InputStrOfInt extends Subtopic {
-  generateQuestion(): Question {
+class InputStrOfInt extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const a = randInt(1n, 10n);
     return createQuestion(`
       ${x} = input()
       ${x}
-    `, [a, `${a}`, x, Symbol(x), 0n, 1n], {input: `${a}`});
+    `, [a, `${a}`, x, Symbol(x), 0n, 1n], {input: `${a}`}, ctx);
   }
 }
 
-class InputInt extends Subtopic {
-  generateQuestion(): Question {
+class InputInt extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const a = randInt(1n, 10n);
     return createQuestion(`
       ${x} = int(input())
       ${x}
-    `, [a, `${a}`, x, Symbol(x), 0n, 1n, 2n, null], {input: `${a}`});
+    `, [a, `${a}`, x, Symbol(x), 0n, 1n, 2n, null], {input: `${a}`}, ctx);
   }
 }
 
 // TODO: this does not work in quiz mode (they cannot type the echoed input correctly)
 //  also the wrong answers don't have the correct echos either
-// class InputOutputTest extends Subtopic {
-//   generateQuestion(): Question {
+// class InputOutputTest extends EvalLastLineSubtopic {
+//   generateQuestion(ctx: GenerateContext) {
 //     const x = randVariable();
 //     const a = randChoice(STRINGS);
 //     return createQuestion(`
 //       name = input("What is your name? ")
 //       print(f"Hello {name}!")
-//     `, [a, x, `Hello ${a}!`], {input: a, usesOutput: true});
+//     `, [a, x, `Hello ${a}!`], {input: a, usesOutput: true}, ctx);
 //   }
 // }
 

@@ -1,4 +1,4 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randInt, randVariable, randVars, randChoice, STRINGS } from '../util';
 import { BASIC_ARITHMETIC } from './BasicArithmetic';
 import { BASIC_VARIABLES, VariableOp, TwoVariableOp, TwoVariableOpBackwards } from './BasicVariables';
@@ -7,8 +7,8 @@ import { STRING_LENGTH, StringLenVar, StringLenMultiVar } from './StringLength';
 import { STRING_INDEX, StringIndex0, StringIndex1, StringIndexN, StringIndexConcat, StringIndexPostConcat, StringIndexVar } from './StringIndexing';
 import { ConvertString, ConvertStringAdd, ConvertStringConcat, ConvertInt, ConvertIntAdd, ConvertIntConcat } from './Quiz3';
 
-export class StringLenPlus extends Subtopic {
-  generateQuestion(): Question {
+export class StringLenPlus extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const a = randChoice(STRINGS);
     const b = randInt(1n, 3n);
@@ -20,12 +20,12 @@ export class StringLenPlus extends Subtopic {
       BigInt(a.length + 1),
       BigInt(a.length - 1),
       BigInt(a.length), y, x, `${x}${y}`, `${x}${b}`, `${a}${b}`,
-    ]);
+    ], {}, ctx);
   }
 }
 
-export class StringIndexLenMinus1 extends Subtopic {
-  generateQuestion(): Question {
+export class StringIndexLenMinus1 extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const a = randChoice(STRINGS);
     return createQuestion(`
@@ -35,12 +35,12 @@ export class StringIndexLenMinus1 extends Subtopic {
       BigInt(a.length - 1),
       BigInt(a.length - 2),
       BigInt(a.length), x, a[a.length - 2],
-    ]);
+    ], {}, ctx);
   }
 }
 
-export class StringIndexXMinusY extends Subtopic {
-  generateQuestion(): Question {
+export class StringIndexXMinusY extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y, z] = randVars(3);
     const a = randChoice(STRINGS);
     const b = randInt(2n, BigInt(a.length - 1));
@@ -53,12 +53,12 @@ export class StringIndexXMinusY extends Subtopic {
     `, [
         b - c, c - b, 
         a, x, y, z, a[0], a[Number(b)-1], a[Number(c)-1], a[Number(b-c)-1],
-    ]);
+    ], {}, ctx);
   }
 }
 
-export class StringLenOfIndex extends Subtopic {
-  generateQuestion(): Question {
+export class StringLenOfIndex extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const a = randChoice(STRINGS);
     const b = randInt(1n, BigInt(a.length - 1));
@@ -66,18 +66,18 @@ export class StringLenOfIndex extends Subtopic {
       ${x} = "${a}"
       ${y} = ${b}
       len(${x}[${y}])
-    `, [BigInt(a.length), x, y, a[Number(b)], a[Number(b)-1]]);
+    `, [BigInt(a.length), x, y, a[Number(b)], a[Number(b)-1]], {}, ctx);
   }
 }
 
-export class ConvertIndexOfStrOfLen extends Subtopic {
-  generateQuestion(): Question {
+export class ConvertIndexOfStrOfLen extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const a = randChoice(STRINGS) + randChoice(STRINGS) + randChoice(STRINGS) + randChoice(STRINGS);
     return createQuestion(`
       ${x} = "${a}"
       str(len(${x}))[1]
-    `, [a, x, a[1], a[0], BigInt(a.length)]);
+    `, [a, x, a[1], a[0], BigInt(a.length)], {}, ctx);
   }
 }
 

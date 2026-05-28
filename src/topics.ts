@@ -1,16 +1,21 @@
 /**
  * Classes, types, and helper functions for creating topics
  */
-import { runLastLine, runGrabOutput, setInput, getInput, PyType, toPyAtom } from './python';
-import { shuffle, randChoice, isClose } from './util';
-import dedent from 'dedent-js';
+import { PyType, toPyAtom } from './python';
+import { randChoice, isClose } from './util';
+import type { QuestionKind, QuestionFor, GenerateContext, Question } from './questions/types';
 
+export type { Question, QuestionKind, GenerateContext };
+export {
+  buildCodeQuestion,
+  createQuestion,
+} from './questions/python/buildCodeQuestion';
 
 // Special case for raw contents that aren't parsed like normal types
 export type RawAnswer = {
   type: 'raw';
   value: string;
-}
+};
 export function raw(value: string): RawAnswer {
   return { type: 'raw', value };
 }
@@ -21,21 +26,6 @@ export function isRawAnswer(answer: Answer): answer is RawAnswer {
 // For answers, there can be any Python type, along with the following special cases:
 // - RawAnswer -> raw output (no transformations, can never be the correct answer)
 export type Answer = PyType | RawAnswer;
-
-/**
- * Question: the code to be executed, the correct answer, and the options (includes the correct answer)
- */
-export interface Question {
-  code: string;
-  correct: Answer;
-  options: Answer[];
-  forceQuiz: boolean;
-
-  // Whether the question uses output (from print()) as the answer instead of the final expression
-  // value. The correct answer and all options should be strings in this case.
-  usesOutput: boolean;
-  input?: string[] | string; // user input for the question
-}
 
 /** One tier of progressive help, unlocked after enough failed attempts on this question type. */
 export interface QuestionHelpTier {
@@ -60,11 +50,6 @@ export function getActiveHelpMessage(
     }
   }
   return message;
-}
-
-// Check if an answer is correct for a question
-export function isAnswerCorrect(answer: Answer, question: Question): boolean {
-  return isAnswerSame(answer, question.correct);
 }
 
 // Check if two answers are the same
@@ -110,7 +95,8 @@ export function formatAnswer(answer: Answer): string {
 /**
  * Subtopic: a subtopic of a topic. Knows how to generate a specific type of question.
  */
-export abstract class Subtopic {
+export abstract class Subtopic<K extends QuestionKind = QuestionKind> {
+  abstract readonly kind: K;
   completed: boolean = false;
   incorrectLastTime: boolean = false;
   /** Incorrect answers on this question type (used for progressive help). */
@@ -122,7 +108,15 @@ export abstract class Subtopic {
     return getActiveHelpMessage(this.help, this.failedAttempts);
   }
 
-  abstract generateQuestion(): Question;
+  abstract generateQuestion(ctx: GenerateContext): QuestionFor<K>;
+}
+
+export abstract class EvalLastLineSubtopic extends Subtopic<'eval-last-line'> {
+  readonly kind = 'eval-last-line' as const;
+}
+
+export abstract class CodeOutputSubtopic extends Subtopic<'code-output'> {
+  readonly kind = 'code-output' as const;
 }
 
 /**
@@ -232,49 +226,4 @@ export class TopicGroup {
     }
     return null;
   }
-}
-
-const MAX_OPTIONS = 10;
-
-// Create a question
-export function createQuestion(
-  code: string,
-  options: (Answer | undefined)[], // the correct answer is always added to the options
-  // if correct is provided, it will be used as the correct answer instead of the actual answer
-  // if usesOutput is provided, it will be used to determine whether the question uses output as the answer (default is true if code includes print())
-  // if input is provided, it will be used to set the user input for the question
-  // if sharedCode is provided, it will be used to add code to the beginning of the question
-  {correct, usesOutput, input, sharedCode, forceQuiz}: {correct?: Answer, usesOutput?: boolean, input?: string[] | string, sharedCode?: string, forceQuiz?: boolean} = {}
-): Question {
-  if (code[0] === '\n' || code[0] === ' ') { code = dedent(code); }
-  usesOutput = usesOutput ?? code.includes('print(');
-  if (input !== undefined) { setInput(input); }
-  const fullCode = sharedCode ? `${sharedCode}\n${code}` : code;
-  const actual = usesOutput ? runGrabOutput(fullCode) : runLastLine(fullCode);
-  const answer = (correct !== undefined) ? correct : actual;
-  if (actual === undefined) { console.error("Syntax error in question"); console.error(code); console.error(actual, answer); }
-  else if (answer !== undefined && !isAnswerSame(actual, answer)) {
-    console.error("Possible bug in question (answer)"); console.error(code); console.error(actual, answer);
-  }
-  if (input !== undefined) {
-    const remainingInput = getInput();
-    if (remainingInput !== "") { console.error("Possible bug in question (input)"); console.error(code); console.error(remainingInput, input); }
-  }
-  // TODO: don't use toFixed() for numbers?
-  let opts = deduplicateAnswers([answer as Answer, ...options.filter(o => o !== undefined).map(o => typeof o === 'number' ? +o.toFixed(5) : o)]);
-  opts = shuffle(opts).slice(0, Math.min(MAX_OPTIONS, opts.length));
-  if (!opts.includes(answer as Answer)) {
-    opts.push(answer as Answer);
-    opts = shuffle(opts);
-  }
-  forceQuiz = forceQuiz ?? (opts.length === 1);
-  
-  return {
-    code,
-    correct: answer as Answer,
-    options: opts,
-    usesOutput,
-    input,
-    forceQuiz,
-  };
 }

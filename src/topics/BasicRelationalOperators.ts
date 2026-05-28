@@ -1,96 +1,96 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randInts, randInt } from '../util';
 import { BASIC_ARITHMETIC } from './BasicArithmetic';
 
-export class EqualTo_True extends Subtopic {
-  generateQuestion(): Question {
+export class EqualTo_True extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const a = randInt(1n, 10n);
-    return createQuestion(`${a} == ${a}`, [true, false, a]);
+    return createQuestion(`${a} == ${a}`, [true, false, a], {}, ctx);
   }
 }
 
-export class EqualTo_False extends Subtopic {
-  generateQuestion(): Question {
+export class EqualTo_False extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b] = randInts(1n, 10n, 2);
-    return createQuestion(`${a} == ${b}`, [true, false, a, b]);
+    return createQuestion(`${a} == ${b}`, [true, false, a, b], {}, ctx);
   }
 }
   
-export class NotEqualTo_True extends Subtopic {
-  generateQuestion(): Question {
+export class NotEqualTo_True extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b] = randInts(1n, 10n, 2);
-    return createQuestion(`${a} != ${b}`, [true, false, a, b]);
+    return createQuestion(`${a} != ${b}`, [true, false, a, b], {}, ctx);
   }
 }
 
-export class NotEqualTo_False extends Subtopic {
-  generateQuestion(): Question {
+export class NotEqualTo_False extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const a = randInt(1n, 10n);
-    return createQuestion(`${a} != ${a}`, [true, false, a]);
+    return createQuestion(`${a} != ${a}`, [true, false, a], {}, ctx);
   }
 }
 
-export class LessThan_True extends Subtopic {
-  generateQuestion(): Question {
+export class LessThan_True extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     let [a, b] = randInts(1n, 10n, 2);
     if (a > b) [a, b] = [b, a];
-    return createQuestion(`${a} < ${b}`, [true, false, a, b]);
+    return createQuestion(`${a} < ${b}`, [true, false, a, b], {}, ctx);
   }
 }
 
-export class LessThan_False extends Subtopic {
-  generateQuestion(): Question {
+export class LessThan_False extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     let [a, b] = randInts(1n, 10n, 2);
     if (a < b) [a, b] = [b, a];
-    return createQuestion(`${a} < ${b}`, [true, false, a, b]);
+    return createQuestion(`${a} < ${b}`, [true, false, a, b], {}, ctx);
   }
 }
 
-export class GreaterThan_True extends Subtopic {
-  generateQuestion(): Question {
+export class GreaterThan_True extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     let [a, b] = randInts(1n, 10n, 2);
     if (a < b) [a, b] = [b, a];
-    return createQuestion(`${a} > ${b}`, [true, false, a, b]);
+    return createQuestion(`${a} > ${b}`, [true, false, a, b], {}, ctx);
   }
 }
 
-export class GreaterThan_False extends Subtopic {
-  generateQuestion(): Question {
+export class GreaterThan_False extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     let [a, b] = randInts(1n, 10n, 2);
     if (a > b) [a, b] = [b, a];
-    return createQuestion(`${a} > ${b}`, [true, false, a, b]);
+    return createQuestion(`${a} > ${b}`, [true, false, a, b], {}, ctx);
   }
 }
 
-export class LessThanOrEqualTo_True extends Subtopic {
-  generateQuestion(): Question {
+export class LessThanOrEqualTo_True extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     let [a, b] = randInts(1n, 10n, 2, false);
     if (a > b) [a, b] = [b, a];
-    return createQuestion(`${a} <= ${b}`, [true, false, a, b]);
+    return createQuestion(`${a} <= ${b}`, [true, false, a, b], {}, ctx);
   }
 }
 
-export class LessThanOrEqualTo_False extends Subtopic {
-  generateQuestion(): Question {
+export class LessThanOrEqualTo_False extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     let [a, b] = randInts(1n, 10n, 2, false);
     if (a <= b) [a, b] = [b, a];
-    return createQuestion(`${a} <= ${b}`, [true, false, a, b]);
+    return createQuestion(`${a} <= ${b}`, [true, false, a, b], {}, ctx);
   }
 }
 
-export class GreaterThanOrEqualTo_True extends Subtopic {
-  generateQuestion(): Question {
+export class GreaterThanOrEqualTo_True extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     let [a, b] = randInts(1n, 10n, 2, false);
     if (a < b) [a, b] = [b, a];
-    return createQuestion(`${a} >= ${b}`, [true, false, a, b]);
+    return createQuestion(`${a} >= ${b}`, [true, false, a, b], {}, ctx);
   }
 }
 
-export class GreaterThanOrEqualTo_False extends Subtopic {
-  generateQuestion(): Question {
+export class GreaterThanOrEqualTo_False extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     let [a, b] = randInts(1n, 10n, 2, false);
     if (a >= b) [a, b] = [b, a];
-    return createQuestion(`${a} >= ${b}`, [true, false, a, b]);
+    return createQuestion(`${a} >= ${b}`, [true, false, a, b], {}, ctx);
   }
 }
 

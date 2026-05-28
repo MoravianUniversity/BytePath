@@ -1,9 +1,9 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randInt, randChoice, randChoices, STRINGS, randVariable } from '../util';
 import { STRING_CONCAT } from './StringConcat';
 
-export class PrintString extends Subtopic {
-  generateQuestion(): Question {
+export class PrintString extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b] = randChoices(STRINGS, 2);
     return createQuestion(`
       print("${a}")
@@ -19,12 +19,12 @@ export class PrintString extends Subtopic {
       `${a}${b}`,
       `${b}${a}`,
       `${a} ${b}`,
-    ]);
+    ], {}, ctx);
   }
 }
 
-export class PrintStringMulti extends Subtopic {
-  generateQuestion(): Question {
+export class PrintStringMulti extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b] = randChoices(STRINGS, 2);
     return createQuestion(`
       print('${a}', "${b}")
@@ -39,12 +39,12 @@ export class PrintStringMulti extends Subtopic {
       `${a}${b}`,
       `${b}${a}`,
       `${a} ${b}`,
-    ]);
+    ], {}, ctx);
   }
 }
 
-export class PrintStringVar extends Subtopic {
-  generateQuestion(): Question {
+export class PrintStringVar extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const a = randChoice(STRINGS);
     return createQuestion(`
@@ -56,12 +56,12 @@ export class PrintStringVar extends Subtopic {
       `'${x}'`,
       `"${a}"`,
       `'${a}'`
-    ]);
+    ], {}, ctx);
   }
 }
 
-export class PrintStringVar2 extends Subtopic {
-  generateQuestion(): Question {
+export class PrintStringVar2 extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const [a, b] = randChoices(STRINGS, 2);
     return createQuestion(`
@@ -77,12 +77,12 @@ export class PrintStringVar2 extends Subtopic {
       `${a}${b}`,
       `${b}${a}`,
       `${a} ${b}`,
-    ]);
+    ], {}, ctx);
   }
 }
 
-export class PrintStringMultiVar extends Subtopic {
-  generateQuestion(): Question {
+export class PrintStringMultiVar extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const [a, b, c] = randChoices(STRINGS, 3);
     return createQuestion(`
@@ -96,12 +96,12 @@ export class PrintStringMultiVar extends Subtopic {
       `${x} ${b}\n${a} ${b}`,
       `${x} ${b}\n${a} ${c}`,
       `${x} ${b}\n${a} ${b}`,
-    ]);
+    ], {}, ctx);
   }
 }
 
-export class PrintStringUpdateVar extends Subtopic {
-  generateQuestion(): Question {
+export class PrintStringUpdateVar extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const [a, b] = randChoices(STRINGS, 2);
     return createQuestion(`
@@ -116,12 +116,12 @@ export class PrintStringUpdateVar extends Subtopic {
       `${x}\n${a}`,
       `${x}\n${b}`,
       `${x}\n${x}`,
-    ]);
+    ], {}, ctx);
   }
 }
 
-export class PrintStringWithMath extends Subtopic {
-  generateQuestion(): Question {
+export class PrintStringWithMath extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const a = randInt(1n, 10n);
     const b = randInt(1n, 10n);
     return createQuestion(`
@@ -132,12 +132,12 @@ export class PrintStringWithMath extends Subtopic {
       `"${a}" + "${b}"`,
       `${a}${b}`,
       `"${a}${b}"`,
-    ]);
+    ], {}, ctx);
   }
 }
 
-export class PrintStringWithQuotedMath extends Subtopic {
-  generateQuestion(): Question {
+export class PrintStringWithQuotedMath extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const a = randInt(1n, 10n);
     const b = randInt(1n, 10n);
     return createQuestion(`
@@ -148,12 +148,12 @@ export class PrintStringWithQuotedMath extends Subtopic {
       `"${a}" + "${b}"`,
       `${a}${b}`,
       `"${a}${b}"`,
-    ]);
+    ], {}, ctx);
   }
 }
 
-export class PrintStringWithQuotedMath2 extends Subtopic {
-  generateQuestion(): Question {
+export class PrintStringWithQuotedMath2 extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const a = randInt(1n, 10n);
     const b = randInt(1n, 10n);
     return createQuestion(`
@@ -164,7 +164,7 @@ export class PrintStringWithQuotedMath2 extends Subtopic {
       `"${a} + ${b}"`,
       `${a} + ${b}`,
       `"${a}${b}"`,
-    ]);
+    ], {}, ctx);
   }
 }
 

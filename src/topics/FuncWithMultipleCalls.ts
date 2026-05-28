@@ -1,4 +1,4 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randInt, randIntNum, randVariable, randVars, randFunc, range } from '../util';
 import { FUNC_WITH_MULTIPLE_ARGS } from './FuncWithMultipleArgs';
 import { randOperation } from './BasicVariables';
@@ -94,44 +94,44 @@ function args(numArgs: number, fixedArgs: string[] = []): string {
 }
 
 
-class FuncCallsAdd extends Subtopic {
-  generateQuestion(): Question {
+class FuncCallsAdd extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [func, numArgs, funcCode] = genFunction();
     const args1 = args(numArgs);
     const args2 = args(numArgs);
     const code = `${funcCode}
       ${func}(${args1}) + ${func}(${args2})
     `;
-    return createQuestion(code, range(-15n, 15n));
+    return createQuestion(code, range(-15n, 15n), {}, ctx);
   }
 }
 
-class FuncCallsSub extends Subtopic {
-  generateQuestion(): Question {
+class FuncCallsSub extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [func, numArgs, funcCode] = genFunction();
     const args1 = args(numArgs);
     const args2 = args(numArgs);
     const code = `${funcCode}
       ${func}(${args1}) - ${func}(${args2})
     `;
-    return createQuestion(code, range(-15n, 15n));
+    return createQuestion(code, range(-15n, 15n), {}, ctx);
   }
 }
 
-class FuncCallsNested extends Subtopic {
-  generateQuestion(): Question {
+class FuncCallsNested extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [func, numArgs, funcCode] = genFunction();
     const args1 = args(numArgs);
     const args2 = args(numArgs, [`${func}(${args1})`]);
     const code = `${funcCode}
       ${func}(${args2})
     `;
-    return createQuestion(code, range(-15n, 15n));
+    return createQuestion(code, range(-15n, 15n), {}, ctx);
   }
 }
 
-class FuncCallsNested2 extends Subtopic {
-  generateQuestion(): Question {
+class FuncCallsNested2 extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     let [func, numArgs, funcCode] = genFunction();
     while (numArgs !== 2) {
       [func, numArgs, funcCode] = genFunction();
@@ -141,12 +141,12 @@ class FuncCallsNested2 extends Subtopic {
     const code = `${funcCode}
       ${func}(${args2})
     `;
-    return createQuestion(code, range(-15n, 15n));
+    return createQuestion(code, range(-15n, 15n), {}, ctx);
   }
 }
 
-class FuncCallsNested2Both extends Subtopic {
-  generateQuestion(): Question {
+class FuncCallsNested2Both extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     let [func, numArgs, funcCode] = genFunction();
     while (numArgs !== 2) {
       [func, numArgs, funcCode] = genFunction();
@@ -157,12 +157,12 @@ class FuncCallsNested2Both extends Subtopic {
     const code = `${funcCode}
       ${func}(${args3})
     `;
-    return createQuestion(code, range(-15n, 15n));
+    return createQuestion(code, range(-15n, 15n), {}, ctx);
   }
 }
 
-class FuncCallsAddNested extends Subtopic {
-  generateQuestion(): Question {
+class FuncCallsAddNested extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [func, numArgs, funcCode] = genFunction();
     const args1 = args(numArgs);
     const args2 = args(numArgs);
@@ -170,12 +170,12 @@ class FuncCallsAddNested extends Subtopic {
     const code = `${funcCode}
       ${func}(${args3})
     `;
-    return createQuestion(code, range(-15n, 15n));
+    return createQuestion(code, range(-15n, 15n), {}, ctx);
   }
 }
 
-class FuncCallsNestedAdd extends Subtopic {
-  generateQuestion(): Question {
+class FuncCallsNestedAdd extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [func, numArgs, funcCode] = genFunction();
     const args1 = args(numArgs);
     const args2 = args(numArgs, [`${func}(${args1})`]);
@@ -183,12 +183,12 @@ class FuncCallsNestedAdd extends Subtopic {
     const code = `${funcCode}
       ${func}(${args2}) + ${func}(${args3})
     `;
-    return createQuestion(code, range(-15n, 15n));
+    return createQuestion(code, range(-15n, 15n), {}, ctx);
   }
 }
 
-class Func2CallsAdd extends Subtopic {
-  generateQuestion(): Question {
+class Func2CallsAdd extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [func1, numArgs1, funcCode1] = genFunction();
     let [func2, numArgs2, funcCode2] = genFunction();
     while (func2 === func1) {
@@ -199,12 +199,12 @@ class Func2CallsAdd extends Subtopic {
     const code = `${funcCode1}${funcCode2}
       ${func1}(${args1}) + ${func2}(${args2})
     `;
-    return createQuestion(code, range(-15n, 15n));
+    return createQuestion(code, range(-15n, 15n), {}, ctx);
   }
 }
 
-class Func2CallsAddBackwards extends Subtopic {
-  generateQuestion(): Question {
+class Func2CallsAddBackwards extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [func1, numArgs1, funcCode1] = genFunction();
     let [func2, numArgs2, funcCode2] = genFunction();
     while (func2 === func1) {
@@ -215,12 +215,12 @@ class Func2CallsAddBackwards extends Subtopic {
     const code = `${funcCode1}${funcCode2}
       ${func2}(${args2}) + ${func1}(${args1})
     `;
-    return createQuestion(code, range(-15n, 15n));
+    return createQuestion(code, range(-15n, 15n), {}, ctx);
   }
 }
 
-class Func2CallsNested extends Subtopic {
-  generateQuestion(): Question {
+class Func2CallsNested extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [func1, numArgs1, funcCode1] = genFunction();
     let [func2, numArgs2, funcCode2] = genFunction();
     while (func2 === func1) {
@@ -231,12 +231,12 @@ class Func2CallsNested extends Subtopic {
     const code = `${funcCode1}${funcCode2}
       ${func1}(${args1})
     `;
-    return createQuestion(code, range(-15n, 15n));
+    return createQuestion(code, range(-15n, 15n), {}, ctx);
   }
 }
 
-class Func2CallsNestedBackwards extends Subtopic {
-  generateQuestion(): Question {
+class Func2CallsNestedBackwards extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [func1, numArgs1, funcCode1] = genFunction();
     let [func2, numArgs2, funcCode2] = genFunction();
     while (func2 === func1) {
@@ -247,7 +247,7 @@ class Func2CallsNestedBackwards extends Subtopic {
     const code = `${funcCode1}${funcCode2}
       ${func2}(${args2})
     `;
-    return createQuestion(code, range(-15n, 15n));
+    return createQuestion(code, range(-15n, 15n), {}, ctx);
   }
 }
 

@@ -1,4 +1,4 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randInts, range, randChoices, randIntNum, randVars } from '../util';
 import { toPyAtom } from '../python.ts';
 import { FOR_LOOP_BASICS } from './ForLoopBasics.ts';
@@ -8,8 +8,8 @@ import { BASIC_BRANCHING } from './BasicBranching';
 
 const ANIMALS = ["cat", "dog", "bird", "fish", "snake", "turtle", "duck", "cow", "pig"]
 
-export class ForLoopNestingPrintList extends Subtopic {
-  generateQuestion(): Question {
+export class ForLoopNestingPrintList extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = ['i', 'j'];
     const [i, j] = randInts(2n, 3n, 2);
     return createQuestion(`
@@ -21,13 +21,12 @@ export class ForLoopNestingPrintList extends Subtopic {
           range(0n, j-1n).map(x => range(0n, i-1n).map(y => `${x} ${y}`).join('\n')).join('\n'),
           range(0n, j-1n).map(x => range(0n, i-1n).map(y => `${x}\n${y}`).join('\n')).join('\n'),
           range(0n, i-1n).map(x => range(0n, j-1n).map(y => `${x}\n${y}`).join('\n')).join('\n'),
-        ]
-    );
+        ], {}, ctx);
   }
 }
 
-export class ForLoopNestingPrintVs extends Subtopic {
-  generateQuestion(): Question {
+export class ForLoopNestingPrintVs extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const w = "animals";
     const x = "animal1";
     const y = "animal2";
@@ -44,12 +43,12 @@ export class ForLoopNestingPrintVs extends Subtopic {
         animals.map((animal, i) => animals.slice(i+1).map(a => `${animal} vs ${a}`).join('\n')).join('\n'),
         animals.map(animal => `${animals[0]} vs ${animal}`).join('\n'),
         animals.slice(1).map(animal => `${animals[0]} vs ${animal}`).join('\n'),
-      ]);
+      ], {}, ctx);
   }
 }
 
-export class ForLoopNestingPrintVsSkipEqual extends Subtopic {
-  generateQuestion(): Question {
+export class ForLoopNestingPrintVsSkipEqual extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const w = "animals";
     const x = "animal1";
     const y = "animal2";
@@ -67,12 +66,12 @@ export class ForLoopNestingPrintVsSkipEqual extends Subtopic {
         animals.map((animal, i) => animals.slice(i+1).map(a => `${animal} vs ${a}`).join('\n')).join('\n'),
         animals.map(animal => `${animals[0]} vs ${animal}`).join('\n'),
         animals.slice(1).map(animal => `${animals[0]} vs ${animal}`).join('\n'),
-      ]);
+      ], {}, ctx);
   }
 }
 
-export class ForLoopNestingSumNested extends Subtopic {
-  generateQuestion(): Question {
+export class ForLoopNestingSumNested extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [w, x, y, z] = ['data', 'row', 'value', 'total'];
     const size = randIntNum(2, 4);
     const list = new Array(randIntNum(2, 4)).fill(0).map(() => randInts(1n, 5n, size));
@@ -91,12 +90,12 @@ export class ForLoopNestingSumNested extends Subtopic {
         total - BigInt(list.length),
         list.reduce((a, b) => a + b[0], 0n),
         BigInt(list.length), BigInt(list.length * size),
-      ]);
+      ], {}, ctx);
   }
 }
 
-export class ForLoopNestingSumEachRow extends Subtopic {
-  generateQuestion(): Question {
+export class ForLoopNestingSumEachRow extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [w, x, y, z, a] = ['data', 'row', 'value', 'totals', 'total'];
     const size = randIntNum(2, 4);
     const list = new Array(randIntNum(2, 4)).fill(0).map(() => randInts(1n, 5n, size));
@@ -118,12 +117,12 @@ export class ForLoopNestingSumEachRow extends Subtopic {
         list.map(row => row[0]),
         list.map(row => BigInt(row.length)),
         list.map(row => BigInt(row.length * size)),
-      ]);
+      ], {}, ctx);
   }
 }
 
-export class ForLoopNestingSumEachRowIndentIssue extends Subtopic {
-  generateQuestion(): Question {
+export class ForLoopNestingSumEachRowIndentIssue extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [w, x, y, z, a] = ['data', 'row', 'value', 'totals', 'total'];
     const size = randIntNum(2, 4);
     const list = new Array(randIntNum(2, 4)).fill(0).map(() => randInts(1n, 5n, size));
@@ -143,12 +142,12 @@ export class ForLoopNestingSumEachRowIndentIssue extends Subtopic {
         list.map(row => row[0]),
         list.map(row => BigInt(row.length)),
         list.map(row => BigInt(row.length * size)),
-      ]);
+      ], {}, ctx);
   }
 }
 
-export class ForLoopNestingSumEvens extends Subtopic {
-  generateQuestion(): Question {
+export class ForLoopNestingSumEvens extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y, z] = randVars(3);
     const list = randInts(1n, 10n, randIntNum(4, 8), false);
     return createQuestion(`
@@ -164,7 +163,7 @@ export class ForLoopNestingSumEvens extends Subtopic {
         list.filter(z => z % 2n == 0n).reduce((a, b) => a + b, 0n) + BigInt(list.length),
         list.filter(z => z % 2n == 0n).reduce((a, b) => a + b, 0n) - BigInt(list.length),
         list.reduce((a, b) => a + b, 0n),
-      ]);
+      ], {}, ctx);
   }
 }
 

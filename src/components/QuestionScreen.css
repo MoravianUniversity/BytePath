@@ -287,7 +287,7 @@ input.quiz-input, textarea.quiz-input {
   height: 2.25em;
   margin-left: 1em;
 }
-.uses-output .submit-button {
+.code-output .submit-button {
   vertical-align: top;
 }
 .submit-button:hover:not(:disabled) {
@@ -298,6 +298,11 @@ input.quiz-input, textarea.quiz-input {
   background: var(--gradient-error);
   animation: shake 0.5s;
   animation-iteration-count: 1;
+}
+.submit-button.skipped {
+  background: var(--button-skip-bg);
+  outline: 2px solid var(--button-skip-color);
+  color: var(--button-skip-color);
 }
 .submit-button:disabled { cursor: default; }
 

@@ -1,10 +1,10 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randVariable, randVars, randInt, range } from '../util';
 import { createException } from '../python';
 import { FOR_LOOP_BASICS } from './ForLoopBasics';
 
-export class ForLoopPrintRange extends Subtopic {
-  generateQuestion(): Question {
+export class ForLoopPrintRange extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const i = randInt(2n, 5n);
     return createQuestion(`
@@ -21,12 +21,12 @@ export class ForLoopPrintRange extends Subtopic {
         range(1n, 3n).join('\n'),
         range(1n, 4n).join('\n'),
         range(1n, 5n).join('\n'),
-      ]);
+      ], {}, ctx);
   }
 }
 
-export class ForLoopRangeToList extends Subtopic {
-  generateQuestion(): Question {
+export class ForLoopRangeToList extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const i = randInt(2n, 5n);
     return createQuestion(`
@@ -44,12 +44,12 @@ export class ForLoopRangeToList extends Subtopic {
         range(1n, 3n),
         range(1n, 4n),
         range(1n, 5n),
-      ]);
+      ], {}, ctx);
   }
 }
 
-export class ForLoopPrintRangeTo1 extends Subtopic {
-  generateQuestion(): Question {
+export class ForLoopPrintRangeTo1 extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     return createQuestion(`
       for ${x} in range(1):
@@ -60,12 +60,12 @@ export class ForLoopPrintRangeTo1 extends Subtopic {
         range(1n, 1n).join('\n'),
         range(0n, 2n).join('\n'),
         range(1n, 2n).join('\n'),
-      ]);
+      ], {}, ctx);
   }
 }
 
-export class ForLoopPrintRangeTo0 extends Subtopic {
-  generateQuestion(): Question {
+export class ForLoopPrintRangeTo0 extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     return createQuestion(`
       for ${x} in range(0):
@@ -73,12 +73,12 @@ export class ForLoopPrintRangeTo0 extends Subtopic {
       `, [
         range(0n, 0n).join('\n'),
         createException('ValueError'),
-      ]);
+      ], {}, ctx);
   }
 }
 
-export class ForLoopPrintRangeToNeg1 extends Subtopic {
-  generateQuestion(): Question {
+export class ForLoopPrintRangeToNeg1 extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     return createQuestion(`
       for ${x} in range(-1):
@@ -89,12 +89,12 @@ export class ForLoopPrintRangeToNeg1 extends Subtopic {
         range(0n, 0n).join('\n'),
         range(-1n, 0n).reverse().join('\n'),
         createException('ValueError'),
-      ]);
+      ], {}, ctx);
   }
 }
 
-export class ForLoopPrintRangeStartStop extends Subtopic {
-  generateQuestion(): Question {
+export class ForLoopPrintRangeStartStop extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const i = randInt(2n, 3n);
     const j = randInt(4n, 5n);
@@ -107,12 +107,12 @@ export class ForLoopPrintRangeStartStop extends Subtopic {
         range(i+1n, j).join('\n'),
         range(i, i+j).join('\n'),
         [i, j].join('\n'),
-      ]);
+      ], {}, ctx);
   }
 }
 
-export class ForLoopPrintRangeStartStopPlus1 extends Subtopic {
-  generateQuestion(): Question {
+export class ForLoopPrintRangeStartStopPlus1 extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const i = randInt(2n, 5n);
     return createQuestion(`
@@ -121,12 +121,12 @@ export class ForLoopPrintRangeStartStopPlus1 extends Subtopic {
       `, [
         range(i, i).join('\n'),
         range(i, i+1n).join('\n'),
-      ]);
+      ], {}, ctx);
   }
 }
 
-export class ForLoopPrintRangeStartStopSame extends Subtopic {
-  generateQuestion(): Question {
+export class ForLoopPrintRangeStartStopSame extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const i = randInt(2n, 5n);
     return createQuestion(`
@@ -136,12 +136,12 @@ export class ForLoopPrintRangeStartStopSame extends Subtopic {
         range(i, i).join('\n'),
         range(i, i+1n).join('\n'),
         createException('ValueError'),
-      ]);
+      ], {}, ctx);
   }
 }
 
-export class ForLoopPrintRangeStartStopBackwards extends Subtopic {
-  generateQuestion(): Question {
+export class ForLoopPrintRangeStartStopBackwards extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const i = randInt(4n, 5n);
     const j = randInt(2n, 3n);
@@ -156,12 +156,12 @@ export class ForLoopPrintRangeStartStopBackwards extends Subtopic {
         [i, j].join('\n'),
         [j, i].join('\n'),
         createException('ValueError'),
-      ]);
+      ], {}, ctx);
   }
 }
 
-export class ForLoopPrintRangeStartNegStopNeg extends Subtopic {
-  generateQuestion(): Question {
+export class ForLoopPrintRangeStartNegStopNeg extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const i = randInt(-5n, -4n);
     const j = randInt(-3n, -2n);
@@ -178,7 +178,7 @@ export class ForLoopPrintRangeStartNegStopNeg extends Subtopic {
         [i, j].join('\n'),
         [j, i].join('\n'),
         createException('ValueError'),
-      ]);
+      ], {}, ctx);
   }
 }
 

@@ -1,4 +1,4 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randInt, randIntNum, randChoice, randChoices, randVariable, STRINGS, range, VARS } from '../util';
 import { createException, toPyAtom, toPyStr } from '../python';
 import { BASIC_VARIABLES } from './BasicVariables';
@@ -34,61 +34,61 @@ export function toTuples<K, V>(dict: Map<K, V>): (readonly [K, V])[] {
   return Array.from(dict.entries()).map((entry) => Object.freeze(entry));
 }
 
-export class DictLength_StrToInt extends Subtopic {
-  generateQuestion(): Question {
+export class DictLength_StrToInt extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const dict = createDict_StrToInt(randIntNum(3, 5));
     return createQuestion(`
       ${x} = ${toPyAtom(dict)}
-      len(${x})`, range(3n, 10n));
+      len(${x})`, range(3n, 10n), {}, ctx);
   }
 }
 
-export class DictLength_StrToString extends Subtopic {
-  generateQuestion(): Question {
+export class DictLength_StrToString extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const dict = createDict_StrToString(randIntNum(3, 5));
     return createQuestion(`
       ${x} = ${toPyAtom(dict)}
-      len(${x})`, range(3n, 10n));
+      len(${x})`, range(3n, 10n), {}, ctx);
   }
 }
 
-export class DictIndex_StrToInt extends Subtopic {
-  generateQuestion(): Question {
+export class DictIndex_StrToInt extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const dict = createDict_StrToInt(randIntNum(3, 5));
     const key = randChoice(Array.from(dict.keys()));
     return createQuestion(`
       ${x} = ${toPyAtom(dict)}
-      ${x}[${toPyStr(key)}]`, [...dict.values(), ...dict.keys(), ...toTuples(dict)]);
+      ${x}[${toPyStr(key)}]`, [...dict.values(), ...dict.keys(), ...toTuples(dict)], {}, ctx);
   }
 }
 
-export class DictIndex_IntToStr extends Subtopic {
-  generateQuestion(): Question {
+export class DictIndex_IntToStr extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const dict = createDict_IntToStr(randIntNum(3, 5));
     const key = randChoice(Array.from(dict.keys()));
     return createQuestion(`
       ${x} = ${toPyAtom(dict)}
-      ${x}[${key}]`, [...dict.values(), ...dict.keys(), ...toTuples(dict)]);
+      ${x}[${key}]`, [...dict.values(), ...dict.keys(), ...toTuples(dict)], {}, ctx);
   }
 }
 
-export class DictIndex_IntToInt extends Subtopic {
-  generateQuestion(): Question {
+export class DictIndex_IntToInt extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const dict = createDict_IntToInt(randIntNum(3, 5));
     const key = randChoice(Array.from(dict.keys()));
     return createQuestion(`
       ${x} = ${toPyAtom(dict)}
-      ${x}[${key}]`, [...dict.values(), ...dict.keys(), ...toTuples(dict)]);
+      ${x}[${key}]`, [...dict.values(), ...dict.keys(), ...toTuples(dict)], {}, ctx);
   }
 }
 
-export class DictIndexSetNew extends Subtopic {
-  generateQuestion(): Question {
+export class DictIndexSetNew extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const dict = createDict_StrToInt(randIntNum(2, 3));
     let key = randVariable();
@@ -102,12 +102,12 @@ export class DictIndexSetNew extends Subtopic {
         new Map().set(key, value),
         createException('KeyError', `Key ${toPyStr(key)} not found in dictionary`),
         createException('AttributeError', `'dict' object has no attribute 'set'`),
-      ]);
+      ], {}, ctx);
   }
 }
 
-export class DictIndexSetExisting extends Subtopic {
-  generateQuestion(): Question {
+export class DictIndexSetExisting extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const dict = createDict_StrToInt(randIntNum(2, 3));
     const key = randChoice(Array.from(dict.keys()));
@@ -121,113 +121,113 @@ export class DictIndexSetExisting extends Subtopic {
         new Map().set(key, value),
         createException('KeyError', `Key ${toPyStr(key)} not found in dictionary`),
         createException('AttributeError', `'dict' object has no attribute 'set'`)
-      ]);
+      ], {}, ctx);
   }
 }
 
-export class DictIn extends Subtopic {
-  generateQuestion(): Question {
+export class DictIn extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const dict = createDict_StrToInt(randIntNum(3, 5));
     const key = randChoice(Array.from(dict.keys()));
     return createQuestion(`
       ${x} = ${toPyAtom(dict)}
-      ${toPyStr(key)} in ${x}`, [true, false]);
+      ${toPyStr(key)} in ${x}`, [true, false], {}, ctx);
   }
 }
 
-export class DictNotIn extends Subtopic {
-  generateQuestion(): Question {
+export class DictNotIn extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const dict = createDict_StrToInt(randIntNum(3, 5));
     const key = randChoice(Array.from(dict.keys()));
     return createQuestion(`
       ${x} = ${toPyAtom(dict)}
-      ${toPyStr(key)} not in ${x}`, [true, false]);
+      ${toPyStr(key)} not in ${x}`, [true, false], {}, ctx);
   }
 }
 
-export class DictInMissing extends Subtopic {
-  generateQuestion(): Question {
+export class DictInMissing extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const dict = createDict_StrToString(randIntNum(3, 5));
     let key = randVariable();
     while (dict.has(key)) { key = randVariable(); }
     return createQuestion(`
       ${x} = ${toPyAtom(dict)}
-      ${toPyStr(key)} in ${x}`, [true, false]);
+      ${toPyStr(key)} in ${x}`, [true, false], {}, ctx);
   }
 }
 
-export class DictInValues extends Subtopic {
-  generateQuestion(): Question {
+export class DictInValues extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const dict = createDict_StrToString(randIntNum(3, 5));
     const key = randChoice(Array.from(dict.values()));
     return createQuestion(`
       ${x} = ${toPyAtom(dict)}
-      ${toPyStr(key)} in ${x}`, [true, false]);
+      ${toPyStr(key)} in ${x}`, [true, false], {}, ctx);
   }
 }
 
-export class DictIndexInValues extends Subtopic {
-  generateQuestion(): Question {
+export class DictIndexInValues extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const dict = createDict_StrToString(randIntNum(3, 4));
     const key = randChoice(Array.from(dict.values()));
     return createQuestion(`
       ${x} = ${toPyAtom(dict)}
-      ${x}[${toPyStr(key)}]`, [...dict.values(), ...dict.keys(), ...toTuples(dict), null]);
+      ${x}[${toPyStr(key)}]`, [...dict.values(), ...dict.keys(), ...toTuples(dict), null], {}, ctx);
   }
 }
-export class DictIndexMissing extends Subtopic {
-  generateQuestion(): Question {
+export class DictIndexMissing extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const dict = createDict_StrToString(randIntNum(3, 4));
     let key = randVariable();
     while (dict.has(key)) { key = randVariable(); }
     return createQuestion(`
       ${x} = ${toPyAtom(dict)}
-      ${x}[${toPyStr(key)}]`, [...dict.values(), ...dict.keys(), ...toTuples(dict), null]);
+      ${x}[${toPyStr(key)}]`, [...dict.values(), ...dict.keys(), ...toTuples(dict), null], {}, ctx);
   }
 }
 
-export class DictIndexGet extends Subtopic {
-  generateQuestion(): Question {
+export class DictIndexGet extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const dict = createDict_StrToString(randIntNum(3, 4));
     const key = randChoice(Array.from(dict.keys()));
     return createQuestion(`
       ${x} = ${toPyAtom(dict)}
-      ${x}.get(${toPyStr(key)})`, [...dict.values(), ...dict.keys(), ...toTuples(dict), null, createException('KeyError', `Key ${toPyStr(key)} not found in dictionary`)]);
+      ${x}.get(${toPyStr(key)})`, [...dict.values(), ...dict.keys(), ...toTuples(dict), null, createException('KeyError', `Key ${toPyStr(key)} not found in dictionary`)], {}, ctx);
   }
 }
 
-export class DictIndexGetInValues extends Subtopic {
-  generateQuestion(): Question {
+export class DictIndexGetInValues extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const dict = createDict_StrToString(randIntNum(3, 4));
     const key = randChoice(Array.from(dict.values()));
     return createQuestion(`
       ${x} = ${toPyAtom(dict)}
-      ${x}.get(${toPyStr(key)})`, [...dict.values(), ...dict.keys(), ...toTuples(dict), null, createException('KeyError', `Key ${toPyStr(key)} not found in dictionary`)]);
+      ${x}.get(${toPyStr(key)})`, [...dict.values(), ...dict.keys(), ...toTuples(dict), null, createException('KeyError', `Key ${toPyStr(key)} not found in dictionary`)], {}, ctx);
   }
 }
 
-export class DictIndexGetMissing extends Subtopic {
-  generateQuestion(): Question {
+export class DictIndexGetMissing extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const dict = createDict_StrToString(randIntNum(3, 4));
     let key = randVariable();
     while (dict.has(key)) { key = randVariable(); }
     return createQuestion(`
       ${x} = ${toPyAtom(dict)}
-      ${x}.get(${toPyStr(key)})`, [...dict.values(), ...dict.keys(), ...toTuples(dict), null, createException('KeyError', `Key ${toPyStr(key)} not found in dictionary`)]);
+      ${x}.get(${toPyStr(key)})`, [...dict.values(), ...dict.keys(), ...toTuples(dict), null, createException('KeyError', `Key ${toPyStr(key)} not found in dictionary`)], {}, ctx);
   }
 }
 
-export class DictIndexGetWithDefault extends Subtopic {
-  generateQuestion(): Question {
+export class DictIndexGetWithDefault extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const dict = createDict_StrToString(randIntNum(3, 4));
     const key = randChoice(Array.from(dict.keys()));
@@ -238,13 +238,12 @@ export class DictIndexGetWithDefault extends Subtopic {
       [
         ...dict.values(), ...dict.keys(), ...toTuples(dict), default_value, null,
         createException('KeyError', `Key ${toPyStr(key)} not found in dictionary`)
-      ]
-    );
+      ], {}, ctx);
   }
 }
 
-export class DictIndexGetWithDefaultMissing extends Subtopic {
-  generateQuestion(): Question {
+export class DictIndexGetWithDefaultMissing extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const dict = createDict_StrToString(randIntNum(3, 4));
     let key = randVariable();
@@ -256,8 +255,7 @@ export class DictIndexGetWithDefaultMissing extends Subtopic {
       [
         ...dict.values(), ...dict.keys(), ...toTuples(dict), default_value, null,
         createException('KeyError', `Key ${toPyStr(key)} not found in dictionary`)
-      ]
-    );
+      ], {}, ctx);
   }
 }
 

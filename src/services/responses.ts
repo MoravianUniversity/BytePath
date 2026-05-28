@@ -1,6 +1,7 @@
 import api from './api';
-import { formatAnswer } from '../topics';
-import type { Question, Answer } from '../topics';
+import type { Question } from '../topics';
+import type { UserAnswer } from '../questions/types';
+import { serializeQuestionResponse } from '../questions/registry';
 
 export interface SubmitResponseRequest {
   user_id: number;
@@ -45,20 +46,23 @@ export const responsesService = {
     topicId: string,
     subtopicType: string,
     question: Question,
-    userAnswer: Answer | null,
+    userAnswer: UserAnswer | null,
     isCorrect: boolean,
     timeSpent: number,
     classId?: number | null,
   ): SubmitResponseRequest {
-    const studentAnswer = userAnswer === null ? null : formatAnswer(userAnswer);
+    const { questionPayload, studentAnswer, correctAnswer } = serializeQuestionResponse(
+      question,
+      userAnswer,
+    );
 
     return {
       user_id: userId,
       topic: topicId,
       subtopic_type: subtopicType,
-      question_code: question.code,
+      question_code: questionPayload,
       student_answer: studentAnswer,
-      correct_answer: formatAnswer(question.correct),
+      correct_answer: correctAnswer,
       is_correct: isCorrect,
       status: userAnswer === null ? 'skipped' : isCorrect ? 'correct' : 'incorrect',
       time_spent: timeSpent,

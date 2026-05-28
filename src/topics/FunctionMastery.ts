@@ -1,4 +1,4 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, CodeOutputSubtopic, GenerateContext } from '../topics';
 import { randChoice, randChoices, randVars, STRINGS, randIntNum, randInts } from '../util';
 import { PRACTICE_03A_FUNCTIONS } from './03a - Functions';
 import dedent from 'dedent-js';
@@ -65,16 +65,16 @@ class FunctionMastery extends Topic {
   }
 }
 
-abstract class FunctionMasteryBase extends Subtopic {
+abstract class FunctionMasteryBase extends EvalLastLineSubtopic {
   vars: string[];
   vals: [string, string];
   fun: string;
   n_args: number;
   sharedCode: string;
   constructor(vars: string[], vals: [string, string], fun: string, n_args: number, sharedCode: string) { super(); this.vars = vars; this.vals = vals; this.fun = fun; this.n_args = n_args; this.sharedCode = sharedCode; }
-  generateQuestion(): Question {
+  generateQuestion(ctx: GenerateContext) {
     const code = this.genCode();
-    return createQuestion(code, [], {sharedCode: this.sharedCode});
+    return createQuestion(code, [], {sharedCode: this.sharedCode}, ctx);
   }
   abstract genCode(): string
 }
@@ -91,8 +91,8 @@ class FunctionMastery3 extends FunctionMasteryBase {
   genCode(): string { return (this.n_args == 1) ? `${this.fun}(${this.fun}(${this.vars[1]}))` : `${this.fun}(${this.vars[1]}, ${this.fun}(${this.vars[0]}, ${this.vars[1]}))`; }
 }
 
-class ReadFunctionCode extends Subtopic {
-  generateQuestion(): Question {
+class ReadFunctionCode extends CodeOutputSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const function_name = randChoice(["perim", "area", "circum", "volume", "surface"])
     const function2_name = randChoice(["foo", "bar", "baz"])
     const [var1, var2] = randChoice([["a", "b"], ["x", "y"]])
@@ -132,7 +132,7 @@ def main():
     print("${var1}", ${var1}, '${var2}', ${var2})`
     }
 
-    return createQuestion(`${code}\n\nif __name__ == "__main__":\n    main()`, [], {usesOutput: true});
+    return createQuestion(`${code}\n\nif __name__ == "__main__":\n    main()`, [], {usesOutput: true}, ctx);
   }
 }
 

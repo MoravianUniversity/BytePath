@@ -1,45 +1,45 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randChoice, randChoices, randVariable, STRINGS } from '../util';
 import { STRING_CONCAT } from './StringConcat';
 
-export class StringLen extends Subtopic {
-  generateQuestion(): Question {
+export class StringLen extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const a = randChoice(STRINGS);
     return createQuestion(`len("${a}")`, [
       BigInt(a.length + 1),
       BigInt(a.length + 2),
       BigInt(a.length - 1),
       BigInt(a.length - 2),
-    ]);
+    ], {}, ctx);
   }
 }
 
-export class StringLenMulti extends Subtopic {
-  generateQuestion(): Question {
+export class StringLenMulti extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b] = randChoices(STRINGS, 2);
     return createQuestion(`len("${a}") + len("${b}")`, [
       BigInt(a.length),
       BigInt(b.length),
       BigInt(a.length + b.length + 1),
       BigInt(a.length + b.length - 1),
-    ]);
+    ], {}, ctx);
   }
 }
 
-export class StringLenMultiConcat extends Subtopic {
-  generateQuestion(): Question {
+export class StringLenMultiConcat extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b] = randChoices(STRINGS, 2);
     return createQuestion(`len("${a}" + "${b}")`, [
       BigInt(a.length),
       BigInt(b.length),
       BigInt(a.length + b.length + 1),
       BigInt(a.length + b.length - 1),
-    ]);
+    ], {}, ctx);
   }
 }
 
-export class StringLenVar extends Subtopic {
-  generateQuestion(): Question {
+export class StringLenVar extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const a = randChoice(STRINGS);
     return createQuestion(`
@@ -50,12 +50,12 @@ export class StringLenVar extends Subtopic {
       BigInt(x.length),
       BigInt(a.length + 1),
       BigInt(a.length - 1),
-    ]);
+    ], {}, ctx);
   }
 }
 
-export class StringLenMultiVar extends Subtopic {
-  generateQuestion(): Question {
+export class StringLenMultiVar extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const [a, b] = randChoices(STRINGS, 2);
     return createQuestion(`
@@ -67,12 +67,12 @@ export class StringLenMultiVar extends Subtopic {
       BigInt(x.length),
       BigInt(a.length + b.length + 1),
       BigInt(a.length + b.length - 1),
-    ]);
+    ], {}, ctx);
   }
 }
 
-export class StringLenMultiVarConcat extends Subtopic {
-  generateQuestion(): Question {
+export class StringLenMultiVarConcat extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const [a, b] = randChoices(STRINGS, 2);
     return createQuestion(`
@@ -84,7 +84,7 @@ export class StringLenMultiVarConcat extends Subtopic {
       BigInt(x.length),
       BigInt(a.length + b.length + 1),
       BigInt(a.length + b.length - 1),
-    ]);
+    ], {}, ctx);
   }
 }
 

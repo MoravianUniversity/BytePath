@@ -1,4 +1,4 @@
-import { Question, Subtopic, Topic, Answer, createQuestion } from '../topics';
+import { Topic, Answer, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randInt, randIntNum, range, randVars, randChoice, randChoices, STRINGS } from '../util';
 import { PRACTICE_03A_FUNCTIONS } from './03a - Functions';
 import dedent from 'dedent-js';
@@ -84,15 +84,15 @@ class Func3AExtra extends Topic {
   }
 }
 
-abstract class Func3AExtraBase extends Subtopic {
+abstract class Func3AExtraBase extends EvalLastLineSubtopic {
   vars: string[];
   vals: [bigint, string, string];
   sharedCode: string;
   constructor(vars: string[], vals: [bigint, string, string], sharedCode: string) { super(); this.vars = vars; this.vals = vals; this.sharedCode = sharedCode; }
-  generateQuestion(): Question {
+  generateQuestion(ctx: GenerateContext) {
     const code = this.genCode();
     const opts = this.genOptions();
-    return createQuestion(code, opts, {sharedCode: this.sharedCode});
+    return createQuestion(code, opts, {sharedCode: this.sharedCode}, ctx);
   }
   abstract genCode(): string
   abstract genOptions(): Answer[]

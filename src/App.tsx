@@ -2,7 +2,9 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-python';
 import './code.css';
-import { Topic, TopicGroup, Subtopic, Question, Answer, isAnswerCorrect } from './topics.ts';
+import { Topic, TopicGroup, Subtopic, Question } from './topics.ts';
+import type { UserAnswer } from './questions/types';
+import { checkAnswer } from './questions/registry';
 import { TOPICS } from './all_topics.ts';
 import QuestionScreen from './components/QuestionScreen.tsx';
 import TopicCompletionScreen from './components/TopicCompletionScreen.tsx';
@@ -106,7 +108,7 @@ function App() {
   }, [undertakenTopics]);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set<string>());
   const [questionList, setQuestionList] = useState<(Question | null)[]>([]);
-  const [questionAnswers, setQuestionAnswers] = useState<(Answer | typeof SKIPPED)[]>([]);
+  const [questionAnswers, setQuestionAnswers] = useState<(UserAnswer | typeof SKIPPED)[]>([]);
   const [questionStartTime, setQuestionStartTime] = useState<number>(Date.now());
   const contentAreaRef = useRef<HTMLDivElement>(null);
   const selectTopicRef = useRef<(topic: Topic) => void>(() => {});
@@ -525,7 +527,10 @@ function App() {
         });
       } else {
         // Topic is not completed, add a new question
-        const nextQuestion = subtopic.generateQuestion();
+        const nextQuestion = subtopic.generateQuestion({
+          sharedCode: currentTopic.sharedCode,
+          mode,
+        });
         setQuestionList(prev => [...prev, nextQuestion]);
         setQuestionStartTime(Date.now());
       }
@@ -541,11 +546,11 @@ function App() {
     }
   }
 
-  const handleAnswerSelect = async (answer: Answer | undefined, question: Question) => {
+  const handleAnswerSelect = async (answer: UserAnswer | undefined, question: Question) => {
     if (answer === undefined && !completedTopics.has(currentTopic?.id || '')) { return; }
 
     const skipped = answer === undefined;
-    const isCorrect = skipped || isAnswerCorrect(answer, question);
+    const isCorrect = skipped || (await Promise.resolve(checkAnswer(question, answer)));
 
     // Update the answer state for this specific question
     setQuestionAnswers(prev => [...prev, skipped ? SKIPPED : answer]);
@@ -961,7 +966,7 @@ function App() {
                       question={question}
                       userAnswer={questionAnswers[index]}
                       onAnswerSelect={handleAnswerSelect}
-                      isQuiz={mode === 'quiz' || currentTopic!.forceQuiz || question.forceQuiz}
+                      isQuiz={mode === 'quiz' || currentTopic!.forceQuiz || !!question.forceQuiz}
                       canSkip={completedTopics.has(currentTopic?.id || '')}
                       helpMessage={
                         questionAnswers[index] === undefined &&

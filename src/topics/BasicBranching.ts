@@ -1,11 +1,11 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randInts, randVars, randVariable, max, min } from '../util';
 import { BASIC_VARIABLES } from './BasicVariables';
 import { BASIC_PRINTS } from './BasicPrints';
 
 
-export class IfEntered extends Subtopic {
-  generateQuestion(): Question {
+export class IfEntered extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 10n, 4);
     return createQuestion(`
@@ -14,12 +14,12 @@ export class IfEntered extends Subtopic {
       if ${x} > ${min(a, c)}:
           ${y} = ${d}
       ${y}
-    `, [a, b, c, d, x, y]);
+    `, [a, b, c, d, x, y], {}, ctx);
   }
 }
 
-export class IfSkipped extends Subtopic {
-  generateQuestion(): Question {
+export class IfSkipped extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 10n, 4);
     return createQuestion(`
@@ -28,12 +28,12 @@ export class IfSkipped extends Subtopic {
       if ${x} > ${max(a, c)}:
           ${y} = ${d}
       ${y}
-    `, [a, b, c, d, x, y]);
+    `, [a, b, c, d, x, y], {}, ctx);
   }
 }
 
-export class IfSkippedClose extends Subtopic {
-  generateQuestion(): Question {
+export class IfSkippedClose extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, d] = randInts(1n, 10n, 3);
     return createQuestion(`
@@ -42,12 +42,12 @@ export class IfSkippedClose extends Subtopic {
       if ${x} > ${a}:
           ${y} = ${d}
       ${y}
-    `, [a, b, d, x, y]);
+    `, [a, b, d, x, y], {}, ctx);
   }
 }
 
-export class IfWrongVar extends Subtopic {
-  generateQuestion(): Question {
+export class IfWrongVar extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 10n, 4);
     return createQuestion(`
@@ -56,12 +56,12 @@ export class IfWrongVar extends Subtopic {
       if ${x} > ${c}:
           ${y} = ${d}
       ${x}
-    `, [a, b, c, d, x, y]);
+    `, [a, b, c, d, x, y], {}, ctx);
   }
 }
 
-export class IfElseEnterIf extends Subtopic {
-  generateQuestion(): Question {
+export class IfElseEnterIf extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c, d, e] = randInts(1n, 10n, 5);
     return createQuestion(`
@@ -72,12 +72,12 @@ export class IfElseEnterIf extends Subtopic {
       else:
           ${y} = ${e}
       ${y}
-    `, [a, b, c, d, e, x, y]);
+    `, [a, b, c, d, e, x, y], {}, ctx);
   }
 }
 
-export class IfElseEnterElse extends Subtopic {
-  generateQuestion(): Question {
+export class IfElseEnterElse extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c, d, e] = randInts(1n, 10n, 5);
     return createQuestion(`
@@ -88,12 +88,12 @@ export class IfElseEnterElse extends Subtopic {
       else:
           ${y} = ${e}
       ${y}
-    `, [a, b, c, d, e, x, y]);
+    `, [a, b, c, d, e, x, y], {}, ctx);
   }
 }
 
-export class IfElseDifferentVarsEnterIf extends Subtopic {
-  generateQuestion(): Question {
+export class IfElseDifferentVarsEnterIf extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y, z] = randVars(3);
     const [a, b, c, d, e, f] = randInts(1n, 10n, 6);
     return createQuestion(`
@@ -105,12 +105,12 @@ export class IfElseDifferentVarsEnterIf extends Subtopic {
       else:
           ${z} = ${e}
       ${y} + ${z}
-    `, [a, b, c, d, e, f, b+f, d+e, b+e, d+f, a+c, x, y, z]);
+    `, [a, b, c, d, e, f, b+f, d+e, b+e, d+f, a+c, x, y, z], {}, ctx);
   }
 }
 
-export class IfElseDifferentVarsEnterElse extends Subtopic {
-  generateQuestion(): Question {
+export class IfElseDifferentVarsEnterElse extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y, z] = randVars(3);
     const [a, b, c, d, e, f] = randInts(1n, 10n, 6);
     return createQuestion(`
@@ -122,12 +122,12 @@ export class IfElseDifferentVarsEnterElse extends Subtopic {
       else:
           ${z} = ${e}
       ${y} + ${z}
-    `, [a, b, c, d, e, f, b+f, d+e, b+e, d+f, a+c, x, y, z]);
+    `, [a, b, c, d, e, f, b+f, d+e, b+e, d+f, a+c, x, y, z], {}, ctx);
   }
 }
 
-export class IfWithPrintEntered extends Subtopic {
-  generateQuestion(): Question {
+export class IfWithPrintEntered extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const [a, b, c, d] = randInts(1n, 10n, 4);
     return createQuestion(`
@@ -139,12 +139,12 @@ export class IfWithPrintEntered extends Subtopic {
       `${a}`, `${b}`, `${c}`, `${d}`,
       `${a}\n${d}`, `${b}\n${c}`, `${a}\n${c}`, `${b}\n${d}`,
       `${a} ${b}`, `${c} ${d}`, `${a} ${c}`, `${b} ${d}`
-    ]);
+    ], {}, ctx);
   }
 }
 
-export class IfWithPrintSkipped extends Subtopic {
-  generateQuestion(): Question {
+export class IfWithPrintSkipped extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const [a, b, c, d] = randInts(1n, 10n, 4);
     return createQuestion(`
@@ -156,12 +156,12 @@ export class IfWithPrintSkipped extends Subtopic {
         `${a}`, `${b}`, `${c}`, `${d}`,
         `${a}\n${d}`, `${b}\n${c}`, `${a}\n${c}`, `${b}\n${d}`,
         `${a} ${b}`, `${c} ${d}`, `${a} ${c}`, `${b} ${d}`
-      ]);
+      ], {}, ctx);
   }
 }
 
-export class IfElseWithPrint extends Subtopic {
-  generateQuestion(): Question {
+export class IfElseWithPrint extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const [a, b, c, d, e] = randInts(1n, 10n, 5);
     return createQuestion(`
@@ -175,12 +175,12 @@ export class IfElseWithPrint extends Subtopic {
       `${a}`, `${b}`, `${c}`, `${d}`, `${e}`,
       `${a}\n${d}`, `${b}\n${c}`, `${a}\n${c}`, `${b}\n${d}`, `${b}\n${e}`, `${c}\n${e}`, `${d}\n${e}`,
       `${a} ${b}`, `${c} ${d}`, `${a} ${c}`, `${b} ${d}`, `${a} ${e}`, `${b} ${e}`, `${c} ${e}`, `${d} ${e}`
-    ]);
+    ], {}, ctx);
   }
 }
 
-export class IfCompareVarsEntered extends Subtopic {
-  generateQuestion(): Question {
+export class IfCompareVarsEntered extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y, z] = randVars(3);
     const [a, b, c, d] = randInts(1n, 10n, 4);
     return createQuestion(`
@@ -190,12 +190,12 @@ export class IfCompareVarsEntered extends Subtopic {
       if ${x} > ${y}:
           ${z} = ${d}
       ${z}
-    `, [a, b, c, d, x, y, z]);
+    `, [a, b, c, d, x, y, z], {}, ctx);
   }
 }
 
-export class IfCompareVarsSkipped extends Subtopic {
-  generateQuestion(): Question {
+export class IfCompareVarsSkipped extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y, z] = randVars(3);
     const [a, b, c, d] = randInts(1n, 10n, 4);
     return createQuestion(`
@@ -205,12 +205,12 @@ export class IfCompareVarsSkipped extends Subtopic {
       if ${x} > ${y}:
           ${z} = ${d}
       ${z}
-    `, [a, b, c, d, x, y, z]);
+    `, [a, b, c, d, x, y, z], {}, ctx);
   }
 }
 
-export class IfElseCompareVars extends Subtopic {
-  generateQuestion(): Question {
+export class IfElseCompareVars extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y, z] = randVars(3);
     const [a, b, c, d, e] = randInts(1n, 10n, 5);
     return createQuestion(`
@@ -222,7 +222,7 @@ export class IfElseCompareVars extends Subtopic {
       else:
           ${z} = ${e}
       ${z}
-    `, [a, b, c, d, e, x, y, z]);
+    `, [a, b, c, d, e, x, y, z], {}, ctx);
   }
 }
 

@@ -1,4 +1,4 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randIntNum, randVars } from '../util';
 import { toPyAtom } from '../python';
 import { DICT_BASICS, createDict_StrToInt, toTuples } from './DictionaryBasics';
@@ -15,75 +15,75 @@ function getDictPrints(dict: Map<string, bigint>): string[] {
   ];
 }
 
-export class DictForIn extends Subtopic {
-  generateQuestion(): Question {
+export class DictForIn extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const dict = createDict_StrToInt(randIntNum(3, 5));
     return createQuestion(`
       ${x} = ${toPyAtom(dict)}
       for ${y} in ${x}:
           print(${y})
-    `, getDictPrints(dict));
+    `, getDictPrints(dict), {}, ctx);
   }
 }
 
-export class DictForInKeys extends Subtopic {
-    generateQuestion(): Question {
+export class DictForInKeys extends EvalLastLineSubtopic {
+    generateQuestion(ctx: GenerateContext) {
       const [x, y] = randVars(2);
       const dict = createDict_StrToInt(randIntNum(3, 5));
       return createQuestion(`
         ${x} = ${toPyAtom(dict)}
         for ${y} in ${x}.keys():
             print(${y})
-      `, getDictPrints(dict));
+      `, getDictPrints(dict), {}, ctx);
   }
 }
 
-export class DictForInValues extends Subtopic {
-  generateQuestion(): Question {
+export class DictForInValues extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const dict = createDict_StrToInt(randIntNum(3, 5));
     return createQuestion(`
       ${x} = ${toPyAtom(dict)}
       for ${y} in ${x}.values():
           print(${y})
-    `, getDictPrints(dict));
+    `, getDictPrints(dict), {}, ctx);
   }
 }
 
-export class DictForInItems extends Subtopic {
-  generateQuestion(): Question {
+export class DictForInItems extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const dict = createDict_StrToInt(randIntNum(3, 5));
     return createQuestion(`
       ${x} = ${toPyAtom(dict)}
       for ${y} in ${x}.items():
           print(${y})
-    `, getDictPrints(dict));
+    `, getDictPrints(dict), {}, ctx);
   }
 }
 
-export class DictForInItems2 extends Subtopic {
-  generateQuestion(): Question {
+export class DictForInItems2 extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y, z] = randVars(3);
     const dict = createDict_StrToInt(randIntNum(3, 5));
     return createQuestion(`
       ${x} = ${toPyAtom(dict)}
       for ${y}, ${z} in ${x}.items():
           print(${y}, ${z})
-    `, getDictPrints(dict));
+    `, getDictPrints(dict), {}, ctx);
   }
 }
 
-export class DictForValuesUsingKeys extends Subtopic {
-  generateQuestion(): Question {
+export class DictForValuesUsingKeys extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(3);
     const dict = createDict_StrToInt(randIntNum(3, 5));
     return createQuestion(`
       ${x} = ${toPyAtom(dict)}
       for ${y} in ${x}:
           print(${x}[${y}])
-    `, getDictPrints(dict));
+    `, getDictPrints(dict), {}, ctx);
   }
 }
 

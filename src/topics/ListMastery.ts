@@ -1,4 +1,4 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, CodeOutputSubtopic, GenerateContext } from '../topics';
 import { randChoice, randChoices, randVars, randInt, randInts, randIntNum, randBool, shuffle } from '../util';
 import { toPyStr, toPyAtom } from '../python';
 import dedent from 'dedent-js';
@@ -69,7 +69,7 @@ class ListMastery extends Topic {
   }
 }
 
-abstract class ListMasteryBase extends Subtopic {
+abstract class ListMasteryBase extends EvalLastLineSubtopic {
   vars: string[];
   vals: [bigint, string, string[]];
   values: {start: bigint, stop: bigint};
@@ -77,9 +77,9 @@ abstract class ListMasteryBase extends Subtopic {
   constructor(vars: string[], vals: [bigint, string, string[]], values: {start: bigint, stop: bigint}, sharedCode: string) {
     super(); this.vars = vars; this.vals = vals; this.values = values; this.sharedCode = sharedCode;
   }
-  generateQuestion(): Question {
+  generateQuestion(ctx: GenerateContext) {
     const code = this.genCode();
-    return createQuestion(code, [], {sharedCode: this.sharedCode});
+    return createQuestion(code, [], {sharedCode: this.sharedCode}, ctx);
   }
   abstract genCode(): string
 }
@@ -120,8 +120,8 @@ class ListMastery_10 extends ListMasteryBase {
   }
 }
 
-class ListMastery_Long extends Subtopic {
-  generateQuestion(): Question {
+class ListMastery_Long extends CodeOutputSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [lst_var, item_var, none_var] = randVars(3);
     const alphabet = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"];
     const list_len = randIntNum(3, 5);
@@ -149,7 +149,7 @@ class ListMastery_Long extends Subtopic {
     }
     const vars = shuffle([item_var, none_var, lst_var]);
     code += `print(${vars[0]}, ${vars[1]}, ${vars[2]})`
-    return createQuestion(code, [], {usesOutput: true});
+    return createQuestion(code, [], {usesOutput: true}, ctx);
   }
 }
 

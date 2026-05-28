@@ -1,10 +1,10 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randVariable, randVars, randFunc, range, randInts } from '../util';
 import { FUNC_WITH_MULTIPLE_ARGS } from './FuncWithMultipleArgs';
 
 
-class FuncWithMultReturnFirst extends Subtopic {
-    generateQuestion(): Question {
+class FuncWithMultReturnFirst extends EvalLastLineSubtopic {
+    generateQuestion(ctx: GenerateContext) {
         const x = randVariable();
         const [c, d] = randVars(2);
         const [a, b] = randInts(1n, 5n, 2);
@@ -13,13 +13,12 @@ class FuncWithMultReturnFirst extends Subtopic {
           def ${func}(${x}):
               return ${x}, ${x} + ${b}
           ${c}, ${d} = ${func}(${a})
-          ${c}`, [...range(0n, 10n), null, Error()]
-        );
+          ${c}`, [...range(0n, 10n), null, Error()], {}, ctx);
     }
 }
 
-class FuncWithMultReturnSecond extends Subtopic {
-    generateQuestion(): Question {
+class FuncWithMultReturnSecond extends EvalLastLineSubtopic {
+    generateQuestion(ctx: GenerateContext) {
         const x = randVariable();
         const [c, d] = randVars(2);
         const [a, b] = randInts(1n, 5n, 2);
@@ -28,13 +27,12 @@ class FuncWithMultReturnSecond extends Subtopic {
           def ${func}(${x}):
               return ${x}, ${x} + ${b}
           ${c}, ${d} = ${func}(${a})
-          ${d}`, [...range(0n, 10n), null, Error()]
-        );
+          ${d}`, [...range(0n, 10n), null, Error()], {}, ctx);
     }
 }
 
-class FuncWithMultReturnBoth extends Subtopic {
-    generateQuestion(): Question {
+class FuncWithMultReturnBoth extends EvalLastLineSubtopic {
+    generateQuestion(ctx: GenerateContext) {
         const x = randVariable();
         const [c, d] = randVars(2);
         const [a, b] = randInts(1n, 5n, 2);
@@ -43,13 +41,12 @@ class FuncWithMultReturnBoth extends Subtopic {
           def ${func}(${x}):
               return ${x}, ${x} - ${b}
           ${c}, ${d} = ${func}(${a})
-          ${c} + ${d}`, [...range(0n, 10n), null, Error()]
-        );
+          ${c} + ${d}`, [...range(0n, 10n), null, Error()], {}, ctx);
     }
 }
 
-class FuncWithNoReturn extends Subtopic {
-    generateQuestion(): Question {
+class FuncWithNoReturn extends EvalLastLineSubtopic {
+    generateQuestion(ctx: GenerateContext) {
         const [x, y, z] = randVars(3);
         const [a, b] = randInts(1n, 5n, 2, false);
         const func = randFunc();
@@ -57,13 +54,12 @@ class FuncWithNoReturn extends Subtopic {
           def ${func}(${x}, ${y}):
               ${x} + ${y}
           ${z} = ${func}(${a}, ${b})
-          ${z}`, [...range(0n, 10n), null, Error()]
-        );
+          ${z}`, [...range(0n, 10n), null, Error()], {}, ctx);
     }
 }
 
-class FuncWithNoReturnNamed extends Subtopic {
-    generateQuestion(): Question {
+class FuncWithNoReturnNamed extends EvalLastLineSubtopic {
+    generateQuestion(ctx: GenerateContext) {
         const [x, y, z] = randVars(3);
         const [a, b] = randInts(1n, 5n, 2, false);
         const func = randFunc();
@@ -71,13 +67,12 @@ class FuncWithNoReturnNamed extends Subtopic {
           def ${func}(${x}, ${y}):
               ${func} = ${x} + ${y}
           ${z} = ${func}(${a}, ${b})
-          ${z}`, [...range(0n, 10n), null, Error()]
-        );
+          ${z}`, [...range(0n, 10n), null, Error()], {}, ctx);
     }
 }
 
-class FuncWithNoReturnNamedOutside extends Subtopic {
-    generateQuestion(): Question {
+class FuncWithNoReturnNamedOutside extends EvalLastLineSubtopic {
+    generateQuestion(ctx: GenerateContext) {
         const [x, y, z] = randVars(3);
         const [a, b] = randInts(1n, 5n, 2, false);
         const func = randFunc();
@@ -85,8 +80,7 @@ class FuncWithNoReturnNamedOutside extends Subtopic {
           def ${func}(${x}, ${y}):
               ${z} = ${x} + ${y}
           ${z} = ${func}(${a}, ${b})
-          ${z}`, [...range(0n, 10n), null, Error()]
-        );
+          ${z}`, [...range(0n, 10n), null, Error()], {}, ctx);
     }
 }
 

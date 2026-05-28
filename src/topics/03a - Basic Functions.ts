@@ -1,4 +1,4 @@
-import { Question, Subtopic, Answer, Topic, createQuestion } from '../topics';
+import { Answer, Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randInt, randInts, randChoice, randChoices, randVars, randFuncs, range, STRINGS } from '../util';
 import { STRING_CONCAT } from './StringConcat';
 import { STRING_LENGTH } from './StringLength';
@@ -104,7 +104,7 @@ class Practice03ABasicFunctions extends Topic {
   }
 }
 
-abstract class SubtopicBase extends Subtopic {
+abstract class SubtopicBase extends EvalLastLineSubtopic {
   funs: string[];
   vars: string[];
   vals: [bigint, bigint, string, string];
@@ -112,10 +112,10 @@ abstract class SubtopicBase extends Subtopic {
   constructor(funs: string[], vars: string[], vals: [bigint, bigint, string, string], sharedCode: string) {
     super(); this.funs = funs; this.vars = vars; this.vals = vals; this.sharedCode = sharedCode;
   }
-  generateQuestion(): Question {
+  generateQuestion(ctx: GenerateContext) {
     const code = this.genCode();
     const opts = this.genOptions();
-    return createQuestion(code, opts, {sharedCode: this.sharedCode});
+    return createQuestion(code, opts, {sharedCode: this.sharedCode}, ctx);
   }
   abstract genCode(): string
   abstract genOptions(): Answer[]

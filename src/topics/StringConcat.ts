@@ -1,10 +1,10 @@
-import { Answer, raw, Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Answer, raw, Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randInt, randInts, randChoice, randChoices, randVars, STRINGS } from '../util';
 import { toPyStr } from '../python';
 import { BASIC_VARIABLES } from './BasicVariables';
 
-abstract class StringConcatBase extends Subtopic {
-  genQuestion(a: string | bigint, b: string | bigint, backwards: boolean = false): Question {
+abstract class StringConcatBase extends EvalLastLineSubtopic {
+  genQuestion(a: string | bigint, b: string | bigint, ctx: GenerateContext, backwards: boolean = false) {
     const [x, y] = randVars(2);
     const options: Answer[] = [
       a + ' ' + b,
@@ -41,51 +41,51 @@ abstract class StringConcatBase extends Subtopic {
     return createQuestion(`
       ${x} = ${toPyStr(a.toString())}
       ${y} = ${toPyStr(b.toString())}
-      ${backwards ? y : x} + ${backwards ? x : y}`, options);
+      ${backwards ? y : x} + ${backwards ? x : y}`, options, {}, ctx);
   }
 }
 
 export class StringConcat extends StringConcatBase {
-  generateQuestion(): Question {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b] = randChoices(STRINGS, 2);
-    return this.genQuestion(a, b);
+    return this.genQuestion(a, b, ctx);
   }
 }
 
 export class StringConcatBackwards extends StringConcatBase {
-  generateQuestion(): Question {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b] = randChoices(STRINGS, 2);
-    return this.genQuestion(a, b, true);
+    return this.genQuestion(a, b, ctx, true);
   }
 }
 
 export class StringConcat_1IntLike extends StringConcatBase {
-  generateQuestion(): Question {
+  generateQuestion(ctx: GenerateContext) {
     const a = randChoice(STRINGS);
     const b = randInt(1n, 9n);
-    return this.genQuestion(a, b);
+    return this.genQuestion(a, b, ctx);
   }
 }
 
 export class StringConcat_1IntLikeBackwards extends StringConcatBase {
-  generateQuestion(): Question {
+  generateQuestion(ctx: GenerateContext) {
     const a = randChoice(STRINGS);
     const b = randInt(1n, 9n);
-    return this.genQuestion(a, b, true);
+    return this.genQuestion(a, b, ctx, true);
   }
 }
 
 export class StringConcat_2IntLike extends StringConcatBase {
-  generateQuestion(): Question {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b] = randInts(1n, 9n, 2);
-    return this.genQuestion(a, b);
+    return this.genQuestion(a, b, ctx);
   }
 }
 
 export class StringConcat_2IntLikeBackwards extends StringConcatBase {
-  generateQuestion(): Question {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b] = randInts(1n, 9n, 2);
-    return this.genQuestion(a, b, true);
+    return this.genQuestion(a, b, ctx, true);
   }
 }
 

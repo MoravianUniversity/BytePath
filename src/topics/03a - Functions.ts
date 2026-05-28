@@ -1,4 +1,4 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, CodeOutputSubtopic, GenerateContext } from '../topics';
 import { randVars, randFuncs, randInts } from '../util';
 import { PRACTICE_03A_BASIC_FUNCTIONS } from './03a - Basic Functions';
 
@@ -18,8 +18,8 @@ import { PRACTICE_03A_BASIC_FUNCTIONS } from './03a - Basic Functions';
 //     main()
 
 
-export class Functions1 extends Subtopic {
-  generateQuestion(): Question {
+export class Functions1 extends CodeOutputSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y, z] = randVars(3);
     const [a, b] = randInts(2n, 5n, 2);
     return createQuestion(`
@@ -39,7 +39,7 @@ export class Functions1 extends Subtopic {
       `${a}x${b}->${a * b}`, `${b}x${a}->${b * a}`, `${a} x ${b} -> ${a * b}`, `${b} x ${a} -> ${b * a}`,
       `${x}x${y}->area`, `${y}x${x}->area`, `${x} x ${y} -> area`, `${y} x ${x} -> area`,
       `${a*b} x ${b} -> ${a}`,
-    ], {usesOutput: true});
+    ], {usesOutput: true}, ctx);
   }
 }
 
@@ -56,8 +56,8 @@ export class Functions1 extends Subtopic {
 // if __name__ == "__main__":
 //     main()
 
-export class Functions2 extends Subtopic {
-  generateQuestion(): Question {
+export class Functions2 extends CodeOutputSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y, z] = randVars(3);
     const [a, b] = randInts(2n, 5n, 2);
     return createQuestion(`
@@ -78,7 +78,7 @@ export class Functions2 extends Subtopic {
       `${z} ${x} ${y}`, `${x} ${y} ${z}`, `${y} ${x} ${z}`, `${z} ${y} ${x}`,
       `${a}, ${b}, ${a}`, `${a}, ${a}, ${b}`, `${b}, ${a}, ${a}`,
       `${a} ${b} ${a}`, `${a} ${a} ${b}`, `${b} ${a} ${a}`,
-    ], {usesOutput: true});
+    ], {usesOutput: true}, ctx);
   }
 }
 
@@ -99,8 +99,8 @@ export class Functions2 extends Subtopic {
 //     main()
 
 
-export class Functions3 extends Subtopic {
-  generateQuestion(): Question {
+export class Functions3 extends CodeOutputSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [f, g] = randFuncs(2);
     const [a, b] = randInts(2n, 5n, 2);
@@ -123,7 +123,7 @@ export class Functions3 extends Subtopic {
     `, [
       `${a}, ${b}`, `${b}, ${a}`, `${a} ${b}`, `${b} ${a}`,
       `${x}, ${y}`, `${y}, ${x}`, `${x} ${y}`, `${y} ${x}`,
-    ], {usesOutput: true});
+    ], {usesOutput: true}, ctx);
   }
 }
 
@@ -145,7 +145,7 @@ export class Functions3 extends Subtopic {
 // TODO: this does not work in quiz mode (they cannot type the echoed input correctly)
 //  also the wrong answers don't have the correct echos either
 // class Functions4 extends Subtopic {
-//   generateQuestion(): Question {
+//   generateQuestion(ctx: GenerateContext) {
 //     const [x, y] = randVars(2);
 //     const [f, g] = randFuncs(2);
 //     const [a, b] = randChoices(STRINGS, 2);
@@ -166,7 +166,7 @@ export class Functions3 extends Subtopic {
 //           main()
 //     `, [
 //       `${a}, ${b}`, `${b}, ${a}`, `${a} ${b}`, `${b} ${a}`,
-//     ], {usesOutput: true, input: [`${c}`, `${d}`]});
+//     ], {usesOutput: true, input: [`${c}`, `${d}`]}, ctx);
 //   }
 // }
 

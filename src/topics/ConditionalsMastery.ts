@@ -1,4 +1,4 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, CodeOutputSubtopic, GenerateContext } from '../topics';
 import { randChoice, randBool, randVars, randFunc, randInt, randInts, randIntNum, shuffle } from '../util';
 import { toPyStr } from '../python';
 import dedent from 'dedent-js';
@@ -80,14 +80,14 @@ class ConditionalsMastery extends Topic {
   }
 }
 
-abstract class ConditionalsMasteryBase extends Subtopic {
+abstract class ConditionalsMasteryBase extends EvalLastLineSubtopic {
   vars: string[];
   vals: [bigint, bigint, string, string];
   sharedCode: string;
   constructor(vars: string[], vals: [bigint, bigint, string, string], sharedCode: string) { super(); this.vars = vars; this.vals = vals; this.sharedCode = sharedCode; }
-  generateQuestion(): Question {
+  generateQuestion(ctx: GenerateContext) {
     const code = this.genCode();
-    return createQuestion(code, [], {sharedCode: this.sharedCode});
+    return createQuestion(code, [], {sharedCode: this.sharedCode}, ctx);
   }
   abstract genCode(): string
 }
@@ -140,8 +140,8 @@ class ConditionalsMastery_9 extends ConditionalsMasteryBase {
     return `${this.vars[2]}[${this.vars[1]}] ${randChoice(['==', '!='])} ${toPyStr(this.vals[3])}`;
   }
 }
-class ConditionalsMastery_10 extends Subtopic {
-  generateQuestion(): Question {
+class ConditionalsMastery_10 extends CodeOutputSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const func = randFunc();
     const [var1, var2] = randVars(2);
     let nums = randInts(0n, 10n, 6);
@@ -186,7 +186,7 @@ class ConditionalsMastery_10 extends Subtopic {
         main()
 `;
 
-    return createQuestion(code, [], {usesOutput: true});
+    return createQuestion(code, [], {usesOutput: true}, ctx);
   }
 }
 

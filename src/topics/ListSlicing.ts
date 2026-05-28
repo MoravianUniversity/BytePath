@@ -1,4 +1,4 @@
-import { Question, Subtopic, Topic, createQuestion } from "../topics";
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randInt, randInts, randVariable, randVars, randIntNum, randChoice, randChoices, STRINGS, range, ASCII_LETTERS } from "../util";
 import { toPyAtom, toPyStr } from "../python";
 import { LIST_BASICS } from "./ListBasics";
@@ -16,12 +16,13 @@ function toTuple(a: bigint | number): [string, number] { return [String(a), Numb
 const DEFAULT_START = (list: any[]) => toTuple(randInt(1n, BigInt(list.length - 3)));
 const DEFAULT_END = (list: any[], start: number) => toTuple(randInt(BigInt(Math.max(start + 2, list.length - 2)), BigInt(list.length - 2)));
 
-abstract class ListSlicingBase extends Subtopic {
+abstract class ListSlicingBase extends EvalLastLineSubtopic {
   genQuestion(
+    ctx: GenerateContext,
     start: (list: any[]) => [string, number] = DEFAULT_START,
     end: (list: any[], start: number, x: string) => [string, number] = DEFAULT_END,
     length: number = randIntNum(3, 5),
-  ): Question {
+  ) {
     const x = randVariable();
     const list = makeList(length);
     const [a, a_] = start(list);
@@ -33,16 +34,16 @@ abstract class ListSlicingBase extends Subtopic {
         list[a_], list[a_-1], list[a_+1], list[b_-1], list[b_], list[b_+1],
         list.slice(a_, b_), list.slice(a_, b_+1), list.slice(a_+1, b_), list.slice(a_+1, b_+1),
         list.slice(Math.max(0, a_-1), b_), list.slice(Math.max(0, a_-1), b_+1)
-      ]);
+      ], {}, ctx);
   }
 }
 
 export class ListSlicing extends ListSlicingBase {
-  generateQuestion(): Question { return this.genQuestion(); }
+  generateQuestion(ctx: GenerateContext) { return this.genQuestion(ctx); }
 }
 
 export class ListSlicingToVar extends ListSlicingBase {
-  generateQuestion(): Question {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const list = makeList();
     const [a, a_] = DEFAULT_START(list);
@@ -55,43 +56,43 @@ export class ListSlicingToVar extends ListSlicingBase {
         list[a_], list[a_-1], list[a_+1], list[b_-1], list[b_], list[b_+1],
         list.slice(a_, b_), list.slice(a_, b_+1), list.slice(a_+1, b_), list.slice(a_+1, b_+1),
         list.slice(Math.max(0, a_-1), b_), list.slice(Math.max(0, a_-1), b_+1)
-      ]);
+      ], {}, ctx);
   }
 }
 
 export class ListSlicingMakeEmpty extends ListSlicingBase {
-  generateQuestion(): Question { return this.genQuestion(
+  generateQuestion(ctx: GenerateContext) { return this.genQuestion(ctx,
     (list) => toTuple(randIntNum(1, list.length-2)),
     (_, start) => toTuple(start)
   ); }
 }
 
 export class ListSlicingMakeReallyEmpty extends ListSlicingBase {
-  generateQuestion(): Question { return this.genQuestion(
+  generateQuestion(ctx: GenerateContext) { return this.genQuestion(ctx,
     (list) => toTuple(randIntNum(2, list.length-2)),
     (_, start) => toTuple(start-1)
   ); }
 }
 
 export class ListSlicingFrom0 extends ListSlicingBase {
-  generateQuestion(): Question { return this.genQuestion(() => ['0', 0]); }
+  generateQuestion(ctx: GenerateContext) { return this.genQuestion(ctx, () => ['0', 0]); }
 }
 
 export class ListSlicingToLen extends ListSlicingBase {
-  generateQuestion(): Question {
-    return this.genQuestion(DEFAULT_START, (s, _, x) => [`len(${x})`, s.length]);
+  generateQuestion(ctx: GenerateContext) {
+    return this.genQuestion(ctx, DEFAULT_START, (s, _, x) => [`len(${x})`, s.length]);
   }
 }
 
 export class ListSlicingLen1 extends ListSlicingBase {
-  generateQuestion(): Question { return this.genQuestion(
+  generateQuestion(ctx: GenerateContext) { return this.genQuestion(ctx,
     (list) => toTuple(randIntNum(1, list.length-2)),
     (_, start) => toTuple(start+1)
   ); }
 }
 
-export class ListIndex extends Subtopic {
-  generateQuestion(): Question {
+export class ListIndex extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const list = makeList();
     const i = randIntNum(1, list.length-1);
@@ -100,43 +101,42 @@ export class ListIndex extends Subtopic {
       ${x}[${i}]`, [
         list[i], list[i-1], list[i+1],
         list.slice(i, i+1), list.slice(i-1, i),
-      ]
-    );
+      ], {}, ctx);
   }
 }
 
 export class ListSlicingToLenMinus1 extends ListSlicingBase {
-  generateQuestion(): Question {
-    return this.genQuestion(DEFAULT_START, (list, _, x) => [`len(${x})-1`, list.length - 1]);
+  generateQuestion(ctx: GenerateContext) {
+    return this.genQuestion(ctx, DEFAULT_START, (list, _, x) => [`len(${x})-1`, list.length - 1]);
   }
 }
 
 export class ListSlicingToNeg1 extends ListSlicingBase {
-  generateQuestion(): Question {
-    return this.genQuestion(DEFAULT_START, (list) => [`-1`, list.length - 1]);
+  generateQuestion(ctx: GenerateContext) {
+    return this.genQuestion(ctx, DEFAULT_START, (list) => [`-1`, list.length - 1]);
   }
 }
 
 export class ListSlicingToNone extends ListSlicingBase {
-  generateQuestion(): Question {
-    return this.genQuestion(DEFAULT_START, (list) => ['', list.length]);
+  generateQuestion(ctx: GenerateContext) {
+    return this.genQuestion(ctx, DEFAULT_START, (list) => ['', list.length]);
   }
 }
 
 export class ListSlicingFromNone extends ListSlicingBase {
-  generateQuestion(): Question {
-    return this.genQuestion(() => ['', 0]);
+  generateQuestion(ctx: GenerateContext) {
+    return this.genQuestion(ctx, () => ['', 0]);
   }
 }
 
 export class ListSlicingFromNoneToNone extends ListSlicingBase {
-  generateQuestion(): Question {
-    return this.genQuestion(() => ['', 0], (list) => ['', list.length]);
+  generateQuestion(ctx: GenerateContext) {
+    return this.genQuestion(ctx, () => ['', 0], (list) => ['', list.length]);
   }
 }
 
-export class ListCopyAndModify extends Subtopic {
-  generateQuestion(): Question {
+export class ListCopyAndModify extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const list = makeList(randIntNum(2, 4));
     const i = randIntNum(0, list.length-1);
@@ -151,12 +151,12 @@ export class ListCopyAndModify extends Subtopic {
       `, [
         toPyAtom(list) + " " + toPyAtom(list),
         toPyAtom(result) + " " + toPyAtom(result),
-      ]);
+      ], {}, ctx);
   }
 }
 
-export class ListAssignAndModify extends Subtopic {
-  generateQuestion(): Question {
+export class ListAssignAndModify extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const list = makeList(randIntNum(2, 4));
     const i = randIntNum(0, list.length-1);
@@ -171,7 +171,7 @@ export class ListAssignAndModify extends Subtopic {
       `, [
         toPyAtom(list) + " " + toPyAtom(list),
         toPyAtom(result) + " " + toPyAtom(result),
-      ]);
+      ], {}, ctx);
   }
 }
 

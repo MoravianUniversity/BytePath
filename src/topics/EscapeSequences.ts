@@ -1,29 +1,29 @@
-import { Question, Subtopic, Topic, createQuestion } from "../topics";
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { STRINGS, randChoice, randChoices } from "../util";
 import { toPyStr } from "../python";
 import { BASIC_VARIABLES } from "./BasicVariables";
 
-export class EscapeSequenceSingleQuote extends Subtopic {
-  generateQuestion(): Question {
-    return createQuestion(`'\\''`, ['\'', '\\\'']);
+export class EscapeSequenceSingleQuote extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
+    return createQuestion(`'\\''`, ['\'', '\\\''], {}, ctx);
   }
 }
 
-export class EscapeSequenceSingleQuotePrint extends Subtopic {
-  generateQuestion(): Question {
-    return createQuestion(`print('\\'')`, ['\'', '\\\'']);
+export class EscapeSequenceSingleQuotePrint extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
+    return createQuestion(`print('\\'')`, ['\'', '\\\''], {}, ctx);
   }
 }
 
-export class EscapeSequenceDoubleQuote extends Subtopic {
-  generateQuestion(): Question {
-    return createQuestion(`"\\""`, ['"', '\\"']);
+export class EscapeSequenceDoubleQuote extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
+    return createQuestion(`"\\""`, ['"', '\\"'], {}, ctx);
   }
 }
 
-export class EscapeSequenceDoubleQuotePrint extends Subtopic {
-  generateQuestion(): Question {
-    return createQuestion(`print("\\"")`, ['"', '\\"']);
+export class EscapeSequenceDoubleQuotePrint extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
+    return createQuestion(`print("\\"")`, ['"', '\\"'], {}, ctx);
   }
 }
 
@@ -38,43 +38,43 @@ const QUOTES = [
   "We told you, \"There's a problem.\"",
 ];
 
-export class EscapeSequenceQuotePrint extends Subtopic {
-  generateQuestion(): Question {
+export class EscapeSequenceQuotePrint extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const s = randChoice(QUOTES);
-    return createQuestion(`print(${toPyStr(s)})`, [s, toPyStr(s).slice(1, -1), toPyStr(s)]);
+    return createQuestion(`print(${toPyStr(s)})`, [s, toPyStr(s).slice(1, -1), toPyStr(s)], {}, ctx);
   }
 }
 
-export class EscapeSequenceNewline extends Subtopic {
-  generateQuestion(): Question {
+export class EscapeSequenceNewline extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b] = randChoices(STRINGS, 2);
-    return createQuestion(`print('${a}\\n${b}')`, [a, b, `${a}\\n${b}`, `${a}n${b}`, `${a}${b}`, `${a}\n${b}`]);
+    return createQuestion(`print('${a}\\n${b}')`, [a, b, `${a}\\n${b}`, `${a}n${b}`, `${a}${b}`, `${a}\n${b}`], {}, ctx);
   }
 }
 
-export class EscapeSequenceBackslash extends Subtopic {
-  generateQuestion(): Question {
+export class EscapeSequenceBackslash extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b] = randChoices(STRINGS, 2);
     const s = `${a}\\\\${b}`;
-    return createQuestion(`print(${toPyStr(s)})`, [s, `${a}\\${b}`, `${a}\\\\${b}`, `${a}${b}`]);
+    return createQuestion(`print(${toPyStr(s)})`, [s, `${a}\\${b}`, `${a}\\\\${b}`, `${a}${b}`], {}, ctx);
   }
 }
 
-export class EscapeSequenceUnicode extends Subtopic {
-  generateQuestion(): Question {
+export class EscapeSequenceUnicode extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     // π ° ♣ ⌘ Ω β √ ½ € ¿
     const char = randChoice(['\\u03C0', '\\u00B0', '\\u2663', '\\u2318', '\\u03A9', '\\u03B2', '\\u221A', '\\u00BD', '\\u20AC', '\\u00BF']);
     const code = char.slice(2);
-    return createQuestion(`print(${toPyStr(char)})`, [code, char]);
+    return createQuestion(`print(${toPyStr(char)})`, [code, char], {}, ctx);
   }
 }
 
-export class EscapeSequenceUnicode2 extends Subtopic {
-  generateQuestion(): Question {
+export class EscapeSequenceUnicode2 extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     // 😛 😜 😝 😞 😟 😠 😡 😢 😣 😤
     const char = randChoice(['\\U0001F61B', '\\U0001F61C', '\\U0001F61D', '\\U0001F61E', '\\U0001F61F', '\\U0001F620', '\\U0001F621', '\\U0001F622', '\\U0001F623', '\\U0001F624']);
     const code = char.slice(2);
-    return createQuestion(`print(${toPyStr(char)})`, [code, `\\U${code}`]);
+    return createQuestion(`print(${toPyStr(char)})`, [code, `\\U${code}`], {}, ctx);
   }
 }
 

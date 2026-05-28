@@ -1,4 +1,4 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randInts, randIntNum, randChoice, randChoices, randVariable, randVars, STRINGS } from '../util';
 import { toPyAtom, toPyStr, asTuple, tuple } from '../python';
 import { BASIC_VARIABLES } from './BasicVariables';
@@ -31,8 +31,8 @@ const PLURAL_TO_SINGULAR_STRS = {
   "colors": "color",
 };
 
-export class ForLoopPrintList extends Subtopic {
-  generateQuestion(): Question {
+export class ForLoopPrintList extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randChoice(Object.keys(PLURAL_TO_SINGULAR_NUMS));
     const y = PLURAL_TO_SINGULAR_NUMS[x as keyof typeof PLURAL_TO_SINGULAR_NUMS];
     const list = randInts(1n, 10n, randIntNum(3, 5));
@@ -40,12 +40,12 @@ export class ForLoopPrintList extends Subtopic {
       ${x} = ${toPyAtom(list)}
       for ${y} in ${x}:
           print(${y})
-      `, [list.join('\n'), list.join(""), list.join(" ")]);
+      `, [list.join('\n'), list.join(""), list.join(" ")], {}, ctx);
   }
 }
 
-export class ForLoopSumStrLen extends Subtopic {
-  generateQuestion(): Question {
+export class ForLoopSumStrLen extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randChoice(Object.keys(PLURAL_TO_SINGULAR_STRS));
     const y = PLURAL_TO_SINGULAR_STRS[x as keyof typeof PLURAL_TO_SINGULAR_STRS];
     const z = randVariable();
@@ -55,24 +55,24 @@ export class ForLoopSumStrLen extends Subtopic {
       ${z} = 0
       for ${y} in ${x}:
           ${z} += len(${y})
-      ${z}`, [BigInt(list.length), 0n]);
+      ${z}`, [BigInt(list.length), 0n], {}, ctx);
   }
 }
 
-export class ForLoopPrintChars extends Subtopic {
-  generateQuestion(): Question {
+export class ForLoopPrintChars extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const str = randChoice(STRINGS);
     return createQuestion(`
       ${x} = ${toPyStr(str)}
       for ${y} in ${x}:
           print(${y})
-      `, [str, str[0]]);
+      `, [str, str[0]], {}, ctx);
   }
 }
 
-export class ForLoopCharsToList extends Subtopic {
-  generateQuestion(): Question {
+export class ForLoopCharsToList extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y, z] = randVars(3);
     const str = randChoice(STRINGS);
     return createQuestion(`
@@ -81,12 +81,12 @@ export class ForLoopCharsToList extends Subtopic {
       for ${y} in ${x}:
           ${z}.append(${y}.upper())
       ${z}
-      `, [str.toUpperCase(), [], [str[0].toUpperCase()], str[0].toUpperCase()]);
+      `, [str.toUpperCase(), [], [str[0].toUpperCase()], str[0].toUpperCase()], {}, ctx);
   }
 }
 
-export class ForLoopTuple extends Subtopic {
-  generateQuestion(): Question {
+export class ForLoopTuple extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randChoice(Object.keys(PLURAL_TO_SINGULAR_NUMS));
     const y = PLURAL_TO_SINGULAR_NUMS[x as keyof typeof PLURAL_TO_SINGULAR_NUMS];
     const z = randVariable();
@@ -96,12 +96,12 @@ export class ForLoopTuple extends Subtopic {
       ${z} = 0
       for ${y} in ${x}:
           ${z} += ${y}
-      ${z}`, [list, 0n, list[0], list[1], list[2], list[3]]);
+      ${z}`, [list, 0n, list[0], list[1], list[2], list[3]], {}, ctx);
   }
 }
 
-export class ForLoopTuple2 extends Subtopic {
-  generateQuestion(): Question {
+export class ForLoopTuple2 extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const x = randChoice(Object.keys(PLURAL_TO_SINGULAR_NUMS));
     const y = PLURAL_TO_SINGULAR_NUMS[x as keyof typeof PLURAL_TO_SINGULAR_NUMS];
     const [z, w] = randVars(2);
@@ -113,7 +113,7 @@ export class ForLoopTuple2 extends Subtopic {
       for ${y} in ${x}:
           ${z} += ${y}
           ${w} += 1
-      (${z}, ${w})`, [tuple(0n, 0n), tuple(0n, 1n), tuple(list[0], 1n), tuple(list[1], 2n), tuple(list[2], 3n), tuple(list[3], 4n)]);
+      (${z}, ${w})`, [tuple(0n, 0n), tuple(0n, 1n), tuple(list[0], 1n), tuple(list[1], 2n), tuple(list[2], 3n), tuple(list[3], 4n)], {}, ctx);
   }
 }
 

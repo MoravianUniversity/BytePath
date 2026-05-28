@@ -1,63 +1,59 @@
-import { Question, Subtopic, Topic, createQuestion } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
 import { randInts, randFunc, randVars, range } from '../util';
 import { BASIC_FUNCTIONS } from './BasicFunctions';
 import { randOperation } from './BasicVariables';
 
 
-export class Func2ArgsAdd extends Subtopic {
-  generateQuestion(): Question {
+export class Func2ArgsAdd extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 5n, 2, false);
     const func = randFunc();
     return createQuestion(`
       def ${func}(${x}, ${y}):
           return ${x} + ${y}
-      ${func}(${a}, ${b})`, range(0n, 10n)
-    );
+      ${func}(${a}, ${b})`, range(0n, 10n), {}, ctx);
   }
 }
 
-export class Func2ArgsSub extends Subtopic {
-  generateQuestion(): Question {
+export class Func2ArgsSub extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 5n, 2);
     const func = randFunc();
     return createQuestion(`
       def ${func}(${x}, ${y}):
           return ${x} - ${y}
-      ${func}(${a}, ${b})`, range(0n, 10n)
-    );
+      ${func}(${a}, ${b})`, range(0n, 10n), {}, ctx);
   }
 }
 
-export class Func2ArgsSubBackwards extends Subtopic {
-  generateQuestion(): Question {
+export class Func2ArgsSubBackwards extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 5n, 2);
     const func = randFunc();
     return createQuestion(`
       def ${func}(${x}, ${y}):
           return ${x} - ${y}
-      ${func}(${a}, ${b})`, range(0n, 10n)
-    );
+      ${func}(${a}, ${b})`, range(0n, 10n), {}, ctx);
   }
 }
 
-export class Func2ArgsMult extends Subtopic {
-  generateQuestion(): Question {
+export class Func2ArgsMult extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 4n, 2);
     const func = randFunc();
     return createQuestion(`
       def ${func}(${x}, ${y}):
           return ${x} * ${y}
-      ${func}(${a}, ${b})`, range(0n, 16n)
-    );
+      ${func}(${a}, ${b})`, range(0n, 16n), {}, ctx);
   }
 }
 
-export class Func2ArgsVar extends Subtopic {
-  generateQuestion(): Question {
+export class Func2ArgsVar extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b, c] = randInts(1n, 5n, 3);
     const func = randFunc();
     const op1 = randOperation();
@@ -67,13 +63,12 @@ export class Func2ArgsVar extends Subtopic {
       def ${func}(${var1}, ${var2}):
           ${var3} = ${var1} ${op1} ${c}
           return ${var3} ${op2} ${var2}
-      ${func}(${a}, ${b})`, range(-15n, 15n)
-    );
+      ${func}(${a}, ${b})`, range(-15n, 15n), {}, ctx);
   }
 }
 
-export class Func2ArgsReassign extends Subtopic {
-  generateQuestion(): Question {
+export class Func2ArgsReassign extends EvalLastLineSubtopic {
+  generateQuestion(ctx: GenerateContext) {
     const [a, b, c] = randInts(1n, 5n, 3);
     const func = randFunc();
     const op1 = randOperation();
@@ -83,8 +78,7 @@ export class Func2ArgsReassign extends Subtopic {
       def ${func}(${var1}, ${var2}):
           ${var2} = ${var1} ${op1} ${c}
           return ${var2} ${op2} ${var1}
-      ${func}(${a}, ${b})`, range(-15n, 15n)
-    );
+      ${func}(${a}, ${b})`, range(-15n, 15n), {}, ctx);
   }
 }
 
