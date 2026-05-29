@@ -9,6 +9,7 @@ import type {
 import { evalLastLineDef } from './eval-last-line';
 import { codeOutputDef } from './code-output';
 import { codeWriteDef } from './code-write.tsx';
+import { funcWriteDef } from './func-write.tsx';
 import { codeEditDef, traceOrderDef, conceptualDef } from './stubs';
 import { SKIPPED } from '../App';
 
@@ -44,8 +45,9 @@ export interface QuestionTypeDef<K extends QuestionKind> {
 export const QUESTION_TYPES: { [K in QuestionKind]: QuestionTypeDef<K> } = {
   'eval-last-line': evalLastLineDef,
   'code-output': codeOutputDef,
-  'code-edit': codeEditDef,
   'code-write': codeWriteDef,
+  'func-write': funcWriteDef,
+  'code-edit': codeEditDef,
   'trace-order': traceOrderDef,
   'conceptual': conceptualDef,
 };

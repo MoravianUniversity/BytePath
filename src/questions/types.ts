@@ -5,6 +5,7 @@ export type QuestionKind =
   | 'eval-last-line'
   | 'code-output'
   | 'code-write'
+  | 'func-write'
   | 'code-edit'
   | 'trace-order'
   | 'conceptual';
@@ -41,6 +42,14 @@ export interface CodeWriteQuestion extends QuestionBase<'code-write'> {
   testCases: { values: PyType[], expected: PyType }[];
 }
 
+export interface FuncWriteQuestion extends QuestionBase<'func-write'> {
+  prompt: string;
+  correct: string;
+  options: string[];
+  name: string;
+  testCases: { args: PyType[], expected: PyType }[];
+}
+
 export interface CodeEditQuestion extends QuestionBase<'code-edit'> {
   starterCode: string;
 }
@@ -60,6 +69,7 @@ export type Question =
   | EvalLastLineQuestion
   | CodeOutputQuestion
   | CodeWriteQuestion
+  | FuncWriteQuestion
   | CodeEditQuestion
   | TraceOrderQuestion
   | ConceptualQuestion;
@@ -70,6 +80,7 @@ export type UserAnswerFor<K extends QuestionKind> =
   K extends 'eval-last-line' ? Answer :
   K extends 'code-output' ? string :
   K extends 'code-write' ? string :
+  K extends 'func-write' ? string :
   K extends 'code-edit' ? string :
   K extends 'trace-order' ? number[] :
   K extends 'conceptual' ? string :

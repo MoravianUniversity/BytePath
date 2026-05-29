@@ -2,10 +2,10 @@ Adding a new question type
 ==========================
 
 * In `questions/types.ts`:
-    - Add the question type string name to the `QuestionKind` enum in `types.ts`
-    - Create a new interface that extends `QuestionBase<K>` in `types.ts`
-    - Add the `Question` type to the `Question` union in `types.ts`
-    - Add the answer type to the `UserAnswerFor<K>` union in `types.ts`
+    - Add the question type string name to the `QuestionKind` enum
+    - Create a new interface that extends `QuestionBase<K>`
+    - Add the `Question` type to the `Question` union
+    - Add the answer type to the `UserAnswerFor<K>` union
 
 * Create the question definition in `questions/<question-type>.tsx`:
     - Needs to define the `checkAnswer` and `serializeResponse` functions, and the `View` component
