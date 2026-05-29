@@ -208,7 +208,6 @@
 }
 .skip-button {
   background: var(--button-skip-bg);
-  outline-color: var(--button-skip-color);
   color: var(--button-skip-color);
   margin-left: auto;
   float: right;
@@ -216,7 +215,6 @@
 }
 .skip-button:hover:not(:disabled) {
   background: var(--button-skip-bg-active);
-  outline-color: var(--button-skip-color-active);
   color: var(--button-skip-color-active);
 }
 
@@ -301,7 +299,6 @@ input.quiz-input, textarea.quiz-input {
 }
 .submit-button.skipped {
   background: var(--button-skip-bg);
-  outline: 2px solid var(--button-skip-color);
   color: var(--button-skip-color);
 }
 .submit-button:disabled { cursor: default; }

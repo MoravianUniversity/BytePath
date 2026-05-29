@@ -98,12 +98,6 @@
   --shadow-question-panel-correct: var(--shadow-success-glow);
   --bg-modal-tooltip: rgba(15, 23, 42, 0.85);
 
-  /* -- Buttons -- */
-  --button-skip-bg: rgba(255, 255, 0, 0.2);
-  --button-skip-color: rgb(128, 128, 36);
-  --button-skip-bg-active: rgba(255, 255, 0, 0.4);
-  --button-skip-color-active: rgb(100, 100, 20);
-
   /* App pages (dashboard, students): shared scroll + content width */
   --app-page-content-max: 1150px;
   --app-page-padding-block: 1.5rem;
@@ -161,6 +155,7 @@
   --overlay-warning-30: rgba(var(--color-warning-bright-rgb), 0.3);
   --overlay-warning-35: rgba(var(--color-warning-bright-rgb), 0.35);
   --overlay-warning-50: rgba(var(--color-warning-bright-rgb), 0.5);
+  --overlay-warning-70: rgba(var(--color-warning-bright-rgb), 0.7);
   --overlay-error-12: rgba(var(--color-error-rgb), 0.12);
   --overlay-error-15: rgba(var(--color-error-rgb), 0.15);
   --overlay-error-18: rgba(var(--color-error-rgb), 0.18);
@@ -176,6 +171,12 @@
   --overlay-neutral-06: rgba(var(--color-neutral-rgb), 0.06);
   --overlay-neutral-18: rgba(var(--color-neutral-rgb), 0.18);
   --overlay-neutral-70: rgba(var(--color-neutral-rgb), 0.7);
+
+  /* -- Buttons -- */
+  --button-skip-bg: var(--overlay-warning-50);
+  --button-skip-color: white;
+  --button-skip-bg-active: var(--overlay-warning-70);
+  --button-skip-color-active: white;
 
   /* ── Gradients ── */
   --gradient-primary: linear-gradient(
@@ -311,9 +312,6 @@
   --bg-modal: #1e293bf2;
   --border-modal: rgba(148, 163, 184, 0.35);
   --shadow-modal: 0 24px 48px #0000008c;
-
-  --button-skip-color: rgba(255, 255, 0, 0.7);
-  --button-skip-color-active: rgb(255, 255, 0);
 }
 
 /* Focus states for accessibility */
