@@ -1,7 +1,7 @@
 import React from 'react';
 import type { CodeOutputQuestion, UserAnswerFor } from './types.ts';
-import type { QuestionTypeDef, QuestionViewProps } from './registry.ts';
-import { QuestionAnswerOptions, QuestionCodeBlock, QuestionHelp, QuestionInput, QuestionQuizInputAnswerDisplay, QuestionQuizInputMultiLine, QuestionSkipButton } from './QuestionComponents.tsx';
+import type { QuestionTypeDef, QuestionViewProps, SerializedResponse } from './registry.ts';
+import { QuestionAnswerOptions, QuestionCodeBlock, QuestionInput, QuestionPrompt, QuestionQuizInputAnswerDisplay, QuestionQuizInputMultiLine } from './QuestionComponents.tsx';
 
 function parseQuizAnswer(raw: string): string | undefined {
   const trimmed = raw.trim();
@@ -10,15 +10,15 @@ function parseQuizAnswer(raw: string): string | undefined {
 
 function checkAnswer(
   question: CodeOutputQuestion,
-  user: UserAnswerFor<'code-output'>,
+  answer: UserAnswerFor<'code-output'>,
 ): boolean {
-  return user === question.correct;  // TODO: more advanced checking?
+  return answer === question.correct;  // TODO: more advanced checking?
 }
 
 function serialize(
   question: CodeOutputQuestion,
   user: UserAnswerFor<'code-output'> | null,
-) {
+): SerializedResponse {
   return {
     questionPayload: question.code,
     studentAnswer: user,
@@ -60,15 +60,9 @@ const CodeOutputView: React.FC<QuestionViewProps<'code-output'>> = ({
   const useQuiz = isQuiz || question.options.length <= 1;
 
   const getAnswerClass = (answer: string) => {
-    if (userAnswer === undefined) {
-      return '';
-    }
-    if (answer === question.correct) {
-      return 'correct';
-    }
-    if (answer === userAnswer && !isCorrect) {
-      return 'incorrect';
-    }
+    if (userAnswer === undefined) { return ''; }
+    if (answer === question.correct) { return 'correct'; }
+    if (answer === userAnswer && !isCorrect) { return 'incorrect'; }
     return '';
   };
 
@@ -76,13 +70,7 @@ const CodeOutputView: React.FC<QuestionViewProps<'code-output'>> = ({
     <>
       <QuestionCodeBlock code={question.code} />
       <QuestionInput input={question.input} />
-      <QuestionSkipButton onClick={onSkip} />
-      <div className="question-type-row">
-        <div className="question-type">
-          What is the <em>output to the user</em>?
-        </div>
-        <QuestionHelp helpMessage={helpMessage} />
-      </div>
+      <QuestionPrompt prompt={<>What is the <em>output to the user</em>?</>} helpMessage={helpMessage} onSkip={onSkip} />
       {useQuiz ? (
         <div className="quiz-input-container">
           {userAnswer !== undefined ? (

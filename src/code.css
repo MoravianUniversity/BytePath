@@ -22,6 +22,14 @@ code {
   line-height: 1.35 !important;
   color: var(--text-code);
 }
+code.inline-code {
+  display: inline;
+  padding: 0.1em 0.4em;
+  margin: 0 0.05em;
+  font-size: 0.88em;
+  white-space: nowrap;
+  vertical-align: baseline;
+}
 
 /* Python syntax highlighting (VS Code Dark Modern) */
 code .token.comment { color: var(--syntax-comment) !important; }

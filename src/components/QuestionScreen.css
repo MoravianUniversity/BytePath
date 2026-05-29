@@ -18,12 +18,12 @@
   overflow-x: auto;
 }
 
-.question-input, .question-type {
+.question-input, .question-prompt {
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 0;
 }
-.question-type-row {
+.question-prompt-row {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -156,7 +156,7 @@
 .question-input code, .input-echo {
   color: var(--color-success-bright) !important;
 }
-.quiz-input.exception, .answer-option.exception, .answer-option.exception.correct {
+.quiz-input.exception, .answer-option.exception, .answer-option.exception.correct, .first-failure .exception {
   color: var(--color-error) !important;
 }
 
@@ -255,7 +255,10 @@ input.quiz-input, textarea.quiz-input {
   border: none !important;
   padding: 0 !important;
 }
-
+.quiz-input.first-failure {
+  margin-top: 0.5em;
+  border-color: var(--color-error);
+}
 
 .quiz-input:focus {
   outline: none;

@@ -1,8 +1,10 @@
 import type { Answer } from '../topics';
+import type { PyType } from '../python';
 
 export type QuestionKind =
   | 'eval-last-line'
   | 'code-output'
+  | 'code-write'
   | 'code-edit'
   | 'trace-order'
   | 'conceptual';
@@ -31,6 +33,14 @@ export interface CodeOutputQuestion extends QuestionBase<'code-output'> {
   input?: string[] | string;
 }
 
+export interface CodeWriteQuestion extends QuestionBase<'code-write'> {
+  prompt: string;
+  correct: string;
+  options: string[];
+  variables: string[];
+  testCases: { values: PyType[], expected: PyType }[];
+}
+
 export interface CodeEditQuestion extends QuestionBase<'code-edit'> {
   starterCode: string;
 }
@@ -49,6 +59,7 @@ export interface ConceptualQuestion extends QuestionBase<'conceptual'> {
 export type Question =
   | EvalLastLineQuestion
   | CodeOutputQuestion
+  | CodeWriteQuestion
   | CodeEditQuestion
   | TraceOrderQuestion
   | ConceptualQuestion;
@@ -58,6 +69,7 @@ export type QuestionFor<K extends QuestionKind> = Extract<Question, { kind: K }>
 export type UserAnswerFor<K extends QuestionKind> =
   K extends 'eval-last-line' ? Answer :
   K extends 'code-output' ? string :
+  K extends 'code-write' ? string :
   K extends 'code-edit' ? string :
   K extends 'trace-order' ? number[] :
   K extends 'conceptual' ? string :

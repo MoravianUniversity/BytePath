@@ -153,3 +153,25 @@ export function maybeNot(probability: number = 0.2): string { return Math.random
 
 // Capitalize the first character of a string
 export function capitalize(s: string): string { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+// Zip two iterables into a generator of pairs
+export function *zip<T1, T2>(iterable1: Iterable<T1>, iterable2: Iterable<T2>): Generator<[T1, T2], void, unknown> {
+  const iter1 = iterable1[Symbol.iterator]();
+  const iter2 = iterable2[Symbol.iterator]();
+  while (true) {
+    const result1 = iter1.next();
+    const result2 = iter2.next();
+    if (result1.done || result2.done) { return; }
+    yield [result1.value, result2.value];
+  }
+}
+
+// Zip multiple iterables into a generator of tuples (has typing issues...)
+// function *zip<T>(...iterables: Iterable<T>[]): Generator<T[], void, unknown> {
+//   const iterators = iterables.map(i => i[Symbol.iterator]());
+//   while (true) {
+//     const results = iterators.map(iter => iter.next());
+//     if (results.some(res => res.done)) { return; }
+//     yield results.map(res => res.value);
+//   }
+// }

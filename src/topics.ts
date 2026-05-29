@@ -119,6 +119,10 @@ export abstract class CodeOutputSubtopic extends Subtopic<'code-output'> {
   readonly kind = 'code-output' as const;
 }
 
+export abstract class CodeWriteSubtopic extends Subtopic<'code-write'> {
+  readonly kind = 'code-write' as const;
+}
+
 /**
  * Topic: a topic is a collection of subtopics.
  */

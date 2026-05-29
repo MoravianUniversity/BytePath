@@ -3,8 +3,8 @@ import type { Answer } from '../topics.ts';
 import { formatAnswer, isAnswerSame } from '../topics.ts';
 import { parsePyAtom, createException } from '../python.ts';
 import type { EvalLastLineQuestion, UserAnswerFor } from './types.ts';
-import type { QuestionTypeDef, QuestionViewProps } from './registry.ts';
-import { QuestionAnswerOptions, QuestionCodeBlock, QuestionHelp, QuestionInput, QuestionQuizInputAnswerDisplay, QuestionSkipButton, QuestionQuizInputSingleLine } from './QuestionComponents.tsx';
+import type { QuestionTypeDef, QuestionViewProps, SerializedResponse } from './registry.ts';
+import { QuestionAnswerOptions, QuestionCodeBlock, QuestionInput, QuestionQuizInputAnswerDisplay, QuestionQuizInputSingleLine, QuestionPrompt } from './QuestionComponents.tsx';
 
 function parseQuizAnswer(raw: string): Answer | undefined {
   let answer = raw.trim();
@@ -29,15 +29,15 @@ function parseQuizAnswer(raw: string): Answer | undefined {
 
 function checkAnswer(
   question: EvalLastLineQuestion,
-  user: UserAnswerFor<'eval-last-line'>,
+  answer: UserAnswerFor<'eval-last-line'>,
 ): boolean {
-  return isAnswerSame(user, question.correct);
+  return isAnswerSame(answer, question.correct);
 }
 
 function serialize(
   question: EvalLastLineQuestion,
   user: UserAnswerFor<'eval-last-line'> | null,
-) {
+): SerializedResponse {
   return {
     questionPayload: question.code,
     studentAnswer: user === null ? null : formatAnswer(user),
@@ -77,13 +77,7 @@ const EvalLastLineView: React.FC<QuestionViewProps<'eval-last-line'>> = ({
     <>
       <QuestionCodeBlock code={question.code} />
       <QuestionInput input={question.input} />
-      <QuestionSkipButton onClick={onSkip} />
-      <div className="question-type-row">
-        <div className="question-type">
-          What is the value of the final line of code?
-        </div>
-        <QuestionHelp helpMessage={helpMessage} />
-      </div>
+      <QuestionPrompt prompt="What is the value of the final line of code?" helpMessage={helpMessage} onSkip={onSkip} />
       {useQuiz ? (
         <div className="quiz-input-container">
           {userAnswer !== undefined ? (

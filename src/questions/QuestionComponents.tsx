@@ -37,6 +37,26 @@ export const QuestionInput: React.FC<{input: string[] | string | undefined}> = (
   );
 };
 
+export const QuestionPrompt: React.FC<{
+  prompt: string|React.ReactNode,
+  helpMessage?: string,
+  onSkip?: (() => void),
+}> = (
+  {prompt, helpMessage = undefined, onSkip = undefined}
+) => {
+  return (
+    <>
+      <QuestionSkipButton onClick={onSkip} />
+      <div className="question-prompt-row">
+        <div className="question-prompt">
+          {prompt}
+        </div>
+        <QuestionHelp helpMessage={helpMessage} />
+      </div>
+    </>
+  );
+};
+
 export const QuestionSkipButton: React.FC<{onClick: (() => void) | undefined}> = (
   {onClick}
 ) => {
@@ -154,12 +174,13 @@ export const QuestionQuizInputMultiLine: React.FC<{
 };
 
 export const QuestionQuizInputAnswerDisplay: React.FC<{
-  userAnswer: any | typeof SKIPPED | undefined,
+  userAnswer: any | typeof SKIPPED,
   correctAnswer: any,
   isCorrect: boolean,
   formatAnswer: (answer: any) => React.ReactNode,
+  children?: React.ReactNode,
 }> = (
-  {userAnswer, correctAnswer, isCorrect, formatAnswer}
+  {userAnswer, correctAnswer, isCorrect, formatAnswer, children = undefined}
 ) => {
   if (userAnswer === SKIPPED) {
     return (
@@ -182,6 +203,7 @@ export const QuestionQuizInputAnswerDisplay: React.FC<{
       <button className={'feedback submit-button ' + correctClass} disabled>
         {isCorrect ? '✓' : '✗'}
       </button>
+      {children}
       {!isCorrect && (
         <div className={'quiz-input ' + getCorrectClass(correctAnswer, true)}>
           {formatAnswer(correctAnswer)}
