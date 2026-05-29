@@ -34,6 +34,13 @@ export class Multiplication extends BasicArithmetic {
   generateQuestion(ctx: GenerateContext) { return this.genQuestion(randInt(2n, 10n), randInt(2n, 10n), ctx); }
 }
 export class Exponentiation extends BasicArithmetic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The exponent is the power to which the base is raised.',
+    },
+  ];
+
   constructor() { super('**'); }
   generateQuestion(ctx: GenerateContext) {
     let a = randInt(2n, 4n);
@@ -65,11 +72,7 @@ export class Parentheses1 extends EvalLastLineSubtopic {
     },
     {
       afterFailedAttempts: 3,
-      message: `Evaluate \`b * c\` first, add \`a\`, then multiply by \`d\`:
-
-\`\`\`python
-result = (a + b * c) * d
-\`\`\``,
+      message: `Evaluate \`b * c\` first, add \`a\`, then multiply by \`d\`.`,
     },
   ];
 
@@ -94,27 +97,27 @@ result = (a + b * c) * d
   }
 }
 export class Parentheses2 extends EvalLastLineSubtopic {
-    generateQuestion(ctx: GenerateContext) {
-      const a = randInt(2n, 4n);
-      const b = randInt(1n, 4n);
-      const c = randInt(1n, 3n);
-      const d = randInt(2n, 4n);
-      const correct = a * (b + c) * d;
-      return createQuestion(
-        `${a} * (${b} + ${c}) * ${d}`,
-        [
-          correct + randInt(1n, 3n),
-          correct - randInt(1n, 3n),
-          (a + b * c) * d,
-          (a + b) * c * d,
-          (a + b) * (c + d),
-          (a * b) + (c * d),
-          (a * b) * d + c * d,
-        ],
-        {correct}, ctx);
-    }
+  generateQuestion(ctx: GenerateContext) {
+    const a = randInt(2n, 4n);
+    const b = randInt(1n, 4n);
+    const c = randInt(1n, 3n);
+    const d = randInt(2n, 4n);
+    const correct = a * (b + c) * d;
+    return createQuestion(
+      `${a} * (${b} + ${c}) * ${d}`,
+      [
+        correct + randInt(1n, 3n),
+        correct - randInt(1n, 3n),
+        (a + b * c) * d,
+        (a + b) * c * d,
+        (a + b) * (c + d),
+        (a * b) + (c * d),
+        (a * b) * d + c * d,
+      ],
+      {correct}, ctx);
   }
-  
+}
+
 export const BASIC_ARITHMETIC: Topic = new Topic('basic-arithmetic', 'Basic Arithmetic', [
   new Addition(),
   new AdditionWithNegative(),
