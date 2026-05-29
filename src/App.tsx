@@ -432,8 +432,9 @@ function App() {
     return topic.numCompletedSubtopics > 0;
   }
 
-  function navigateToTopic(topic: Topic, options?: { startQuestions?: boolean }) {
+  function navigateToTopic(topic: Topic, options?: { startQuestions?: boolean; forceAccess?: boolean }) {
     const startQuestions = options?.startQuestions ?? true;
+    const forceAccess = options?.forceAccess ?? false;
 
     setCurrentTopic(topic);
     window.location.hash = topic.id;
@@ -442,7 +443,7 @@ function App() {
       return;
     }
 
-    if (!canAccessTopic(topic)) {
+    if (!forceAccess && !canAccessTopic(topic)) {
       setCurrentScreen('locked-topic');
       return;
     }
@@ -460,7 +461,7 @@ function App() {
     if (currentTopic?.id === topic.id && currentScreen === 'question') {
       return;
     }
-    navigateToTopic(topic);
+    navigateToTopic(topic, { forceAccess: true });
   }
 
   function selectTopic(topic: Topic) {
