@@ -4,7 +4,7 @@ import remarkGfm from 'remark-gfm';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-python';
 
-const helpMarkdownComponents: Components = {
+const markdownComponents: Components = {
   a({ href, children, ...props }) {
     return (
       <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
@@ -27,18 +27,19 @@ const helpMarkdownComponents: Components = {
       );
     }
     return (
-      <code className="language-python" {...props}>
+      <code className="language-python inline-code" {...props}>
         {children}
       </code>
     );
   },
 };
 
-interface HelpMarkdownProps {
+interface MarkdownProps {
   content: string;
+  className?: string;
 }
 
-export function HelpMarkdown({ content }: HelpMarkdownProps) {
+export function Markdown({ content, className = '' }: MarkdownProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -48,8 +49,8 @@ export function HelpMarkdown({ content }: HelpMarkdownProps) {
   }, [content]);
 
   return (
-    <div ref={containerRef} className="question-help-markdown">
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={helpMarkdownComponents}>
+    <div ref={containerRef} className={`markdown ${className}`}>
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
         {content}
       </ReactMarkdown>
     </div>

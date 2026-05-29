@@ -1,5 +1,5 @@
-import { Topic, CodeOutputSubtopic, CodeOutputQuestionGen } from '../topics';
-import { randInt, randChoice, randChoices, STRINGS, randVariable } from '../util';
+import { Topic, CodeOutputSubtopic, CodeOutputQuestionGen, CodeWriteQuestionGen, CodeWriteSubtopic } from '../topics';
+import { randInt, randChoice, randChoices, STRINGS, randVariable, randVars } from '../util';
 import { STRING_CONCAT } from './StringConcat';
 
 export class PrintString extends CodeOutputSubtopic {
@@ -222,6 +222,30 @@ export class PrintStringWithQuotedMath2 extends CodeOutputSubtopic {
   }
 }
 
+export class WritePrintVarsCode extends CodeWriteSubtopic {
+  gen(): CodeWriteQuestionGen {
+    const [x, y] = randVars(2);
+    return {
+      prompt: `What is the code to print the values of the variables \`${x}\` and \`${y}\` on the same line separated by a space?`,
+      correct: `print(${x}, ${y})`,
+      options: [
+        `print ${x} ${y}`, `print ${x}, ${y}`, `print(${x} ${y})`, `print(${x}+${y})`,
+        `print(${x})\nprint(${y})`, `print("${x} ${y}")`, `print("${x}", "${y}")`,
+        `${x}, ${y}`, `${x} ${y}`
+      ],
+      variables: [x, y],
+      testCases: [
+        { values: [STRINGS[0], STRINGS[1]], expected: `${STRINGS[0]} ${STRINGS[1]}` },
+        { values: [STRINGS[1], STRINGS[0]], expected: `${STRINGS[1]} ${STRINGS[0]}` },
+        { values: [STRINGS[0], STRINGS[0]], expected: `${STRINGS[0]} ${STRINGS[0]}` },
+        { values: [STRINGS[1], STRINGS[1]], expected: `${STRINGS[1]} ${STRINGS[1]}` },
+        { values: [STRINGS[2], STRINGS[3]], expected: `${STRINGS[2]} ${STRINGS[3]}` },
+      ],
+      testsUseOutput: true,
+    };
+  }
+}
+
 export const BASIC_PRINTS: Topic = new Topic('basic-prints', 'Basic Printing', [
   new PrintString(),
   new PrintStringMulti(),
@@ -232,4 +256,5 @@ export const BASIC_PRINTS: Topic = new Topic('basic-prints', 'Basic Printing', [
   new PrintStringWithMath(),
   new PrintStringWithQuotedMath(),
   new PrintStringWithQuotedMath2(),
+  new WritePrintVarsCode(),
 ], [STRING_CONCAT]);

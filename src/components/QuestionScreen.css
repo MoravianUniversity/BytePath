@@ -78,49 +78,18 @@
   pointer-events: auto;
 }
 
-.question-help-markdown {
-  font-weight: 400;
-}
-.question-help-markdown > :first-child {
-  margin-top: 0;
-}
-.question-help-markdown > :last-child {
-  margin-bottom: 0;
-}
-.question-help-markdown p {
-  margin: 0.5em 0;
-}
-.question-help-markdown p:first-child {
-  margin-top: 0;
-}
-.question-help-markdown p:last-child {
-  margin-bottom: 0;
-}
-.question-help-markdown ul,
-.question-help-markdown ol {
-  margin: 0.5em 0;
-  padding-left: 1.25em;
-}
-.question-help-markdown li {
-  margin: 0.2em 0;
-}
-.question-help-markdown li > p {
-  margin: 0;
-}
-.question-help-markdown strong {
-  font-weight: 700;
-}
-.question-help-markdown em {
-  font-style: italic;
-}
-.question-help-markdown a {
-  color: var(--color-primary);
-  text-decoration: underline;
-}
-.question-help-markdown a:hover {
-  color: var(--color-primary-light);
-}
-.question-help-markdown :not(pre) > code {
+.markdown { font-weight: 400; }
+.markdown > :first-child { margin-top: 0; }
+.markdown > :last-child { margin-bottom: 0; }
+.markdown p { margin: 0.5em 0; }
+.markdown ul, .markdown ol { margin: 0.5em 0; padding-left: 1.25em; }
+.markdown li { margin: 0.2em 0; }
+.markdown li > p { margin: 0; }
+.markdown strong { font-weight: 700; }
+.markdown em { font-style: italic; }
+.markdown a { color: var(--color-primary); text-decoration: underline; }
+.markdown a:hover { color: var(--color-primary-light); }
+.markdown :not(pre) > code {
   display: inline;
   padding: 0.1em 0.4em;
   margin: 0 0.05em;
@@ -133,11 +102,8 @@
   color: var(--text-code);
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
 }
-.question-help-markdown pre {
-  margin: 0.5em 0;
-  overflow-x: auto;
-}
-.question-help-markdown pre code {
+.markdown pre { margin: 0.5em 0; overflow-x: auto; }
+.markdown pre code {
   display: block;
   margin: 0;
   padding: 0.5em 0.75em;
@@ -150,9 +116,7 @@
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   line-height: 1.35 !important;
 }
-.question-help-markdown pre code .token {
-  text-shadow: none !important;
-}
+.markdown pre code .token { text-shadow: none !important; }
 .question-input code, .input-echo {
   color: var(--color-success-bright) !important;
 }
@@ -193,6 +157,7 @@
   background: none !important;
   border: none !important;
   padding: 0 !important;
+  overflow-x: visible;
 }
 .answer-option.correct {
   background: var(--syntax-success-bg) !important;

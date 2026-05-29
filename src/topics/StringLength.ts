@@ -3,6 +3,12 @@ import { randChoice, randChoices, randVariable, STRINGS } from '../util';
 import { STRING_CONCAT } from './StringConcat';
 
 export class StringLen extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 1,
+      message: '`len()` computes the length of a string, i.e. the number of characters in a string.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const a = randChoice(STRINGS);
     return {
@@ -18,6 +24,12 @@ export class StringLen extends EvalLastLineSubtopic {
 }
 
 export class StringLenMulti extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: '`len()` gives an integer, so add those together.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const [a, b] = randChoices(STRINGS, 2);
     return {
@@ -33,6 +45,12 @@ export class StringLenMulti extends EvalLastLineSubtopic {
 }
 
 export class StringLenMultiConcat extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Concatenate the strings first, then compute the length.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const [a, b] = randChoices(STRINGS, 2);
     return {
@@ -48,6 +66,12 @@ export class StringLenMultiConcat extends EvalLastLineSubtopic {
 }
 
 export class StringLenVar extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 1,
+      message: 'Make sure to take the length of the string value, not the variable name.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);

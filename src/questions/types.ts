@@ -42,6 +42,7 @@ export interface CodeWriteQuestion extends QuestionBase<'code-write'> {
   options: string[];
   variables: string[];
   testCases: { values: PyType[], expected: PyType }[];
+  testsUseOutput?: boolean;
 }
 
 export interface FuncWriteQuestion extends QuestionBase<'func-write'> {
@@ -50,6 +51,7 @@ export interface FuncWriteQuestion extends QuestionBase<'func-write'> {
   options: string[];
   name: string;
   testCases: { args: PyType[], expected: PyType }[];
+  testsUseOutput?: boolean;
 }
 
 export interface CodeEditQuestion extends QuestionBase<'code-edit'> {

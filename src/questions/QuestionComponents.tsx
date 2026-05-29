@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
-import { HelpMarkdown } from "../components/HelpMarkdown";
+import { Markdown } from "../components/Markdown";
 import '../components/QuestionScreen.css';
 import { SKIPPED } from '../App';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -49,7 +49,11 @@ export const QuestionPrompt: React.FC<{
       <QuestionSkipButton onClick={onSkip} />
       <div className="question-prompt-row">
         <div className="question-prompt">
-          {prompt}
+          {typeof prompt === 'string' ? (
+            <Markdown content={prompt} className="question-prompt-markdown" />
+          ) : (
+            prompt
+          )}
         </div>
         <QuestionHelp helpMessage={helpMessage} />
       </div>
@@ -82,7 +86,7 @@ export const QuestionHelp: React.FC<{helpMessage: string | undefined}> = (
         ?
       </span>
       <span className="question-help-tooltip" role="tooltip">
-        <HelpMarkdown content={helpMessage} />
+        <Markdown content={helpMessage} className="question-help-markdown" />
       </span>
     </span>
   );

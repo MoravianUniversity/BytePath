@@ -3,7 +3,7 @@ import type { CodeWriteQuestion, UserAnswerFor } from './types.ts';
 import type { QuestionTypeDef, QuestionViewProps, SerializedResponse } from './registry.ts';
 import { QuestionAnswerOptions, QuestionPrompt, QuestionQuizInputAnswerDisplay, QuestionQuizInputSingleLine, QuestionSkipButton } from './QuestionComponents.tsx';
 import { isAnswerSame } from '../topics.ts';
-import { toPyAtom, runLastLine, PyType } from '../python.ts';
+import { toPyAtom, runLastLine, PyType, runGrabOutput } from '../python.ts';
 import { SKIPPED } from '../App.tsx';
 import { zip } from '../util.ts';
 
@@ -15,13 +15,18 @@ function parseQuizAnswer(raw: string): string | undefined {
 function* testResults(question: CodeWriteQuestion, answer: string): Generator<PyType | undefined, void, unknown> {
   const variables = question.variables;
   const testCases = question.testCases;
+  const testsUseOutput = question.testsUseOutput;
   for (const testCase of testCases) {
     const code = (
       Array.from(zip(variables, testCase.values).map(
         ([variable, value]) => `${variable} = ${toPyAtom(value)}`
       )).join('\n')
     ) + '\n' + answer;
-    yield runLastLine(code);
+    if (testsUseOutput) {
+      yield runGrabOutput(code);
+    } else {
+      yield runLastLine(code);
+    }
   }
 }
 

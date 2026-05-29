@@ -7,7 +7,7 @@ import type { QuestionKind, Question, QuestionFor } from './questions/types';
 import { TopicContext } from './questions/types';
 import { createEvalLastLineQuestion } from './questions/eval-last-line';
 import { createCodeOutputQuestion } from './questions/code-output';
-import { BuildCodeQuestionOpts } from './questions/utils';
+import { BuildCodeQuestionOpts, prepareOptions } from './questions/utils';
 
 export type { Question, QuestionKind };
 export { TopicContext };
@@ -123,12 +123,54 @@ export abstract class CodeOutputSubtopic extends Subtopic<'code-output'> {
   abstract gen(ctx: TopicContext): CodeOutputQuestionGen|string
 }
 
+export type CodeWriteQuestionGen = {
+  prompt: string,
+  correct: string,
+  options?: string[],
+  variables?: string[],
+  testCases: { values: PyType[], expected: PyType }[],
+  testsUseOutput?: boolean;
+};
 export abstract class CodeWriteSubtopic extends Subtopic<'code-write'> {
   readonly kind = 'code-write' as const;
+  generateQuestion(ctx: TopicContext): QuestionFor<'code-write'> {
+    const {prompt, correct, options = [], variables = [], testCases, testsUseOutput = false} = this.gen(ctx);
+    return {
+      kind: 'code-write' as const,
+      prompt,
+      correct,
+      options: prepareOptions(correct, options || []),
+      variables,
+      testCases,
+      testsUseOutput,
+    };
+  }
+  abstract gen(ctx: TopicContext): CodeWriteQuestionGen;
 }
 
+export type FuncWriteQuestionGen = {
+  prompt: string;
+  correct: string;
+  options?: string[];
+  name: string;
+  testCases: { args: PyType[], expected: PyType }[];
+  testsUseOutput?: boolean;
+};
 export abstract class FuncWriteSubtopic extends Subtopic<'func-write'> {
   readonly kind = 'func-write' as const;
+  generateQuestion(ctx: TopicContext): QuestionFor<'func-write'> {
+    const {prompt, correct, options = [], name, testCases, testsUseOutput = false} = this.gen(ctx);
+    return {
+      kind: 'func-write' as const,
+      prompt,
+      correct,
+      options: prepareOptions(correct, options || []),
+      name,
+      testCases,
+      testsUseOutput,
+    };
+  }
+  abstract gen(ctx: TopicContext): FuncWriteQuestionGen;
 }
 
 /**
