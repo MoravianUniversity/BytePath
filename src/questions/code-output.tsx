@@ -3,18 +3,30 @@ import type { CodeOutputQuestion, TopicContext, UserAnswerFor } from './types.ts
 import type { QuestionTypeDef, QuestionViewProps, SerializedResponse } from './registry.ts';
 import { QuestionAnswerOptions, QuestionCodeBlock, QuestionInput, QuestionPrompt, QuestionQuizInputAnswerDisplay, QuestionQuizInputMultiLine } from './QuestionComponents.tsx';
 import { createCodeQuestionCore, prepareOptions, type BuildCodeQuestionOpts } from './utils.ts';
-import { Exception, runGrabOutput } from '../python.ts';
+import { Exception, normalizeOutputContainers, runGrabOutput } from '../python.ts';
 
 function parseQuizAnswer(raw: string): string | undefined {
   const trimmed = raw.trim();
   return trimmed === '' ? undefined : trimmed;
 };
 
+function correctOutputString(correct: CodeOutputQuestion['correct']): string {
+  return correct instanceof Error ? correct.name : correct;
+}
+
+function outputsMatch(a: string, b: string): boolean {
+  return normalizeOutputContainers(a) === normalizeOutputContainers(b);
+}
+
 function checkAnswer(
   question: CodeOutputQuestion,
   answer: UserAnswerFor<'code-output'>,
 ): boolean {
-  return answer === question.correct;  // TODO: more advanced checking?
+  return (
+    answer === question.correct ||
+    answer instanceof Error && question.correct instanceof Error && answer.name === question.correct.name ||
+    typeof answer === 'string' && outputsMatch(answer, correctOutputString(question.correct))
+  );
 }
 
 function answerToString(answer: string | Exception | null): string {
@@ -67,9 +79,10 @@ const CodeOutputView: React.FC<QuestionViewProps<'code-output'>> = ({
 }) => {
   const useQuiz = isQuiz || question.options.length <= 1;
 
+  const correctStr = correctOutputString(question.correct);
   const getAnswerClass = (answer: string) => {
     if (userAnswer === undefined) { return ''; }
-    if (answer === question.correct) { return 'correct'; }
+    if (outputsMatch(answer, correctStr)) { return 'correct'; }
     if (answer === userAnswer && !isCorrect) { return 'incorrect'; }
     return '';
   };

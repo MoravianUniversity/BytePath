@@ -507,6 +507,111 @@ function isCollection(atom: PyType): boolean {
   return Array.isArray(atom) || atom instanceof Map || atom instanceof Set;
 }
 
+const CONTAINER_PAIRS: Record<string, string> = { '[': ']', '(': ')', '{': '}' };
+const CONTAINER_OPENERS = new Set(Object.keys(CONTAINER_PAIRS));
+const CONTAINER_CLOSERS = new Set(Object.values(CONTAINER_PAIRS));
+
+function skipQuotedString(s: string, start: number): number {
+  if (s.startsWith('"""', start) || s.startsWith("'''", start)) {
+    const delim = s.slice(start, start + 3);
+    let i = start + 3;
+    while (i < s.length) {
+      if (s.startsWith(delim, i)) { return i + 3; }
+      i++;
+    }
+    return s.length;
+  }
+  const quote = s[start];
+  let i = start + 1;
+  while (i < s.length) {
+    if (s[i] === '\\') { i += 2; continue; }
+    if (s[i] === quote) { return i + 1; }
+    i++;
+  }
+  return s.length;
+}
+
+function findContainerEnd(s: string, start: number): number | null {
+  const expectedClose = CONTAINER_PAIRS[s[start]];
+  if (!expectedClose) { return null; }
+  let depth = 0;
+  for (let i = start; i < s.length; i++) {
+    const c = s[i];
+    if (c === '"' || c === "'") {
+      i = skipQuotedString(s, i) - 1;
+      continue;
+    }
+    if (CONTAINER_OPENERS.has(c)) { depth++; }
+    else if (CONTAINER_CLOSERS.has(c)) {
+      depth--;
+      if (depth === 0 && c === expectedClose) { return i; }
+    }
+  }
+  return null;
+}
+
+function isListTupleOrDict(atom: PyType): boolean {
+  return atom instanceof Map || Array.isArray(atom);
+}
+
+/** Canonicalize list/tuple/dict values for stable repr (dict key order). */
+function canonicalizeContainerAtom(atom: PyType): PyType {
+  if (atom instanceof Map) {
+    const entries = [...atom.entries()]
+      .sort(([ka], [kb]) => toPyAtom(ka).localeCompare(toPyAtom(kb)))
+      .map(([k, v]) => [canonicalizeContainerAtom(k), canonicalizeContainerAtom(v)] as [Immutable, PyType]);
+    return new Map(entries);
+  }
+  if (Array.isArray(atom)) {
+    const items = atom.map(canonicalizeContainerAtom);
+    return Object.isFrozen(atom) ? Object.freeze(items) as Tuple<PyType> : items;
+  }
+  return atom;
+}
+
+function tryNormalizeContainerSubstring(substr: string): string | null {
+  try {
+    const [atom, rem] = parsePyAtom(substr);
+    if (rem.trim() !== '' || !isListTupleOrDict(atom)) { return null; }
+    return toPyAtom(canonicalizeContainerAtom(atom));
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Normalize list, tuple, and dict substrings in printed output for lenient comparison.
+ * Valid container substrings are parsed with parsePyAtom() and re-formatted with toPyAtom();
+ * dict keys are sorted so order does not matter. Unparseable substrings are left unchanged.
+ */
+export function normalizeOutputContainers(s: string): string {
+  let result = '';
+  let i = 0;
+  while (i < s.length) {
+    const c = s[i];
+    if (c === '"' || c === "'") {
+      const end = skipQuotedString(s, i);
+      result += s.slice(i, end);
+      i = end;
+      continue;
+    }
+    if (CONTAINER_OPENERS.has(c)) {
+      const end = findContainerEnd(s, i);
+      if (end !== null) {
+        const normalized = tryNormalizeContainerSubstring(s.slice(i, end + 1));
+        if (normalized !== null) {
+          result += normalized;
+          i = end + 1;
+          continue;
+        }
+      }
+    }
+    result += c;
+    i++;
+  }
+  return result;
+}
+
 // Convert a boolean to a Python boolean string (True/False) - subset of toPyAtom()
 export function toPyBool(a: boolean): string { return a ? 'True' : 'False'; }
 
