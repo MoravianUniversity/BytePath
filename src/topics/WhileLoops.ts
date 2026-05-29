@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext, CodeOutputSubtopic } from '../topics';
 import { randInt, randInts, randIntNum, randChoice, randVariable, randVars, ASCII_LETTERS, range } from '../util';
 import { toPyAtom, toPyStr } from '../python';
 import { BASIC_VARIABLES } from './BasicVariables';
@@ -22,7 +22,7 @@ export class WhileLoopInc extends EvalLastLineSubtopic {
   }
 }
 
-export class WhileLoopPrintInc extends EvalLastLineSubtopic {
+export class WhileLoopPrintInc extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const i = randInt(2n, 4n);
@@ -37,11 +37,11 @@ export class WhileLoopPrintInc extends EvalLastLineSubtopic {
         "0\n1\n2", "1\n2",
         "0\n1", "1",
         "0", "",
-      ], {}, ctx);
+      ], {usesOutput: true}, ctx);
   }
 }
 
-export class WhileLoopIncPrint extends EvalLastLineSubtopic {
+export class WhileLoopIncPrint extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const i = randInt(2n, 4n);
@@ -56,7 +56,7 @@ export class WhileLoopIncPrint extends EvalLastLineSubtopic {
         "0\n1\n2", "1\n2",
         "0\n1", "1",
         "0", "",
-      ], {}, ctx);
+      ], {usesOutput: true}, ctx);
   }
 }
 

@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext, CodeOutputSubtopic } from '../topics';
 import { randInts, randVars, randVariable, max, min } from '../util';
 import { BASIC_VARIABLES } from './BasicVariables';
 import { BASIC_PRINTS } from './BasicPrints';
@@ -126,7 +126,7 @@ export class IfElseDifferentVarsEnterElse extends EvalLastLineSubtopic {
   }
 }
 
-export class IfWithPrintEntered extends EvalLastLineSubtopic {
+export class IfWithPrintEntered extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const [a, b, c, d] = randInts(1n, 10n, 4);
@@ -139,11 +139,11 @@ export class IfWithPrintEntered extends EvalLastLineSubtopic {
       `${a}`, `${b}`, `${c}`, `${d}`,
       `${a}\n${d}`, `${b}\n${c}`, `${a}\n${c}`, `${b}\n${d}`,
       `${a} ${b}`, `${c} ${d}`, `${a} ${c}`, `${b} ${d}`
-    ], {}, ctx);
+    ], {usesOutput: true}, ctx);
   }
 }
 
-export class IfWithPrintSkipped extends EvalLastLineSubtopic {
+export class IfWithPrintSkipped extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const [a, b, c, d] = randInts(1n, 10n, 4);
@@ -156,11 +156,11 @@ export class IfWithPrintSkipped extends EvalLastLineSubtopic {
         `${a}`, `${b}`, `${c}`, `${d}`,
         `${a}\n${d}`, `${b}\n${c}`, `${a}\n${c}`, `${b}\n${d}`,
         `${a} ${b}`, `${c} ${d}`, `${a} ${c}`, `${b} ${d}`
-      ], {}, ctx);
+      ], {usesOutput: true}, ctx);
   }
 }
 
-export class IfElseWithPrint extends EvalLastLineSubtopic {
+export class IfElseWithPrint extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const [a, b, c, d, e] = randInts(1n, 10n, 5);
@@ -175,7 +175,7 @@ export class IfElseWithPrint extends EvalLastLineSubtopic {
       `${a}`, `${b}`, `${c}`, `${d}`, `${e}`,
       `${a}\n${d}`, `${b}\n${c}`, `${a}\n${c}`, `${b}\n${d}`, `${b}\n${e}`, `${c}\n${e}`, `${d}\n${e}`,
       `${a} ${b}`, `${c} ${d}`, `${a} ${c}`, `${b} ${d}`, `${a} ${e}`, `${b} ${e}`, `${c} ${e}`, `${d} ${e}`
-    ], {}, ctx);
+    ], {usesOutput: true}, ctx);
   }
 }
 

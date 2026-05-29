@@ -53,6 +53,12 @@ export class StringConcat extends StringConcatBase {
 }
 
 export class StringConcatBackwards extends StringConcatBase {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Be careful to read the variables and operation in the correct order.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const [a, b] = randChoices(STRINGS, 2);
     return this.genQuestion(a, b, ctx, true);
@@ -76,6 +82,12 @@ export class StringConcat_1IntLikeBackwards extends StringConcatBase {
 }
 
 export class StringConcat_2IntLike extends StringConcatBase {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'When in quotes, the contents are treated literally, not as numbers.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const [a, b] = randInts(1n, 9n, 2);
     return this.genQuestion(a, b, ctx);

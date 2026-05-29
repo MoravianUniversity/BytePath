@@ -5,6 +5,12 @@ import { randOperation } from './BasicVariables';
 
 
 export class Func2ArgsAdd extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'When a function is called with multiple arguments, the arguments are substituted for the parameters in the function body in the order they are given.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 5n, 2, false);
@@ -17,6 +23,12 @@ export class Func2ArgsAdd extends EvalLastLineSubtopic {
 }
 
 export class Func2ArgsSub extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'When a function is called with multiple arguments, the arguments are substituted for the parameters in the function body in the order they are given.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 5n, 2);
@@ -29,18 +41,30 @@ export class Func2ArgsSub extends EvalLastLineSubtopic {
 }
 
 export class Func2ArgsSubBackwards extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Make sure to read the variables and operation in the correct order.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 5n, 2);
     const func = randFunc();
     return createQuestion(`
       def ${func}(${x}, ${y}):
-          return ${x} - ${y}
+          return ${y} - ${x}
       ${func}(${a}, ${b})`, range(0n, 10n), {}, ctx);
   }
 }
 
 export class Func2ArgsMult extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'When a function is called with multiple arguments, the arguments are substituted for the parameters in the function body in the order they are given.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 4n, 2);
@@ -68,6 +92,12 @@ export class Func2ArgsVar extends EvalLastLineSubtopic {
 }
 
 export class Func2ArgsReassign extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Parameters are like variables that can be reassigned within the function body.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const [a, b, c] = randInts(1n, 5n, 3);
     const func = randFunc();

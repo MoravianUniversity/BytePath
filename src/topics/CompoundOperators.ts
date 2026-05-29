@@ -5,6 +5,12 @@ import { BASIC_VARIABLES } from './BasicVariables';
 import { STRING_CONCAT } from './StringConcat';
 
 export class CompoundAdd extends EvalLastLineSubtopic {
+    readonly help = [
+        {
+            afterFailedAttempts: 2,
+            message: 'The compound operator += is equivalent to the simple operator (+) followed by an assignment (=).',
+        },
+    ];
     generateQuestion(ctx: GenerateContext) {
         const var1 = randVariable();
         const [a, b] = randInts(1n, 5n, 2);
@@ -17,6 +23,12 @@ export class CompoundAdd extends EvalLastLineSubtopic {
 }
 
 export class CompoundSubtract extends EvalLastLineSubtopic {
+    readonly help = [
+        {
+            afterFailedAttempts: 2,
+            message: 'The compound operator -= is equivalent to the simple operator (-) followed by an assignment (=).',
+        },
+    ];
     generateQuestion(ctx: GenerateContext) {
         const var1 = randVariable();
         const [a, b] = randInts(1n, 5n, 2);
@@ -29,6 +41,12 @@ export class CompoundSubtract extends EvalLastLineSubtopic {
 }
 
 export class CompoundMultiply extends EvalLastLineSubtopic {
+    readonly help = [
+        {
+            afterFailedAttempts: 2,
+            message: 'The compound operator *= is equivalent to the simple operator (*) followed by an assignment (=).',
+        },
+    ];
     generateQuestion(ctx: GenerateContext) {
         const var1 = randVariable();
         const [a, b] = randInts(1n, 3n, 2);
@@ -41,6 +59,12 @@ export class CompoundMultiply extends EvalLastLineSubtopic {
 }
 
 export class CompoundMulti extends EvalLastLineSubtopic {
+    readonly help = [
+        {
+            afterFailedAttempts: 2,
+            message: 'You must evaluate the expression on the right side of the compound operator before performing the multiplication and assignment.',
+        },
+    ];
     generateQuestion(ctx: GenerateContext) {
         const var1 = randVariable();
         const [a, b, c] = randInts(1n, 4n, 3);
@@ -52,6 +76,12 @@ export class CompoundMulti extends EvalLastLineSubtopic {
 }
 
 export class CompoundConcat extends EvalLastLineSubtopic {
+    readonly help = [
+        {
+            afterFailedAttempts: 2,
+            message: 'Remember that + with strings concatenates the strings, not adds.',
+        },
+    ];
     generateQuestion(ctx: GenerateContext) {
         const var1 = randVariable();
         const [a, b] = randChoices(STRINGS, 2);

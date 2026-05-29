@@ -1,9 +1,9 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext, CodeOutputSubtopic } from '../topics';
 import { randVariable, randVars, randInt, range } from '../util';
 import { createException } from '../python';
 import { FOR_LOOP_BASICS } from './ForLoopBasics';
 
-export class ForLoopPrintRange extends EvalLastLineSubtopic {
+export class ForLoopPrintRange extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const i = randInt(2n, 5n);
@@ -21,11 +21,11 @@ export class ForLoopPrintRange extends EvalLastLineSubtopic {
         range(1n, 3n).join('\n'),
         range(1n, 4n).join('\n'),
         range(1n, 5n).join('\n'),
-      ], {}, ctx);
+      ], {usesOutput: true}, ctx);
   }
 }
 
-export class ForLoopRangeToList extends EvalLastLineSubtopic {
+export class ForLoopRangeToList extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const i = randInt(2n, 5n);
@@ -44,11 +44,11 @@ export class ForLoopRangeToList extends EvalLastLineSubtopic {
         range(1n, 3n),
         range(1n, 4n),
         range(1n, 5n),
-      ], {}, ctx);
+      ], {usesOutput: true}, ctx);
   }
 }
 
-export class ForLoopPrintRangeTo1 extends EvalLastLineSubtopic {
+export class ForLoopPrintRangeTo1 extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     return createQuestion(`
@@ -60,11 +60,11 @@ export class ForLoopPrintRangeTo1 extends EvalLastLineSubtopic {
         range(1n, 1n).join('\n'),
         range(0n, 2n).join('\n'),
         range(1n, 2n).join('\n'),
-      ], {}, ctx);
+      ], {usesOutput: true}, ctx);
   }
 }
 
-export class ForLoopPrintRangeTo0 extends EvalLastLineSubtopic {
+export class ForLoopPrintRangeTo0 extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     return createQuestion(`
@@ -73,11 +73,11 @@ export class ForLoopPrintRangeTo0 extends EvalLastLineSubtopic {
       `, [
         range(0n, 0n).join('\n'),
         createException('ValueError'),
-      ], {}, ctx);
+      ], {usesOutput: true}, ctx);
   }
 }
 
-export class ForLoopPrintRangeToNeg1 extends EvalLastLineSubtopic {
+export class ForLoopPrintRangeToNeg1 extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     return createQuestion(`
@@ -89,11 +89,11 @@ export class ForLoopPrintRangeToNeg1 extends EvalLastLineSubtopic {
         range(0n, 0n).join('\n'),
         range(-1n, 0n).reverse().join('\n'),
         createException('ValueError'),
-      ], {}, ctx);
+      ], {usesOutput: true}, ctx);
   }
 }
 
-export class ForLoopPrintRangeStartStop extends EvalLastLineSubtopic {
+export class ForLoopPrintRangeStartStop extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const i = randInt(2n, 3n);
@@ -107,11 +107,11 @@ export class ForLoopPrintRangeStartStop extends EvalLastLineSubtopic {
         range(i+1n, j).join('\n'),
         range(i, i+j).join('\n'),
         [i, j].join('\n'),
-      ], {}, ctx);
+      ], {usesOutput: true}, ctx);
   }
 }
 
-export class ForLoopPrintRangeStartStopPlus1 extends EvalLastLineSubtopic {
+export class ForLoopPrintRangeStartStopPlus1 extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const i = randInt(2n, 5n);
@@ -121,11 +121,11 @@ export class ForLoopPrintRangeStartStopPlus1 extends EvalLastLineSubtopic {
       `, [
         range(i, i).join('\n'),
         range(i, i+1n).join('\n'),
-      ], {}, ctx);
+      ], {usesOutput: true}, ctx);
   }
 }
 
-export class ForLoopPrintRangeStartStopSame extends EvalLastLineSubtopic {
+export class ForLoopPrintRangeStartStopSame extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const i = randInt(2n, 5n);
@@ -136,11 +136,11 @@ export class ForLoopPrintRangeStartStopSame extends EvalLastLineSubtopic {
         range(i, i).join('\n'),
         range(i, i+1n).join('\n'),
         createException('ValueError'),
-      ], {}, ctx);
+      ], {usesOutput: true}, ctx);
   }
 }
 
-export class ForLoopPrintRangeStartStopBackwards extends EvalLastLineSubtopic {
+export class ForLoopPrintRangeStartStopBackwards extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const i = randInt(4n, 5n);
@@ -156,11 +156,11 @@ export class ForLoopPrintRangeStartStopBackwards extends EvalLastLineSubtopic {
         [i, j].join('\n'),
         [j, i].join('\n'),
         createException('ValueError'),
-      ], {}, ctx);
+      ], {usesOutput: true}, ctx);
   }
 }
 
-export class ForLoopPrintRangeStartNegStopNeg extends EvalLastLineSubtopic {
+export class ForLoopPrintRangeStartNegStopNeg extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const i = randInt(-5n, -4n);
@@ -178,7 +178,7 @@ export class ForLoopPrintRangeStartNegStopNeg extends EvalLastLineSubtopic {
         [i, j].join('\n'),
         [j, i].join('\n'),
         createException('ValueError'),
-      ], {}, ctx);
+      ], {usesOutput: true}, ctx);
   }
 }
 

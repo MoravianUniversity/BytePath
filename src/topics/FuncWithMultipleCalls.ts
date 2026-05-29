@@ -95,6 +95,12 @@ function args(numArgs: number, fixedArgs: string[] = []): string {
 
 
 class FuncCallsAdd extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Each time a function is called, the arguments are substituted for the parameters in the function body in the order they are given and the returned value is used where the function call is.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const [func, numArgs, funcCode] = genFunction();
     const args1 = args(numArgs);
@@ -107,6 +113,12 @@ class FuncCallsAdd extends EvalLastLineSubtopic {
 }
 
 class FuncCallsSub extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Each time a function is called, the arguments are substituted for the parameters in the function body in the order they are given and the returned value is used where the function call is.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const [func, numArgs, funcCode] = genFunction();
     const args1 = args(numArgs);
@@ -119,6 +131,12 @@ class FuncCallsSub extends EvalLastLineSubtopic {
 }
 
 class FuncCallsNested extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The first function call (inside the parentheses) is evaluated first and its returned value is used as the argument for the second function call.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const [func, numArgs, funcCode] = genFunction();
     const args1 = args(numArgs);
@@ -131,6 +149,12 @@ class FuncCallsNested extends EvalLastLineSubtopic {
 }
 
 class FuncCallsNested2 extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The first function call (inside the parentheses) is evaluated first and its returned value is used as the argument for the second function call.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     let [func, numArgs, funcCode] = genFunction();
     while (numArgs !== 2) {
@@ -146,6 +170,12 @@ class FuncCallsNested2 extends EvalLastLineSubtopic {
 }
 
 class FuncCallsNested2Both extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Both of the function calls inside the parentheses are evaluated before their return values are used as arguments for the third (outside) function call.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     let [func, numArgs, funcCode] = genFunction();
     while (numArgs !== 2) {
@@ -162,6 +192,12 @@ class FuncCallsNested2Both extends EvalLastLineSubtopic {
 }
 
 class FuncCallsAddNested extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The first function call (inside the parentheses) is evaluated first and its returned value is used as the argument for the second function call.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const [func, numArgs, funcCode] = genFunction();
     const args1 = args(numArgs);
@@ -175,6 +211,12 @@ class FuncCallsAddNested extends EvalLastLineSubtopic {
 }
 
 class FuncCallsNestedAdd extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Make sure to read the code carefully and understand the order of operations.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const [func, numArgs, funcCode] = genFunction();
     const args1 = args(numArgs);
@@ -188,6 +230,12 @@ class FuncCallsNestedAdd extends EvalLastLineSubtopic {
 }
 
 class Func2CallsAdd extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Make sure to read the code carefully and understand the order of operations.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const [func1, numArgs1, funcCode1] = genFunction();
     let [func2, numArgs2, funcCode2] = genFunction();
@@ -204,6 +252,12 @@ class Func2CallsAdd extends EvalLastLineSubtopic {
 }
 
 class Func2CallsAddBackwards extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Make sure to read the code carefully and understand the order of operations.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const [func1, numArgs1, funcCode1] = genFunction();
     let [func2, numArgs2, funcCode2] = genFunction();
@@ -213,13 +267,19 @@ class Func2CallsAddBackwards extends EvalLastLineSubtopic {
     const args1 = args(numArgs1);
     const args2 = args(numArgs2);
     const code = `${funcCode1}${funcCode2}
-      ${func2}(${args2}) + ${func1}(${args1})
+      ${func2}(${args2}) - ${func1}(${args1})
     `;
     return createQuestion(code, range(-15n, 15n), {}, ctx);
   }
 }
 
 class Func2CallsNested extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Make sure to read the code carefully and understand the order of operations.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const [func1, numArgs1, funcCode1] = genFunction();
     let [func2, numArgs2, funcCode2] = genFunction();
@@ -236,6 +296,12 @@ class Func2CallsNested extends EvalLastLineSubtopic {
 }
 
 class Func2CallsNestedBackwards extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Make sure to read the code carefully and understand the order of operations.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const [func1, numArgs1, funcCode1] = genFunction();
     let [func2, numArgs2, funcCode2] = genFunction();

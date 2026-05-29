@@ -57,6 +57,12 @@ export class TwoVariableOp extends EvalLastLineSubtopic {
 }
 
 export class TwoVariableOpBackwards extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Be careful to read the variables and operation in the correct order.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 10n, 2);
@@ -80,6 +86,12 @@ export class TwoVariableOpBackwards extends EvalLastLineSubtopic {
 }
 
 export class VariableReassignment extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Reassigning a variable replaces the previous value with the new value.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const [a, b, c] = randInts(1n, 10n, 3);
@@ -126,6 +138,12 @@ export class VariableReassignmentBackwards extends EvalLastLineSubtopic {
 }
 
 export class VariableReassignmentOp extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Read each line of code one at a time, updating the variable with the new value as you go.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const [a, b, c] = randInts(1n, 6n, 3);

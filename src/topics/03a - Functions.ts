@@ -17,7 +17,6 @@ import { PRACTICE_03A_BASIC_FUNCTIONS } from './03a - Basic Functions';
 // if __name__ == "__main__":
 //     main()
 
-
 export class Functions1 extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const [x, y, z] = randVars(3);
@@ -144,7 +143,7 @@ export class Functions3 extends CodeOutputSubtopic {
 
 // TODO: this does not work in quiz mode (they cannot type the echoed input correctly)
 //  also the wrong answers don't have the correct echos either
-// class Functions4 extends Subtopic {
+// class Functions4 extends CodeOutputSubtopic {
 //   generateQuestion(ctx: GenerateContext) {
 //     const [x, y] = randVars(2);
 //     const [f, g] = randFuncs(2);

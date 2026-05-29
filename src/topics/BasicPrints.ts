@@ -1,8 +1,14 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, GenerateContext, CodeOutputSubtopic, createQuestion } from '../topics';
 import { randInt, randChoice, randChoices, STRINGS, randVariable } from '../util';
 import { STRING_CONCAT } from './StringConcat';
 
-export class PrintString extends EvalLastLineSubtopic {
+export class PrintString extends CodeOutputSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'When printing a string, the quotes are not shown in the output and each `print()` ends up on a new line.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const [a, b] = randChoices(STRINGS, 2);
     return createQuestion(`
@@ -19,11 +25,17 @@ export class PrintString extends EvalLastLineSubtopic {
       `${a}${b}`,
       `${b}${a}`,
       `${a} ${b}`,
-    ], {}, ctx);
+    ], {usesOutput: true}, ctx);
   }
 }
 
-export class PrintStringMulti extends EvalLastLineSubtopic {
+export class PrintStringMulti extends CodeOutputSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'When printing multiple strings with a single `print()`, they are printed on the same line, separated by a space.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const [a, b] = randChoices(STRINGS, 2);
     return createQuestion(`
@@ -39,11 +51,17 @@ export class PrintStringMulti extends EvalLastLineSubtopic {
       `${a}${b}`,
       `${b}${a}`,
       `${a} ${b}`,
-    ], {}, ctx);
+    ], {usesOutput: true}, ctx);
   }
 }
 
-export class PrintStringVar extends EvalLastLineSubtopic {
+export class PrintStringVar extends CodeOutputSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'When printing a variable, the value of the variable is printed, not the variable name.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const a = randChoice(STRINGS);
@@ -56,11 +74,17 @@ export class PrintStringVar extends EvalLastLineSubtopic {
       `'${x}'`,
       `"${a}"`,
       `'${a}'`
-    ], {}, ctx);
+    ], {usesOutput: true}, ctx);
   }
 }
 
-export class PrintStringVar2 extends EvalLastLineSubtopic {
+export class PrintStringVar2 extends CodeOutputSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Make sure to pay attention to variables vs string literals.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const [a, b] = randChoices(STRINGS, 2);
@@ -77,11 +101,17 @@ export class PrintStringVar2 extends EvalLastLineSubtopic {
       `${a}${b}`,
       `${b}${a}`,
       `${a} ${b}`,
-    ], {}, ctx);
+    ], {usesOutput: true}, ctx);
   }
 }
 
-export class PrintStringMultiVar extends EvalLastLineSubtopic {
+export class PrintStringMultiVar extends CodeOutputSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Make sure to pay attention to variables vs string literals when printing.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const [a, b, c] = randChoices(STRINGS, 3);
@@ -96,11 +126,17 @@ export class PrintStringMultiVar extends EvalLastLineSubtopic {
       `${x} ${b}\n${a} ${b}`,
       `${x} ${b}\n${a} ${c}`,
       `${x} ${b}\n${a} ${b}`,
-    ], {}, ctx);
+    ], {usesOutput: true}, ctx);
   }
 }
 
-export class PrintStringUpdateVar extends EvalLastLineSubtopic {
+export class PrintStringUpdateVar extends CodeOutputSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Remember to read each line of code one at a time and update the variable with the new value at the correct time.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const [a, b] = randChoices(STRINGS, 2);
@@ -116,11 +152,17 @@ export class PrintStringUpdateVar extends EvalLastLineSubtopic {
       `${x}\n${a}`,
       `${x}\n${b}`,
       `${x}\n${x}`,
-    ], {}, ctx);
+    ], {usesOutput: true}, ctx);
   }
 }
 
-export class PrintStringWithMath extends EvalLastLineSubtopic {
+export class PrintStringWithMath extends CodeOutputSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The math expression is evaluated before printing the result.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const a = randInt(1n, 10n);
     const b = randInt(1n, 10n);
@@ -132,11 +174,17 @@ export class PrintStringWithMath extends EvalLastLineSubtopic {
       `"${a}" + "${b}"`,
       `${a}${b}`,
       `"${a}${b}"`,
-    ], {}, ctx);
+    ], {usesOutput: true}, ctx);
   }
 }
 
-export class PrintStringWithQuotedMath extends EvalLastLineSubtopic {
+export class PrintStringWithQuotedMath extends CodeOutputSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Inside a string literal, the math expression is never evaluated since it is literal text.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const a = randInt(1n, 10n);
     const b = randInt(1n, 10n);
@@ -148,11 +196,17 @@ export class PrintStringWithQuotedMath extends EvalLastLineSubtopic {
       `"${a}" + "${b}"`,
       `${a}${b}`,
       `"${a}${b}"`,
-    ], {}, ctx);
+    ], {usesOutput: true}, ctx);
   }
 }
 
-export class PrintStringWithQuotedMath2 extends EvalLastLineSubtopic {
+export class PrintStringWithQuotedMath2 extends CodeOutputSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Remember that string concatenation and not numeric addition is done when the values are string literals.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const a = randInt(1n, 10n);
     const b = randInt(1n, 10n);
@@ -164,7 +218,7 @@ export class PrintStringWithQuotedMath2 extends EvalLastLineSubtopic {
       `"${a} + ${b}"`,
       `${a} + ${b}`,
       `"${a}${b}"`,
-    ], {}, ctx);
+    ], {usesOutput: true}, ctx);
   }
 }
 

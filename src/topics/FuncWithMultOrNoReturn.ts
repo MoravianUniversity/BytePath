@@ -4,6 +4,12 @@ import { FUNC_WITH_MULTIPLE_ARGS } from './FuncWithMultipleArgs';
 
 
 class FuncWithMultReturnFirst extends EvalLastLineSubtopic {
+    readonly help = [
+        {
+            afterFailedAttempts: 2,
+            message: 'When a function returns multiple values, the returned values are assigned to the variables in the order they are returned.',
+        },
+    ];
     generateQuestion(ctx: GenerateContext) {
         const x = randVariable();
         const [c, d] = randVars(2);
@@ -18,6 +24,12 @@ class FuncWithMultReturnFirst extends EvalLastLineSubtopic {
 }
 
 class FuncWithMultReturnSecond extends EvalLastLineSubtopic {
+    readonly help = [
+        {
+            afterFailedAttempts: 2,
+            message: 'When a function returns multiple values, the returned values are assigned to the variables in the order they are returned.',
+        },
+    ];
     generateQuestion(ctx: GenerateContext) {
         const x = randVariable();
         const [c, d] = randVars(2);
@@ -41,11 +53,17 @@ class FuncWithMultReturnBoth extends EvalLastLineSubtopic {
           def ${func}(${x}):
               return ${x}, ${x} - ${b}
           ${c}, ${d} = ${func}(${a})
-          ${c} + ${d}`, [...range(0n, 10n), null, Error()], {}, ctx);
+          ${c} - ${d}`, [...range(-5n, 5n), null, Error()], {}, ctx);
     }
 }
 
 class FuncWithNoReturn extends EvalLastLineSubtopic {
+    readonly help = [
+        {
+            afterFailedAttempts: 2,
+            message: 'When a function does not have an explicit return statement, it returns the special value `None`.',
+        },
+    ];
     generateQuestion(ctx: GenerateContext) {
         const [x, y, z] = randVars(3);
         const [a, b] = randInts(1n, 5n, 2, false);
@@ -59,6 +77,12 @@ class FuncWithNoReturn extends EvalLastLineSubtopic {
 }
 
 class FuncWithNoReturnNamed extends EvalLastLineSubtopic {
+    readonly help = [
+        {
+            afterFailedAttempts: 2,
+            message: 'When a function does not have an explicit return statement, it returns the special value `None`.',
+        },
+    ];
     generateQuestion(ctx: GenerateContext) {
         const [x, y, z] = randVars(3);
         const [a, b] = randInts(1n, 5n, 2, false);
@@ -72,6 +96,12 @@ class FuncWithNoReturnNamed extends EvalLastLineSubtopic {
 }
 
 class FuncWithNoReturnNamedOutside extends EvalLastLineSubtopic {
+    readonly help = [
+        {
+            afterFailedAttempts: 2,
+            message: 'When a function does not have an explicit return statement, it returns the special value `None`. The variables used in the function itself are not available outside the function.',
+        },
+    ];
     generateQuestion(ctx: GenerateContext) {
         const [x, y, z] = randVars(3);
         const [a, b] = randInts(1n, 5n, 2, false);

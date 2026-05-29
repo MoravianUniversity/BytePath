@@ -21,42 +21,102 @@ abstract class DivisionArithmetic extends EvalLastLineSubtopic {
   }
 }
 export class FloatDivisionWithFraction extends DivisionArithmetic {
+    readonly help = [
+        {
+            afterFailedAttempts: 2,
+            message: 'The result of division is a number with a decimal point.',
+        },
+    ];
     constructor() { super('/'); }
     generateQuestion(ctx: GenerateContext) { return this.genQuestion(randChoice([1n, 3n, 7n, 9n]), randChoice([2n, 4n, 5n]), ctx); }
 }
 export class PerfectFloatDivision2 extends DivisionArithmetic {
+    readonly help = [
+        {
+            afterFailedAttempts: 2,
+            message: 'The result of division is a number with a decimal point.',
+        },
+    ];
     constructor() { super('/'); }
     generateQuestion(ctx: GenerateContext) { return this.genQuestion(randInt(1n, 5n)*2n, 2n, ctx, 1); }
 }
 export class PerfectFloatDivision3 extends DivisionArithmetic {
+    readonly help = [
+        {
+            afterFailedAttempts: 2,
+            message: 'The result of division is a number with a decimal point.',
+        },
+    ];
     constructor() { super('/'); }
     generateQuestion(ctx: GenerateContext) { return this.genQuestion(randInt(1n, 4n)*3n, 3n, ctx, 1); }
 }
 export class PerfectIntDivision2WithHint extends DivisionArithmetic {
+    readonly help = [
+        {
+            afterFailedAttempts: 2,
+            message: 'An integer division result is always an integer, dropping anything after the decimal point.',
+        },
+    ];
     constructor() { super('//'); }
     generateQuestion(ctx: GenerateContext) { return this.genQuestion(randInt(2n, 5n)*2n, 2n, ctx, 1, '// is "integer division"'); }
 }
 export class PerfectIntDivision2 extends DivisionArithmetic {
+    readonly help = [
+        {
+            afterFailedAttempts: 2,
+            message: 'An integer division result is always an integer, dropping anything after the decimal point.',
+        },
+    ];
     constructor() { super('//'); }
     generateQuestion(ctx: GenerateContext) { return this.genQuestion(randInt(2n, 5n)*2n, 2n, ctx, 1); }
 }
 export class PerfectIntDivision3 extends DivisionArithmetic {
+    readonly help = [
+        {
+            afterFailedAttempts: 2,
+            message: 'An integer division result is always an integer, dropping anything after the decimal point.',
+        },
+    ];
     constructor() { super('//'); }
     generateQuestion(ctx: GenerateContext) { return this.genQuestion(randInt(1n, 4n)*3n, 3n, ctx, 1); }
 }
 export class IntDivision extends DivisionArithmetic {
+    readonly help = [
+        {
+            afterFailedAttempts: 2,
+            message: 'An integer division result is always an integer, dropping anything after the decimal point.',
+        },
+    ];
     constructor() { super('//'); }
     generateQuestion(ctx: GenerateContext) { return this.genQuestion(randChoice([3n, 7n, 9n, 11n]), randChoice([2n, 4n, 5n]), ctx); }
 }
 export class ModuloWithHint extends DivisionArithmetic {
+    readonly help = [
+        {
+            afterFailedAttempts: 2,
+            message: 'The remainder is the integral amount left over after the division is performed.',
+        },
+    ];
     constructor() { super('%'); }
     generateQuestion(ctx: GenerateContext) { return this.genQuestion(randChoice([3n, 7n, 9n, 11n]), 2n, ctx, 1, '% is "remainder"'); }
 }
 export class Modulo extends DivisionArithmetic {
+    readonly help = [
+        {
+            afterFailedAttempts: 2,
+            message: 'The remainder is the integral amount left over after the division is performed.',
+        },
+    ];
     constructor() { super('%'); }
     generateQuestion(ctx: GenerateContext) { return this.genQuestion(randChoice([3n, 7n, 9n, 11n]), 2n, ctx, 1); }
 }
 export class ModuloToZero extends DivisionArithmetic {
+    readonly help = [
+        {
+            afterFailedAttempts: 2,
+            message: 'The remainder is the integral amount left over after the division is performed.',
+        },
+    ];
     constructor() { super('%'); }
     generateQuestion(ctx: GenerateContext) { return this.genQuestion(randChoice([2n, 5n])*2n, 2n, ctx, 1); }
 }

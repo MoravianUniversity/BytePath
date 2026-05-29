@@ -111,7 +111,7 @@ class InputInt extends EvalLastLineSubtopic {
 
 // TODO: this does not work in quiz mode (they cannot type the echoed input correctly)
 //  also the wrong answers don't have the correct echos either
-// class InputOutputTest extends EvalLastLineSubtopic {
+// class InputOutputTest extends CodeOutputSubtopic {
 //   generateQuestion(ctx: GenerateContext) {
 //     const x = randVariable();
 //     const a = randChoice(STRINGS);

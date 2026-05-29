@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext, CodeOutputSubtopic } from '../topics';
 import { randInts, randChoice, randChoices, randIntNum, randVars, randInt } from '../util';
 import { toPyAtom, toPyStr } from '../python.ts';
 
@@ -87,7 +87,7 @@ class NumberOfLoopsRangeNested extends EvalLastLineSubtopic {
   }
 }
 
-class ShortCode1 extends EvalLastLineSubtopic {
+class ShortCode1 extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const words = (Math.random() < 0.7) ? randChoices(ANIMALS, 3) : ["Coding", "Is", "Fun!"];
     const [x, y, z, w] = randVars(4);
@@ -98,11 +98,11 @@ class ShortCode1 extends EvalLastLineSubtopic {
           ${y} += len(${z})
           print(${y}, ${z})
       for ${w} in range(len(${x})):
-          print(${w}, ${x}[${w}])`, [], {}, ctx);
+          print(${w}, ${x}[${w}])`, [], {usesOutput: true}, ctx);
   }
 }
 
-class ShortCode2 extends EvalLastLineSubtopic {
+class ShortCode2 extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     let [outer, inner] = randInts(2n, 4n, 2);
     if (outer > inner) { [outer, inner] = [inner, outer]; }
@@ -113,11 +113,11 @@ class ShortCode2 extends EvalLastLineSubtopic {
           ${y} = ''
           for ${z} in range(${inner}):
               ${y} += str(${z})
-          print(${x}, ${y})`, [], {}, ctx);
+          print(${x}, ${y})`, [], {usesOutput: true}, ctx);
   }
 }
 
-class LongCode extends EvalLastLineSubtopic {
+class LongCode extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const fun = randChoice(["build", "compute", "process", "fun"]);
     const var_names = randVars(3);
@@ -186,7 +186,7 @@ def ${fun}(${param}):
 def main():
     ${main_code}
 
-    main()`, [], {}, ctx);
+    main()`, [], {usesOutput: true}, ctx);
   }
 }
 

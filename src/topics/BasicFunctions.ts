@@ -4,6 +4,12 @@ import { BASIC_ARITHMETIC } from './BasicArithmetic';
 import { BASIC_VARIABLES, randOperation } from './BasicVariables';
 
 export class FuncNoArgs extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'When a function is "called" using its name and parentheses, it is executed and the returned value is used in place of the function call.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const a = randInt(1n, 10n);
     const func = randFunc();
@@ -15,6 +21,12 @@ export class FuncNoArgs extends EvalLastLineSubtopic {
 }
 
 export class FuncArg extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'When a function is called with an argument, the parameter variable takes the value of the argument within the function body.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const a = randInt(1n, 10n);
     const arg = randVariable();
@@ -39,6 +51,12 @@ export class FuncArgUnused extends EvalLastLineSubtopic {
 }
 
 export class FuncArgWithMath extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'When a function is called with an argument, the argument is substituted for the parameter variable in the function body',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const [a, b] = randInts(1n, 5n, 2);
     const op = randOperation();
@@ -64,6 +82,12 @@ export class FuncArgWithMathRepeated extends EvalLastLineSubtopic {
 }
 
 export class FuncWithMathAfter extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The function is called and the returned value is used in the math expression in place of the function call.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const [a, b] = randInts(1n, 5n, 2);
     const op = randOperation();
@@ -76,6 +100,12 @@ export class FuncWithMathAfter extends EvalLastLineSubtopic {
 }
 
 export class FuncWithMathBefore extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The function is called and the returned value is used in the math expression in place of the function call.',
+    },
+  ];
   generateQuestion(ctx: GenerateContext) {
     const [a, b] = randInts(1n, 5n, 2);
     const op = randOperation();

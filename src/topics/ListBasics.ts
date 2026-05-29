@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext, CodeOutputSubtopic } from '../topics';
 import { randInt, randInts, randIntNum, randChoice, randChoices, randVariable, randVars, STRINGS, randFloats, shuffle, range } from '../util';
 import { toPyAtom, toPyStr } from '../python';
 import { BASIC_VARIABLES } from './BasicVariables';
@@ -143,18 +143,18 @@ function getAllPairs(list1: any[], list2: any[]) {
   return pairs;
 }
 
-export class PrintList extends EvalLastLineSubtopic {
+export class PrintList extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const x = randVariable();
     const list = [...randInts(1n, 10n, randIntNum(1, 2)), ...randFloats(1, 2, randIntNum(1, 2))];
     return createQuestion(`
       ${x} = ${toPyAtom(list)}
       print(${x})
-    `, badLists(list), {}, ctx);
+    `, badLists(list), {usesOutput: true}, ctx);
   }
 }
 
-export class PrintListWithStr extends EvalLastLineSubtopic {
+export class PrintListWithStr extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b] = randChoices(STRINGS, 2);
@@ -165,7 +165,7 @@ export class PrintListWithStr extends EvalLastLineSubtopic {
       ${y} = ${toPyStr(a)}
       ${x} = ${toPyAtom(list)}
       print(${x}[0], ${x})
-    `, getAllPairs([toPyStr(a), x[0]], badLists(listWithVar)), {}, ctx);
+    `, getAllPairs([toPyStr(a), x[0]], badLists(listWithVar)), {usesOutput: true}, ctx);
   }
 }
 

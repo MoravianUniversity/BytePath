@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext, CodeOutputSubtopic } from '../topics';
 import { randInts, range, randChoices, randIntNum, randVars } from '../util';
 import { toPyAtom } from '../python.ts';
 import { FOR_LOOP_BASICS } from './ForLoopBasics.ts';
@@ -8,7 +8,7 @@ import { BASIC_BRANCHING } from './BasicBranching';
 
 const ANIMALS = ["cat", "dog", "bird", "fish", "snake", "turtle", "duck", "cow", "pig"]
 
-export class ForLoopNestingPrintList extends EvalLastLineSubtopic {
+export class ForLoopNestingPrintList extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const [x, y] = ['i', 'j'];
     const [i, j] = randInts(2n, 3n, 2);
@@ -21,11 +21,11 @@ export class ForLoopNestingPrintList extends EvalLastLineSubtopic {
           range(0n, j-1n).map(x => range(0n, i-1n).map(y => `${x} ${y}`).join('\n')).join('\n'),
           range(0n, j-1n).map(x => range(0n, i-1n).map(y => `${x}\n${y}`).join('\n')).join('\n'),
           range(0n, i-1n).map(x => range(0n, j-1n).map(y => `${x}\n${y}`).join('\n')).join('\n'),
-        ], {}, ctx);
+        ], {usesOutput: true}, ctx);
   }
 }
 
-export class ForLoopNestingPrintVs extends EvalLastLineSubtopic {
+export class ForLoopNestingPrintVs extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const w = "animals";
     const x = "animal1";
@@ -43,11 +43,11 @@ export class ForLoopNestingPrintVs extends EvalLastLineSubtopic {
         animals.map((animal, i) => animals.slice(i+1).map(a => `${animal} vs ${a}`).join('\n')).join('\n'),
         animals.map(animal => `${animals[0]} vs ${animal}`).join('\n'),
         animals.slice(1).map(animal => `${animals[0]} vs ${animal}`).join('\n'),
-      ], {}, ctx);
+      ], {usesOutput: true}, ctx);
   }
 }
 
-export class ForLoopNestingPrintVsSkipEqual extends EvalLastLineSubtopic {
+export class ForLoopNestingPrintVsSkipEqual extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const w = "animals";
     const x = "animal1";
@@ -66,7 +66,7 @@ export class ForLoopNestingPrintVsSkipEqual extends EvalLastLineSubtopic {
         animals.map((animal, i) => animals.slice(i+1).map(a => `${animal} vs ${a}`).join('\n')).join('\n'),
         animals.map(animal => `${animals[0]} vs ${animal}`).join('\n'),
         animals.slice(1).map(animal => `${animals[0]} vs ${animal}`).join('\n'),
-      ], {}, ctx);
+      ], {usesOutput: true}, ctx);
   }
 }
 

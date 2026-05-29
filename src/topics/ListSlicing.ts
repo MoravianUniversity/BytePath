@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext, CodeOutputSubtopic } from '../topics';
 import { randInt, randInts, randVariable, randVars, randIntNum, randChoice, randChoices, STRINGS, range, ASCII_LETTERS } from "../util";
 import { toPyAtom, toPyStr } from "../python";
 import { LIST_BASICS } from "./ListBasics";
@@ -135,7 +135,7 @@ export class ListSlicingFromNoneToNone extends ListSlicingBase {
   }
 }
 
-export class ListCopyAndModify extends EvalLastLineSubtopic {
+export class ListCopyAndModify extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const list = makeList(randIntNum(2, 4));
@@ -151,11 +151,11 @@ export class ListCopyAndModify extends EvalLastLineSubtopic {
       `, [
         toPyAtom(list) + " " + toPyAtom(list),
         toPyAtom(result) + " " + toPyAtom(result),
-      ], {}, ctx);
+      ], {usesOutput: true}, ctx);
   }
 }
 
-export class ListAssignAndModify extends EvalLastLineSubtopic {
+export class ListAssignAndModify extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const list = makeList(randIntNum(2, 4));
@@ -171,7 +171,7 @@ export class ListAssignAndModify extends EvalLastLineSubtopic {
       `, [
         toPyAtom(list) + " " + toPyAtom(list),
         toPyAtom(result) + " " + toPyAtom(result),
-      ], {}, ctx);
+      ], {usesOutput: true}, ctx);
   }
 }
 

@@ -57,6 +57,12 @@ export class AdditionWithNegative extends BasicArithmetic {
   generateQuestion(ctx: GenerateContext) { return this.genQuestion(randInt(-10n, -1n), randInt(-3n, 7n), ctx); }
 }
 export class SubtractionWithNegative extends BasicArithmetic {
+  readonly help = [
+    {
+      afterFailedAttempts: 1,
+      message: 'Subtracting a negative number is the same as adding a positive number.',
+    },
+  ];
   constructor() { super('-'); }
   generateQuestion(ctx: GenerateContext) { return this.genQuestion(randInt(-10n, -1n), randInt(-7n, 3n), ctx); }
 }

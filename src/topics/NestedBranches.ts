@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext, CodeOutputSubtopic } from '../topics';
 import { randInts, randVars, evalRelOp } from '../util';
 import { toPyStr } from '../python';
 import { CHAINED_BRANCHES, randOp, getTrueOp, getFalseOp } from './ChainedBranches';
@@ -14,7 +14,7 @@ function combos(letters: string[]): string[] {
   return combinations;
 }
 
-export class ChainedBranches extends EvalLastLineSubtopic {
+export class ChainedBranches extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 5n, 4);
@@ -30,11 +30,11 @@ export class ChainedBranches extends EvalLastLineSubtopic {
       elif ${y} ${op2} ${d}:
           print(${toPyStr(letters[i++])})
       print(${toPyStr(letters[i++])})
-    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {}, ctx);
+    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {usesOutput: true}, ctx);
   }
 }
 
-export class NestedBranches1 extends EvalLastLineSubtopic {
+export class NestedBranches1 extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 5n, 4);
@@ -51,11 +51,11 @@ export class NestedBranches1 extends EvalLastLineSubtopic {
       else:
           print(${toPyStr(letters[i++])})
       print(${toPyStr(letters[i++])})
-    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {}, ctx);
+    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {usesOutput: true}, ctx);
   }
 }
 
-export class NestedBranches2 extends EvalLastLineSubtopic {
+export class NestedBranches2 extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 5n, 4);
@@ -72,11 +72,11 @@ export class NestedBranches2 extends EvalLastLineSubtopic {
       else:
           print(${toPyStr(letters[i++])})
       print(${toPyStr(letters[i++])})
-    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {}, ctx);
+    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {usesOutput: true}, ctx);
   }
 }
 
-export class NestedBranches3 extends EvalLastLineSubtopic {
+export class NestedBranches3 extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 5n, 4);
@@ -95,11 +95,11 @@ export class NestedBranches3 extends EvalLastLineSubtopic {
       else:
           print(${toPyStr(letters[i++])})
       print(${toPyStr(letters[i++])})
-    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {}, ctx);
+    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {usesOutput: true}, ctx);
   }
 }
 
-export class NestedBranches4 extends EvalLastLineSubtopic {
+export class NestedBranches4 extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 5n, 4);
@@ -118,11 +118,11 @@ export class NestedBranches4 extends EvalLastLineSubtopic {
       else:
           print(${toPyStr(letters[i++])})
       print(${toPyStr(letters[i++])})
-    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {}, ctx);
+    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {usesOutput: true}, ctx);
   }
 }
 
-export class NestedBranches5 extends EvalLastLineSubtopic {
+export class NestedBranches5 extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 5n, 4);
@@ -141,11 +141,11 @@ export class NestedBranches5 extends EvalLastLineSubtopic {
       else:
           print(${toPyStr(letters[i++])})
       print(${toPyStr(letters[i++])})
-    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {}, ctx);
+    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {usesOutput: true}, ctx);
   }
 }
 
-export class NestedBranches6 extends EvalLastLineSubtopic {
+export class NestedBranches6 extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c, d, e] = randInts(1n, 5n, 5);
@@ -165,11 +165,11 @@ export class NestedBranches6 extends EvalLastLineSubtopic {
       elif ${x} ${op3} ${e}:
           print(${toPyStr(letters[i++])})
       print(${toPyStr(letters[i++])})
-    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {}, ctx);
+    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {usesOutput: true}, ctx);
   }
 }
 
-export class NestedBranches7 extends EvalLastLineSubtopic {
+export class NestedBranches7 extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c, d, e] = randInts(1n, 5n, 5);
@@ -189,10 +189,10 @@ export class NestedBranches7 extends EvalLastLineSubtopic {
       elif ${x} ${op3} ${e}:
           print(${toPyStr(letters[i++])})
       print(${toPyStr(letters[i++])})
-    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {}, ctx);
+    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {usesOutput: true}, ctx);
   }
 }
-export class NestedBranches8 extends EvalLastLineSubtopic {
+export class NestedBranches8 extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const [a, b, c, d, e] = randInts(1n, 5n, 5);
@@ -212,7 +212,7 @@ export class NestedBranches8 extends EvalLastLineSubtopic {
       if ${x} ${op3} ${e}:
           print(${toPyStr(letters[i++])})
       print(${toPyStr(letters[i++])})
-    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {}, ctx);
+    `, [...letters.slice(0, i), ...combos(letters.slice(0, i))], {usesOutput: true}, ctx);
   }
 }
 export const NESTED_BRANCHES = new Topic('nested-branches', 'Nested Branches', [

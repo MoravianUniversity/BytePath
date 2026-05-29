@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext, CodeOutputSubtopic } from '../topics';
 import { randInts, randChoice, randChoices, randIntNum, randVars, randInt, range } from '../util';
 import { toPyAtom, toPyStr } from '../python.ts';
 
@@ -125,7 +125,7 @@ export class NumberOfLoopsRangeNested extends EvalLastLineSubtopic {
   }
 }
 
-export class ShortCode0 extends EvalLastLineSubtopic {
+export class ShortCode0 extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const [word, letter] = randChoice([
       ["potato", "t"], ["better", "e"], ["kinetic", "i"], ["perfect", "e"], ["vacant", "a"],
@@ -139,11 +139,11 @@ export class ShortCode0 extends EvalLastLineSubtopic {
       ${z} = 0
       for ${w} in ${y}:
           ${z} += len(${w})
-          print(${z}, ${w})`, [], {}, ctx);
+          print(${z}, ${w})`, [], {usesOutput: true}, ctx);
   }
 }
 
-export class ShortCode1 extends EvalLastLineSubtopic {
+export class ShortCode1 extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const words = (Math.random() < 0.7) ? randChoices(ANIMALS, 3) : ["Coding", "Is", "Fun!"];
     const [x, y, z] = randVars(4);
@@ -152,11 +152,11 @@ export class ShortCode1 extends EvalLastLineSubtopic {
       for ${y} in ${x}:
           print(len(${y}), ${y})
       for ${z} in range(len(${x})):
-          print(${z}, ${x}[${z}])`, [], {}, ctx);
+          print(${z}, ${x}[${z}])`, [], {usesOutput: true}, ctx);
   }
 }
 
-export class ShortCode2 extends EvalLastLineSubtopic {
+export class ShortCode2 extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     let [outer, inner] = randInts(2n, 4n, 2);
     if (outer > inner) { [outer, inner] = [inner, outer]; }
@@ -167,7 +167,7 @@ export class ShortCode2 extends EvalLastLineSubtopic {
           ${y} = ''
           for ${z} in range(${inner}):
               ${y} += str(${z})
-          print(${x}, ${y})`, [], {}, ctx);
+          print(${x}, ${y})`, [], {usesOutput: true}, ctx);
   }
 }
 

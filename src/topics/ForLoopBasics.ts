@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext, CodeOutputSubtopic } from '../topics';
 import { randInts, randIntNum, randChoice, randChoices, randVariable, randVars, STRINGS } from '../util';
 import { toPyAtom, toPyStr, asTuple, tuple } from '../python';
 import { BASIC_VARIABLES } from './BasicVariables';
@@ -31,7 +31,7 @@ const PLURAL_TO_SINGULAR_STRS = {
   "colors": "color",
 };
 
-export class ForLoopPrintList extends EvalLastLineSubtopic {
+export class ForLoopPrintList extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const x = randChoice(Object.keys(PLURAL_TO_SINGULAR_NUMS));
     const y = PLURAL_TO_SINGULAR_NUMS[x as keyof typeof PLURAL_TO_SINGULAR_NUMS];
@@ -40,7 +40,7 @@ export class ForLoopPrintList extends EvalLastLineSubtopic {
       ${x} = ${toPyAtom(list)}
       for ${y} in ${x}:
           print(${y})
-      `, [list.join('\n'), list.join(""), list.join(" ")], {}, ctx);
+      `, [list.join('\n'), list.join(""), list.join(" ")], {usesOutput: true}, ctx);
   }
 }
 
@@ -59,7 +59,7 @@ export class ForLoopSumStrLen extends EvalLastLineSubtopic {
   }
 }
 
-export class ForLoopPrintChars extends EvalLastLineSubtopic {
+export class ForLoopPrintChars extends CodeOutputSubtopic {
   generateQuestion(ctx: GenerateContext) {
     const [x, y] = randVars(2);
     const str = randChoice(STRINGS);
@@ -67,7 +67,7 @@ export class ForLoopPrintChars extends EvalLastLineSubtopic {
       ${x} = ${toPyStr(str)}
       for ${y} in ${x}:
           print(${y})
-      `, [str, str[0]], {}, ctx);
+      `, [str, str[0]], {usesOutput: true}, ctx);
   }
 }
 
