@@ -2,8 +2,8 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-python';
 import './code.css';
-import { Topic, TopicGroup, Subtopic, Question } from './topics.ts';
-import type { UserAnswer } from './questions/types';
+import { Topic, TopicGroup, Subtopic, Question, TopicContext } from './topics.ts';
+import { UserAnswer } from './questions/types';
 import { checkAnswer } from './questions/registry';
 import { TOPICS } from './all_topics.ts';
 import QuestionScreen from './components/QuestionScreen.tsx';
@@ -88,7 +88,7 @@ function App() {
   useEffect(() => { localStorage.setItem('mode', mode); }, [mode]);
   let [currentTopic, setCurrentTopic] = useState<Topic | null>(null);
   const [allTopics] = useState<Topic[]>(getAllTopics());
-  const [sharedCode, setSharedCode] = useState<string | null>(null);
+  const [context, setContext] = useState<TopicContext | null>(null);
   const [currentSubtopic, setCurrentSubtopic] = useState<Subtopic | null>(null);
   const [completedTopics, setCompletedTopics] = useState<Set<string>>(() => {
     let saved = localStorage.getItem('completedTopics');
@@ -222,7 +222,7 @@ function App() {
   }, [completedTopics]);
 
   // Syntax highlighting for shared code
-  useEffect(() => { Prism.highlightAll(); }, [sharedCode]);
+  useEffect(() => { Prism.highlightAll(); }, [context]);
   useEffect(()=>{
     // Adjust token types for some keywords
     Prism.hooks.add('after-tokenize', function(env) {
@@ -329,7 +329,7 @@ function App() {
     setCurrentScreen('welcome');
     setCurrentTopic(null);
     setCurrentSubtopic(null);
-    setSharedCode(null);
+    setContext(null);
     setQuestionList([]);
     setQuestionAnswers([]);
     setCompletedTopics(new Set());
@@ -507,8 +507,7 @@ function App() {
   };
 
   function startTopic() {
-    currentTopic?.start();
-    setSharedCode(currentTopic?.sharedCode || null);
+    setContext(currentTopic?.generateContext() ?? null);
     setQuestionList([]);
     setQuestionAnswers([]);
     addQuestion();
@@ -527,10 +526,7 @@ function App() {
         });
       } else {
         // Topic is not completed, add a new question
-        const nextQuestion = subtopic.generateQuestion({
-          sharedCode: currentTopic.sharedCode,
-          mode,
-        });
+        const nextQuestion = subtopic.generateQuestion(context ?? new TopicContext());
         setQuestionList(prev => [...prev, nextQuestion]);
         setQuestionStartTime(Date.now());
       }
@@ -942,11 +938,11 @@ function App() {
 
               {currentScreen === 'question' && (
                 <div className="topic-container">
-                  {sharedCode && (
+                  {context?.sharedCode && (
                     <div className="shared-code">
                   <div className="shared-code-header">Code shared by all questions in this topic:</div>
                   <code className="language-python">
-                    {sharedCode}
+                    {context?.sharedCode}
                   </code>
                 </div>
               )}

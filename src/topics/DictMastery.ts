@@ -1,109 +1,67 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, EvalLastLineSubtopic, TopicContext } from '../topics';
 import { randInts, randIntNum, randChoices, randVars, range, shuffle, randBool, ASCII_LOWER, ASCII_UPPER } from '../util';
 import { toPyStr, toPyAtom } from '../python.ts';
-
 import { DICT_BASICS } from './DictionaryBasics';
 import { DICT_WITH_LOOPS } from './DictionaryWithLoops';
 import dedent from 'dedent-js';
 
 const ANIMALS = ["cat", "dog", "bird", "fish", "snake", "duck", "cow", "pig"]
 
-
-function createVarsVals(): [string[], [bigint, bigint], [string, string]] {
-  const [var1, var2, var3, var4] = randVars(4);
-  let [int1, int2] = randInts(2n, 5n, 2);
-  if (int1 > int2) { [int1, int2] = [int2, int1]; }
-  const [str1, str2] = randChoices(ANIMALS, 2);
-  return [[var1, var2, var3, var4], [int1, int2], [str1, str2]];
-}
-function createCode(vars: string[], ints: [bigint, bigint], strs: [string, string]): string {
-  const [var1, var2, var3, var4] = vars;
-  const [int1, int2] = ints;
-  const [str1, str2] = strs;
-  return dedent`
-    ${var1} = ${int1}
-    ${var2} = ${int2}
-    ${var3} = ${toPyStr(str1)}
-    ${var4} = {${toPyStr(var1)}: (${int1}, ${int2}), ${int1}: ${toPyStr(str2)}, ${var2}: ${toPyStr(str1)}, ${var3}: ${int1}}
-  `;
-}
-
-class DictMastery extends Topic {
-  vars: string[];
-  ints: [bigint, bigint];
-  strs: [string, string];
+class DictMasteryContext extends TopicContext {
+  var1: string;
+  var2: string;
+  var3: string;
+  var4: string;
+  int1: bigint;
+  int2: bigint;
+  str1: string;
+  str2: string;
   constructor() {
-    const [vars, ints, strs] = createVarsVals();
-    const code = createCode(vars, ints, strs);
-    super('dict-mastery', 'Dict Mastery', [
-      new DictMastery_1(vars, ints, strs, code),
-      new DictMastery_2(vars, ints, strs, code),
-      new DictMastery_3(vars, ints, strs, code),
-      new DictMastery_4(vars, ints, strs, code),
-      new DictMastery_5(vars, ints, strs, code),
-      new DictMastery_6(vars, ints, strs, code),
-      new DictMastery_7(vars, ints, strs, code),
-      new DictMastery_8(vars, ints, strs, code),
-      new DictMastery_Long(),
-    ], [DICT_BASICS, DICT_WITH_LOOPS],
-    {order: 'sequential', sharedCode: code, forceQuiz: true});
-    this.vars = vars;
-    this.ints = ints;
-    this.strs = strs;
-  }
-
-  start(): void {
-    const [vars, ints, strs] = createVarsVals();
-    this.vars.splice(0, this.vars.length, ...vars);
-    this.ints.splice(0, this.ints.length, ...ints);
-    this.strs.splice(0, this.strs.length, ...strs);
-    this.sharedCode = createCode(vars, ints, strs);
-    for (const subtopic of this.subtopics) {
-      if (subtopic instanceof DictMasteryBase) {
-        subtopic.sharedCode = this.sharedCode;
-      }
-    }
+    super();
+    const [var1, var2, var3, var4] = randVars(4);
+    let [int1, int2] = randInts(2n, 5n, 2);
+    if (int1 > int2) { [int1, int2] = [int2, int1]; }
+    const [str1, str2] = randChoices(ANIMALS, 2);
+    this.var1 = var1;
+    this.var2 = var2;
+    this.var3 = var3;
+    this.var4 = var4;
+    this.int1 = int1;
+    this.int2 = int2;
+    this.str1 = str1;
+    this.str2 = str2;
+    this.sharedCode = dedent`
+      ${var1} = ${int1}
+      ${var2} = ${int2}
+      ${var3} = ${toPyStr(str1)}
+      ${var4} = {${toPyStr(var1)}: (${int1}, ${int2}), ${int1}: ${toPyStr(str2)}, ${var2}: ${toPyStr(str1)}, ${var3}: ${int1}}
+    `;
   }
 }
 
-abstract class DictMasteryBase extends EvalLastLineSubtopic {
-  vars: string[];
-  ints: [bigint, bigint];
-  strs: [string, string];
-  sharedCode: string;
-  constructor(vars: string[], ints: [bigint, bigint], strs: [string, string], sharedCode: string) {
-    super(); this.vars = vars; this.ints = ints; this.strs = strs; this.sharedCode = sharedCode;
-  }
-  generateQuestion(ctx: GenerateContext) {
-    const code = this.genCode();
-    return createQuestion(code, [], {sharedCode: this.sharedCode}, ctx);
-  }
-  abstract genCode(): string
+class DictMastery_1 extends EvalLastLineSubtopic {
+  gen(ctx: DictMasteryContext): string { return `len(${ctx.var4})`; }
 }
-
-class DictMastery_1 extends DictMasteryBase {
-  genCode(): string { return `len(${this.vars[3]})`; }
+class DictMastery_2 extends EvalLastLineSubtopic {
+  gen(ctx: DictMasteryContext): string { return `${ctx.var4}[toPyStr(${ctx.var1})]`; }
 }
-class DictMastery_2 extends DictMasteryBase {
-  genCode(): string { return `${this.vars[3]}[toPyStr(${this.vars[0]})]`; }
+class DictMastery_3 extends EvalLastLineSubtopic {
+  gen(ctx: DictMasteryContext): string { return `${ctx.var4}[${ctx.var1}]`; }
 }
-class DictMastery_3 extends DictMasteryBase {
-  genCode(): string { return `${this.vars[3]}[${this.vars[0]}]`; }
+class DictMastery_4 extends EvalLastLineSubtopic {
+  gen(ctx: DictMasteryContext): string { return `${ctx.var4}[${ctx.int1}]`; }
 }
-class DictMastery_4 extends DictMasteryBase {
-  genCode(): string { return `${this.vars[3]}[${this.ints[0]}]`; }
+class DictMastery_5 extends EvalLastLineSubtopic {
+  gen(ctx: DictMasteryContext): string { return `${ctx.var2} in ${ctx.var4}`; }
 }
-class DictMastery_5 extends DictMasteryBase {
-  genCode(): string { return `${this.vars[1]} in ${this.vars[3]}`; }
+class DictMastery_6 extends EvalLastLineSubtopic {
+  gen(ctx: DictMasteryContext): string { return `${toPyStr(ctx.var2)} in ${ctx.var4}`; }
 }
-class DictMastery_6 extends DictMasteryBase {
-  genCode(): string { return `${toPyStr(this.vars[1])} in ${this.vars[3]}`; }
+class DictMastery_7 extends EvalLastLineSubtopic {
+  gen(ctx: DictMasteryContext): string { return `${ctx.var3} in ${ctx.var4}`; }
 }
-class DictMastery_7 extends DictMasteryBase {
-  genCode(): string { return `${this.vars[2]} in ${this.vars[3]}`; }
-}
-class DictMastery_8 extends DictMasteryBase {
-  genCode(): string { return `${toPyStr(this.strs[0])} in ${this.vars[3]}`; }
+class DictMastery_8 extends EvalLastLineSubtopic {
+  gen(ctx: DictMasteryContext): string { return `${toPyStr(ctx.str1)} in ${ctx.var4}`; }
 }
 
 function sample_with_repeats<T>(data: T[],
@@ -117,7 +75,7 @@ function sample_with_repeats<T>(data: T[],
 }
 
 class DictMastery_Long extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): string {
     const [var1, var2, i] = randVars(3);
     const elem1 = `${var1}[${i}]`;
     const elem2 = `${var2}[${i}]`;
@@ -174,13 +132,23 @@ class DictMastery_Long extends EvalLastLineSubtopic {
     }
 
     //data = textwrap.fill(repr(data), width=20, subsequent_indent="     ");
-    code = `${var1} = ${toPyAtom(data)}
+    return `${var1} = ${toPyAtom(data)}
 ${var2} = {}
 for ${i} in ${var1}:
     ${code}
 ${var2}`;
-    return createQuestion(code, [], {}, ctx);
   }
 }
 
-export const DICT_MASTERY = new DictMastery();
+export const DICT_MASTERY = new Topic('dict-mastery', 'Dict Mastery', [
+  new DictMastery_1(),
+  new DictMastery_2(),
+  new DictMastery_3(),
+  new DictMastery_4(),
+  new DictMastery_5(),
+  new DictMastery_6(),
+  new DictMastery_7(),
+  new DictMastery_8(),
+  new DictMastery_Long(),
+], [DICT_BASICS, DICT_WITH_LOOPS],
+{order: 'sequential', forceQuiz: true, generateContext: () => new DictMasteryContext()});

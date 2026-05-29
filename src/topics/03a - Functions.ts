@@ -1,4 +1,4 @@
-import { Topic, createQuestion, CodeOutputSubtopic, GenerateContext } from '../topics';
+import { Topic, CodeOutputSubtopic, CodeOutputQuestionGen } from '../topics';
 import { randVars, randFuncs, randInts } from '../util';
 import { PRACTICE_03A_BASIC_FUNCTIONS } from './03a - Basic Functions';
 
@@ -18,27 +18,30 @@ import { PRACTICE_03A_BASIC_FUNCTIONS } from './03a - Basic Functions';
 //     main()
 
 export class Functions1 extends CodeOutputSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     const [x, y, z] = randVars(3);
     const [a, b] = randInts(2n, 5n, 2);
-    return createQuestion(`
-      def area(${x}, ${y}):
-          ${x} = ${x} * ${y}
-          return ${y}
+    return {
+      code: `
+        def area(${x}, ${y}):
+            ${x} = ${x} * ${y}
+            return ${y}
 
-      def main():
-          ${x} = ${a}
-          ${y} = ${b}
-          ${z} = area(${y}, ${x})
-          print(${x}, "x", ${y}, "->", ${z})
+        def main():
+            ${x} = ${a}
+            ${y} = ${b}
+            ${z} = area(${y}, ${x})
+            print(${x}, "x", ${y}, "->", ${z})
 
-      if __name__ == "__main__":
-          main()
-    `, [
-      `${a}x${b}->${a * b}`, `${b}x${a}->${b * a}`, `${a} x ${b} -> ${a * b}`, `${b} x ${a} -> ${b * a}`,
-      `${x}x${y}->area`, `${y}x${x}->area`, `${x} x ${y} -> area`, `${y} x ${x} -> area`,
-      `${a*b} x ${b} -> ${a}`,
-    ], {usesOutput: true}, ctx);
+        if __name__ == "__main__":
+            main()
+      `,
+      options: [
+        `${a}x${b}->${a * b}`, `${b}x${a}->${b * a}`, `${a} x ${b} -> ${a * b}`, `${b} x ${a} -> ${b * a}`,
+        `${x}x${y}->area`, `${y}x${x}->area`, `${x} x ${y} -> area`, `${y} x ${x} -> area`,
+        `${a*b} x ${b} -> ${a}`,
+      ],
+    };
   }
 }
 
@@ -56,28 +59,31 @@ export class Functions1 extends CodeOutputSubtopic {
 //     main()
 
 export class Functions2 extends CodeOutputSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     const [x, y, z] = randVars(3);
     const [a, b] = randInts(2n, 5n, 2);
-    return createQuestion(`
-      def add(${x}, ${y}):
-          ${x} = ${x} - ${y}
-          return ${x}
+    return {
+      code: `
+        def add(${x}, ${y}):
+            ${x} = ${x} - ${y}
+            return ${x}
 
-      def main():
-          ${x} = ${a}
-          ${y} = ${b}
-          ${z} = add(${y}, add(${y}, ${x}))
-          print(${z}, ${x}, ${y})
-      
-      if __name__ == "__main__":
-          main()
-    `, [
-      `${z}, ${x}, ${y}`, `${x}, ${y}, ${z}`, `${y}, ${x}, ${z}`, `${z}, ${y}, ${x}`,
-      `${z} ${x} ${y}`, `${x} ${y} ${z}`, `${y} ${x} ${z}`, `${z} ${y} ${x}`,
-      `${a}, ${b}, ${a}`, `${a}, ${a}, ${b}`, `${b}, ${a}, ${a}`,
-      `${a} ${b} ${a}`, `${a} ${a} ${b}`, `${b} ${a} ${a}`,
-    ], {usesOutput: true}, ctx);
+        def main():
+            ${x} = ${a}
+            ${y} = ${b}
+            ${z} = add(${y}, add(${y}, ${x}))
+            print(${z}, ${x}, ${y})
+        
+        if __name__ == "__main__":
+            main()
+      `,
+      options: [
+        `${z}, ${x}, ${y}`, `${x}, ${y}, ${z}`, `${y}, ${x}, ${z}`, `${z}, ${y}, ${x}`,
+        `${z} ${x} ${y}`, `${x} ${y} ${z}`, `${y} ${x} ${z}`, `${z} ${y} ${x}`,
+        `${a}, ${b}, ${a}`, `${a}, ${a}, ${b}`, `${b}, ${a}, ${a}`,
+        `${a} ${b} ${a}`, `${a} ${a} ${b}`, `${b} ${a} ${a}`,
+      ],
+    };
   }
 }
 
@@ -99,30 +105,33 @@ export class Functions2 extends CodeOutputSubtopic {
 
 
 export class Functions3 extends CodeOutputSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     const [x, y] = randVars(2);
     const [f, g] = randFuncs(2);
     const [a, b] = randInts(2n, 5n, 2);
-    return createQuestion(`
-      def ${f}(${x}, ${y}):
-          ${y} = ${x} + 2*${y}
-          return ${y}
+    return {
+      code: `
+        def ${f}(${x}, ${y}):
+            ${y} = ${x} + 2*${y}
+            return ${y}
 
-      def ${g}(${y}):
-          return ${f}(${y}, 2)
+        def ${g}(${y}):
+            return ${f}(${y}, 2)
 
-      def main():
-          ${x} = ${a}
-          ${y} = ${b}
-          ${x} = ${f}(${g}(${x}), ${y}) + ${g}(${y})
-          print(${x}, ${y})
+        def main():
+            ${x} = ${a}
+            ${y} = ${b}
+            ${x} = ${f}(${g}(${x}), ${y}) + ${g}(${y})
+            print(${x}, ${y})
 
-      if __name__ == "__main__":
-          main()
-    `, [
-      `${a}, ${b}`, `${b}, ${a}`, `${a} ${b}`, `${b} ${a}`,
-      `${x}, ${y}`, `${y}, ${x}`, `${x} ${y}`, `${y} ${x}`,
-    ], {usesOutput: true}, ctx);
+        if __name__ == "__main__":
+            main()
+      `,
+      options: [
+        `${a}, ${b}`, `${b}, ${a}`, `${a} ${b}`, `${b} ${a}`,
+        `${x}, ${y}`, `${y}, ${x}`, `${x} ${y}`, `${y} ${x}`,
+      ],
+    };
   }
 }
 
@@ -144,12 +153,13 @@ export class Functions3 extends CodeOutputSubtopic {
 // TODO: this does not work in quiz mode (they cannot type the echoed input correctly)
 //  also the wrong answers don't have the correct echos either
 // class Functions4 extends CodeOutputSubtopic {
-//   generateQuestion(ctx: GenerateContext) {
+//   gen(): CodeOutputQuestionGen {
 //     const [x, y] = randVars(2);
 //     const [f, g] = randFuncs(2);
 //     const [a, b] = randChoices(STRINGS, 2);
 //     const [c, d] = randInts(2n, 5n, 2);
-//     return createQuestion(`
+//     return {
+//       code: `
 //       def ${f}(${x}):
 //           ${y} = int(input(${x}+" ${x}: "))
 //           return ${y}
@@ -163,9 +173,9 @@ export class Functions3 extends CodeOutputSubtopic {
 
 //       if __name__ == "__main__":
 //           main()
-//     `, [
-//       `${a}, ${b}`, `${b}, ${a}`, `${a} ${b}`, `${b} ${a}`,
-//     ], {usesOutput: true, input: [`${c}`, `${d}`]}, ctx);
+//       `,
+//       options: [`${a}, ${b}`, `${b}, ${a}`, `${a} ${b}`, `${b} ${a}`],
+//     };
 //   }
 // }
 

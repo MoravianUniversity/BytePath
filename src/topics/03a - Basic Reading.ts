@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen } from '../topics';
 import { randInt, randVariable, randVars, randChoice, STRINGS } from '../util';
 import { BASIC_ARITHMETIC } from './BasicArithmetic';
 import { BASIC_VARIABLES, VariableOp, TwoVariableOp, TwoVariableOpBackwards } from './BasicVariables';
@@ -8,76 +8,91 @@ import { STRING_INDEX, StringIndex0, StringIndex1, StringIndexN, StringIndexConc
 import { ConvertString, ConvertStringAdd, ConvertStringConcat, ConvertInt, ConvertIntAdd, ConvertIntConcat } from './Quiz3';
 
 export class StringLenPlus extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const a = randChoice(STRINGS);
     const b = randInt(1n, 3n);
-    return createQuestion(`
-      ${x} = "${a}"
-      ${y} = ${b}
-      len(${x}) + ${y}
-    `, [
-      BigInt(a.length + 1),
-      BigInt(a.length - 1),
-      BigInt(a.length), y, x, `${x}${y}`, `${x}${b}`, `${a}${b}`,
-    ], {}, ctx);
+    return {
+      code: `
+        ${x} = "${a}"
+        ${y} = ${b}
+        len(${x}) + ${y}
+      `,
+      options: [
+        BigInt(a.length + 1),
+        BigInt(a.length - 1),
+        BigInt(a.length), y, x, `${x}${y}`, `${x}${b}`, `${a}${b}`,
+      ],
+    };
   }
 }
 
 export class StringIndexLenMinus1 extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
-    return createQuestion(`
-      ${x} = "${a}"
-      ${x}[len(${x}) - 1]
-    `, [
-      BigInt(a.length - 1),
-      BigInt(a.length - 2),
-      BigInt(a.length), x, a[a.length - 2],
-    ], {}, ctx);
+    return {
+      code: `
+        ${x} = "${a}"
+        ${x}[len(${x}) - 1]
+      `,
+      options: [
+        BigInt(a.length - 1),
+        BigInt(a.length - 2),
+        BigInt(a.length), x, a[a.length - 2],
+      ],
+    };
   }
 }
 
 export class StringIndexXMinusY extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y, z] = randVars(3);
     const a = randChoice(STRINGS);
     const b = randInt(2n, BigInt(a.length - 1));
     const c = randInt(1n, b - 1n);
-    return createQuestion(`
-      ${x} = "${a}"
-      ${y} = ${b}
-      ${z} = ${c}
-      ${x}[${y} - ${z}]
-    `, [
+    return {
+      code: `
+        ${x} = "${a}"
+        ${y} = ${b}
+        ${z} = ${c}
+        ${x}[${y} - ${z}]
+      `,
+      options: [
         b - c, c - b, 
         a, x, y, z, a[0], a[Number(b)-1], a[Number(c)-1], a[Number(b-c)-1],
-    ], {}, ctx);
+      ],
+    };
   }
 }
 
 export class StringLenOfIndex extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const a = randChoice(STRINGS);
     const b = randInt(1n, BigInt(a.length - 1));
-    return createQuestion(`
-      ${x} = "${a}"
-      ${y} = ${b}
-      len(${x}[${y}])
-    `, [BigInt(a.length), x, y, a[Number(b)], a[Number(b)-1]], {}, ctx);
+    return {
+      code: `
+        ${x} = "${a}"
+        ${y} = ${b}
+        len(${x}[${y}])
+      `,
+      options: [BigInt(a.length), x, y, a[Number(b)], a[Number(b)-1]],
+    };
   }
 }
 
 export class ConvertIndexOfStrOfLen extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS) + randChoice(STRINGS) + randChoice(STRINGS) + randChoice(STRINGS);
-    return createQuestion(`
-      ${x} = "${a}"
-      str(len(${x}))[1]
-    `, [a, x, a[1], a[0], BigInt(a.length)], {}, ctx);
+    return {
+      code: `
+        ${x} = "${a}"
+        str(len(${x}))[1]
+      `,
+      options: [a, x, a[1], a[0], BigInt(a.length)],
+    };
   }
 }
 

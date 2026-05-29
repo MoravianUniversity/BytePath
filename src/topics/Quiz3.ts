@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen } from '../topics';
 import { randInt, randVars, randInts, randVariable, randChoice, STRINGS } from '../util';
 import { BASIC_ARITHMETIC, Addition, AdditionWithNegative } from './BasicArithmetic';
 import { BASIC_VARIABLES, VariableAssignment, VariableOp, TwoVariableOp, TwoVariableOpBackwards } from './BasicVariables';
@@ -7,118 +7,139 @@ import { STRING_LENGTH, StringLen, StringLenVar, StringLenMultiVar } from './Str
 import { BASIC_PRINTS, PrintString, PrintStringMulti, PrintStringVar, PrintStringVar2, PrintStringMultiVar } from './BasicPrints';
 
 export class ConvertString extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randInt(1n, 10n);
-    return createQuestion(`
-      ${x} = ${a}
-      str(${x})
-    `, [a, `${a}`, x, Symbol(x), 0n, 1n, 2n, null], {}, ctx);
+    return { code: `
+        ${x} = ${a}
+        str(${x})
+      `,
+      options: [a, `${a}`, x, Symbol(x), 0n, 1n, 2n, null],
+    };
   }
 }
 
 export class ConvertStringAdd extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 10n, 2);
-    return createQuestion(`
-      ${x} = ${a}
-      ${y} = ${b}
-      str(${x} + ${y})
-    `, [a, b, x+y, a+b, `${a}`, `${b}`, `${a}${b}`, x, y, Symbol(x), Symbol(y), Symbol(x+y), 0n, 1n, 2n, null], {}, ctx);
+    return { code: `
+        ${x} = ${a}
+        ${y} = ${b}
+        str(${x} + ${y})
+      `,
+      options: [a, b, x+y, a+b, `${a}`, `${b}`, `${a}${b}`, x, y, Symbol(x), Symbol(y), Symbol(x+y), 0n, 1n, 2n, null],
+    };
   }
 }
 
 export class ConvertStringConcat extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 10n, 2);
-    return createQuestion(`
-      ${x} = ${a}
-      ${y} = ${b}
-      str(${x}) + str(${y})
-    `, [a, b, x+y, `${a}`, `${b}`, `${a}${b}`, x, y, Symbol(x), Symbol(y), Symbol(x+y), 0n, 1n, 2n, null], {}, ctx);
+    return { code: `
+        ${x} = ${a}
+        ${y} = ${b}
+        str(${x}) + str(${y})
+      `,
+      options: [a, b, x+y, `${a}`, `${b}`, `${a}${b}`, x, y, Symbol(x), Symbol(y), Symbol(x+y), 0n, 1n, 2n, null],
+    };
   }
 }
 
 export class ConvertInt extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randInt(1n, 10n);
-    return createQuestion(`
-      ${x} = "${a}"
-      int(${x})
-    `, [a, `${a}`, x, Symbol(x), 0n, 1n, 2n, null], {}, ctx);
+    return { code: `
+        ${x} = "${a}"
+        int(${x})
+      `,
+      options: [a, `${a}`, x, Symbol(x), 0n, 1n, 2n, null],
+    };
   }
 }
 
 export class ConvertIntAdd extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 10n, 2);
-    return createQuestion(`
-      ${x} = "${a}"
-      ${y} = "${b}"
-      int(${x}) + int(${y})
-    `, [a, b, x+y, `${a}`, `${b}`, `${a}${b}`, x, y, Symbol(x), Symbol(y), Symbol(x+y), 0n, 1n, 2n, null], {}, ctx);
+    return { code: `
+        ${x} = "${a}"
+        ${y} = "${b}"
+        int(${x}) + int(${y})
+      `,
+      options: [a, b, x+y, `${a}`, `${b}`, `${a}${b}`, x, y, Symbol(x), Symbol(y), Symbol(x+y), 0n, 1n, 2n, null],
+    };
   }
 }
 
 export class ConvertIntConcat extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 10n, 2);
-    return createQuestion(`
-      ${x} = "${a}"
-      ${y} = "${b}"
-      int(${x}) + int(${y})
-    `, [a, b, x+y, `${a}`, `${b}`, `${a}${b}`, x, y, Symbol(x), Symbol(y), Symbol(x+y), 0n, 1n, 2n, null], {}, ctx);
+    return { code: `
+        ${x} = "${a}"
+        ${y} = "${b}"
+        int(${x}) + int(${y})
+      `,
+      options: [a, b, x+y, `${a}`, `${b}`, `${a}${b}`, x, y, Symbol(x), Symbol(y), Symbol(x+y), 0n, 1n, 2n, null],
+    };
   }
 }
 
 class Input extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
-    return createQuestion(`
-      ${x} = input()
-      ${x}
-    `, [a, x, Symbol(x)], {input: a}, ctx);
+    return { code: `
+        ${x} = input()
+        ${x}
+      `,
+      options: [a, x, Symbol(x)],
+      opts: {input: a},
+    };
   }
 }
 
 class InputStrOfInt extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randInt(1n, 10n);
-    return createQuestion(`
-      ${x} = input()
-      ${x}
-    `, [a, `${a}`, x, Symbol(x), 0n, 1n], {input: `${a}`}, ctx);
+    return { code: `
+        ${x} = input()
+        ${x}
+      `,
+      options: [a, `${a}`, x, Symbol(x), 0n, 1n],
+      opts: {input: `${a}`},
+    };
   }
 }
 
 class InputInt extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randInt(1n, 10n);
-    return createQuestion(`
-      ${x} = int(input())
-      ${x}
-    `, [a, `${a}`, x, Symbol(x), 0n, 1n, 2n, null], {input: `${a}`}, ctx);
+    return { code: `
+        ${x} = int(input())
+        ${x}
+      `,
+      options: [a, `${a}`, x, Symbol(x), 0n, 1n, 2n, null],
+      opts: {input: `${a}`},
+    };
   }
 }
 
 // TODO: this does not work in quiz mode (they cannot type the echoed input correctly)
 //  also the wrong answers don't have the correct echos either
 // class InputOutputTest extends CodeOutputSubtopic {
-//   generateQuestion(ctx: GenerateContext) {
+//   gen(): CodeOutputQuestionGen {
 //     const x = randVariable();
 //     const a = randChoice(STRINGS);
-//     return createQuestion(`
+//     return { code: `
 //       name = input("What is your name? ")
 //       print(f"Hello {name}!")
-//     `, [a, x, `Hello ${a}!`], {input: a, usesOutput: true}, ctx);
+//     `, options: [a, x, `Hello ${a}!`], opts: {input: a} };
 //   }
 // }
 

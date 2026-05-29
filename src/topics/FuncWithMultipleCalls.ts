@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen } from '../topics';
 import { randInt, randIntNum, randVariable, randVars, randFunc, range } from '../util';
 import { FUNC_WITH_MULTIPLE_ARGS } from './FuncWithMultipleArgs';
 import { randOperation } from './BasicVariables';
@@ -101,14 +101,14 @@ class FuncCallsAdd extends EvalLastLineSubtopic {
       message: 'Each time a function is called, the arguments are substituted for the parameters in the function body in the order they are given and the returned value is used where the function call is.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [func, numArgs, funcCode] = genFunction();
     const args1 = args(numArgs);
     const args2 = args(numArgs);
     const code = `${funcCode}
       ${func}(${args1}) + ${func}(${args2})
     `;
-    return createQuestion(code, range(-15n, 15n), {}, ctx);
+    return { code, options: range(-15n, 15n) };
   }
 }
 
@@ -119,14 +119,14 @@ class FuncCallsSub extends EvalLastLineSubtopic {
       message: 'Each time a function is called, the arguments are substituted for the parameters in the function body in the order they are given and the returned value is used where the function call is.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [func, numArgs, funcCode] = genFunction();
     const args1 = args(numArgs);
     const args2 = args(numArgs);
     const code = `${funcCode}
       ${func}(${args1}) - ${func}(${args2})
     `;
-    return createQuestion(code, range(-15n, 15n), {}, ctx);
+    return { code, options: range(-15n, 15n) };
   }
 }
 
@@ -137,14 +137,14 @@ class FuncCallsNested extends EvalLastLineSubtopic {
       message: 'The first function call (inside the parentheses) is evaluated first and its returned value is used as the argument for the second function call.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [func, numArgs, funcCode] = genFunction();
     const args1 = args(numArgs);
     const args2 = args(numArgs, [`${func}(${args1})`]);
     const code = `${funcCode}
       ${func}(${args2})
     `;
-    return createQuestion(code, range(-15n, 15n), {}, ctx);
+    return { code, options: range(-15n, 15n) };
   }
 }
 
@@ -155,7 +155,7 @@ class FuncCallsNested2 extends EvalLastLineSubtopic {
       message: 'The first function call (inside the parentheses) is evaluated first and its returned value is used as the argument for the second function call.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     let [func, numArgs, funcCode] = genFunction();
     while (numArgs !== 2) {
       [func, numArgs, funcCode] = genFunction();
@@ -165,7 +165,7 @@ class FuncCallsNested2 extends EvalLastLineSubtopic {
     const code = `${funcCode}
       ${func}(${args2})
     `;
-    return createQuestion(code, range(-15n, 15n), {}, ctx);
+    return { code, options: range(-15n, 15n) };
   }
 }
 
@@ -176,7 +176,7 @@ class FuncCallsNested2Both extends EvalLastLineSubtopic {
       message: 'Both of the function calls inside the parentheses are evaluated before their return values are used as arguments for the third (outside) function call.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     let [func, numArgs, funcCode] = genFunction();
     while (numArgs !== 2) {
       [func, numArgs, funcCode] = genFunction();
@@ -187,7 +187,7 @@ class FuncCallsNested2Both extends EvalLastLineSubtopic {
     const code = `${funcCode}
       ${func}(${args3})
     `;
-    return createQuestion(code, range(-15n, 15n), {}, ctx);
+    return { code, options: range(-15n, 15n) };
   }
 }
 
@@ -198,7 +198,7 @@ class FuncCallsAddNested extends EvalLastLineSubtopic {
       message: 'The first function call (inside the parentheses) is evaluated first and its returned value is used as the argument for the second function call.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [func, numArgs, funcCode] = genFunction();
     const args1 = args(numArgs);
     const args2 = args(numArgs);
@@ -206,7 +206,7 @@ class FuncCallsAddNested extends EvalLastLineSubtopic {
     const code = `${funcCode}
       ${func}(${args3})
     `;
-    return createQuestion(code, range(-15n, 15n), {}, ctx);
+    return { code, options: range(-15n, 15n) };
   }
 }
 
@@ -217,7 +217,7 @@ class FuncCallsNestedAdd extends EvalLastLineSubtopic {
       message: 'Make sure to read the code carefully and understand the order of operations.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [func, numArgs, funcCode] = genFunction();
     const args1 = args(numArgs);
     const args2 = args(numArgs, [`${func}(${args1})`]);
@@ -225,7 +225,7 @@ class FuncCallsNestedAdd extends EvalLastLineSubtopic {
     const code = `${funcCode}
       ${func}(${args2}) + ${func}(${args3})
     `;
-    return createQuestion(code, range(-15n, 15n), {}, ctx);
+    return { code, options: range(-15n, 15n) };
   }
 }
 
@@ -236,7 +236,7 @@ class Func2CallsAdd extends EvalLastLineSubtopic {
       message: 'Make sure to read the code carefully and understand the order of operations.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [func1, numArgs1, funcCode1] = genFunction();
     let [func2, numArgs2, funcCode2] = genFunction();
     while (func2 === func1) {
@@ -247,7 +247,7 @@ class Func2CallsAdd extends EvalLastLineSubtopic {
     const code = `${funcCode1}${funcCode2}
       ${func1}(${args1}) + ${func2}(${args2})
     `;
-    return createQuestion(code, range(-15n, 15n), {}, ctx);
+    return { code, options: range(-15n, 15n) };
   }
 }
 
@@ -258,7 +258,7 @@ class Func2CallsAddBackwards extends EvalLastLineSubtopic {
       message: 'Make sure to read the code carefully and understand the order of operations.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [func1, numArgs1, funcCode1] = genFunction();
     let [func2, numArgs2, funcCode2] = genFunction();
     while (func2 === func1) {
@@ -269,7 +269,7 @@ class Func2CallsAddBackwards extends EvalLastLineSubtopic {
     const code = `${funcCode1}${funcCode2}
       ${func2}(${args2}) - ${func1}(${args1})
     `;
-    return createQuestion(code, range(-15n, 15n), {}, ctx);
+    return { code, options: range(-15n, 15n) };
   }
 }
 
@@ -280,7 +280,7 @@ class Func2CallsNested extends EvalLastLineSubtopic {
       message: 'Make sure to read the code carefully and understand the order of operations.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [func1, numArgs1, funcCode1] = genFunction();
     let [func2, numArgs2, funcCode2] = genFunction();
     while (func2 === func1) {
@@ -291,7 +291,7 @@ class Func2CallsNested extends EvalLastLineSubtopic {
     const code = `${funcCode1}${funcCode2}
       ${func1}(${args1})
     `;
-    return createQuestion(code, range(-15n, 15n), {}, ctx);
+    return { code, options: range(-15n, 15n) };
   }
 }
 
@@ -302,7 +302,7 @@ class Func2CallsNestedBackwards extends EvalLastLineSubtopic {
       message: 'Make sure to read the code carefully and understand the order of operations.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [func1, numArgs1, funcCode1] = genFunction();
     let [func2, numArgs2, funcCode2] = genFunction();
     while (func2 === func1) {
@@ -313,7 +313,7 @@ class Func2CallsNestedBackwards extends EvalLastLineSubtopic {
     const code = `${funcCode1}${funcCode2}
       ${func2}(${args2})
     `;
-    return createQuestion(code, range(-15n, 15n), {}, ctx);
+    return { code, options: range(-15n, 15n) };
   }
 }
 

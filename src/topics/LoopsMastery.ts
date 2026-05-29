@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext, CodeOutputSubtopic } from '../topics';
+import { Topic, EvalLastLineSubtopic, CodeOutputSubtopic, EvalLastLineQuestionGen, CodeOutputQuestionGen } from '../topics';
 import { randInts, randChoice, randChoices, randIntNum, randVars, randInt } from '../util';
 import { toPyAtom, toPyStr } from '../python.ts';
 
@@ -11,114 +11,116 @@ const ANIMALS = ["cat", "dog", "bird", "fish", "snake", "turtle", "duck", "cow",
 const VAR_NAMES_LONG = ["foo", "bar", "baz", "qux", "quux"]
 
 class ReadRangeBasic extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const a = randInt(3n, 6n);
-    return createQuestion(`# The list() creates a list of all of the numbers from the range()
-list(range(${a}))`, [], {}, ctx);
+    return {
+      code: `# The list() creates a list of all of the numbers from the range()
+list(range(${a}))`,
+    };
   }
 }
 
 class ReadRangeStartStop extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     let [a, b] = randInts(3n, 6n, 2);
     if (a > b) { [a, b] = [b, a]; }
-    return createQuestion(`list(range(${a}, ${b}))`, [], {}, ctx);
+    return { code: `list(range(${a}, ${b}))` };
   }
 }
 
 class ReadRangeStartStopBackwards extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     let [a, b] = randInts(3n, 6n, 2);
     if (a < b) { [a, b] = [b, a]; }
-    return createQuestion(`list(range(${a}, ${b}))`, [], {}, ctx);
+    return { code: `list(range(${a}, ${b}))` };
   }
 }
 
 class NumberOfLoopsList extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const v = randChoice(VAR_NAMES_LONG);
     const [x, y] = randVars(2);
     const lst = randChoices(ANIMALS, randIntNum(2, 4));
-    return createQuestion(`
+    return { code: `
       ${v} = ${toPyAtom(lst)}
       ${y} = 0
       for ${x} in ${v}:
           ${y} += 1
-      ${y}`, [], {}, ctx);
+      ${y}` };
   }
 }
 
 class NumberOfLoopsStr extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const v = randChoice(VAR_NAMES_LONG);
     const [x, y] = randVars(2);
     const str = randChoice(ANIMALS);
-    return createQuestion(`
+    return { code: `
       ${v} = ${toPyStr(str)}
       ${y} = 0
       for ${x} in ${v}:
           ${y} += 1
-      ${y}`, [], {}, ctx);
+      ${y}` };
   }
 }
 
 class NumberOfLoopsRange extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(3);
     const num = randInt(3n, 5n);
-    return createQuestion(`
+    return { code: `
       ${y} = 0
       for ${x} in range(${num}):
           ${y} += 1
-      ${y}`, [], {}, ctx);
+      ${y}` };
   }
 }
 
 class NumberOfLoopsRangeNested extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y, z] = randVars(3);
     const [a, b] = randInts(2n, 4n, 2);
-    return createQuestion(`
+    return { code: `
       ${z} = 0
       for ${x} in range(${a}):
           for ${y} in range(${b}):
               ${z} += 1
-      ${z}`, [], {}, ctx);
+      ${z}` };
   }
 }
 
 class ShortCode1 extends CodeOutputSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     const words = (Math.random() < 0.7) ? randChoices(ANIMALS, 3) : ["Coding", "Is", "Fun!"];
     const [x, y, z, w] = randVars(4);
-    return createQuestion(`
+    return { code: `
       ${x} = ${toPyAtom(words)}
       ${y} = 0
       for ${z} in ${x}:
           ${y} += len(${z})
           print(${y}, ${z})
       for ${w} in range(len(${x})):
-          print(${w}, ${x}[${w}])`, [], {usesOutput: true}, ctx);
+          print(${w}, ${x}[${w}])` };
   }
 }
 
 class ShortCode2 extends CodeOutputSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     let [outer, inner] = randInts(2n, 4n, 2);
     if (outer > inner) { [outer, inner] = [inner, outer]; }
     if (outer === 2n) { [outer, inner] = [inner, outer]; }
     const [x, y, z] = randVars(3);
-    return createQuestion(`
+    return { code: `
       for ${x} in range(1, ${outer}):
           ${y} = ''
           for ${z} in range(${inner}):
               ${y} += str(${z})
-          print(${x}, ${y})`, [], {usesOutput: true}, ctx);
+          print(${x}, ${y})` };
   }
 }
 
 class LongCode extends CodeOutputSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     const fun = randChoice(["build", "compute", "process", "fun"]);
     const var_names = randVars(3);
     const param = var_names.pop();
@@ -179,14 +181,14 @@ class LongCode extends CodeOutputSubtopic {
         print(${v1}, ${v2})`;
     }
 
-    return createQuestion(`
+    return { code: `
 def ${fun}(${param}):
     ${fun_code}
 
 def main():
     ${main_code}
 
-    main()`, [], {usesOutput: true}, ctx);
+    main()` };
   }
 }
 

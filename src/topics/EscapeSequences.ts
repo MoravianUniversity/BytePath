@@ -1,29 +1,29 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext, CodeOutputSubtopic } from '../topics';
+import { Topic, EvalLastLineSubtopic, CodeOutputSubtopic, CodeOutputQuestionGen, EvalLastLineQuestionGen } from '../topics';
 import { STRINGS, randChoice, randChoices } from "../util";
 import { toPyStr } from "../python";
 import { BASIC_VARIABLES } from "./BasicVariables";
 
 export class EscapeSequenceSingleQuote extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
-    return createQuestion(`'\\''`, ['\'', '\\\''], {}, ctx);
+  gen(): EvalLastLineQuestionGen {
+    return { code: `'\\''`, options: ['\'', '\\\''] };
   }
 }
 
 export class EscapeSequenceSingleQuotePrint extends CodeOutputSubtopic {
-  generateQuestion(ctx: GenerateContext) {
-    return createQuestion(`print('\\'')`, ['\'', '\\\''], {usesOutput: true}, ctx);
+  gen(): CodeOutputQuestionGen {
+    return { code: `print('\\'')`, options: ['\'', '\\\''] };
   }
 }
 
 export class EscapeSequenceDoubleQuote extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
-    return createQuestion(`"\\""`, ['"', '\\"'], {}, ctx);
+  gen(): EvalLastLineQuestionGen {
+    return { code: `"\\""`, options: ['"', '\\"'] };
   }
 }
 
 export class EscapeSequenceDoubleQuotePrint extends CodeOutputSubtopic {
-  generateQuestion(ctx: GenerateContext) {
-    return createQuestion(`print("\\"")`, ['"', '\\"'], {usesOutput: true}, ctx);
+  gen(): CodeOutputQuestionGen {
+    return { code: `print("\\"")`, options: ['"', '\\"'] };
   }
 }
 
@@ -39,42 +39,42 @@ const QUOTES = [
 ];
 
 export class EscapeSequenceQuotePrint extends CodeOutputSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     const s = randChoice(QUOTES);
-    return createQuestion(`print(${toPyStr(s)})`, [s, toPyStr(s).slice(1, -1), toPyStr(s)], {usesOutput: true}, ctx);
+    return { code: `print(${toPyStr(s)})`, options: [s, toPyStr(s).slice(1, -1), toPyStr(s)] };
   }
 }
 
 export class EscapeSequenceNewline extends CodeOutputSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     const [a, b] = randChoices(STRINGS, 2);
-    return createQuestion(`print('${a}\\n${b}')`, [a, b, `${a}\\n${b}`, `${a}n${b}`, `${a}${b}`, `${a}\n${b}`], {usesOutput: true}, ctx);
+    return { code: `print('${a}\\n${b}')`, options: [a, b, `${a}\\n${b}`, `${a}n${b}`, `${a}${b}`, `${a}\n${b}`] };
   }
 }
 
 export class EscapeSequenceBackslash extends CodeOutputSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     const [a, b] = randChoices(STRINGS, 2);
     const s = `${a}\\\\${b}`;
-    return createQuestion(`print(${toPyStr(s)})`, [s, `${a}\\${b}`, `${a}\\\\${b}`, `${a}${b}`], {usesOutput: true}, ctx);
+    return { code: `print(${toPyStr(s)})`, options: [s, `${a}\\${b}`, `${a}\\\\${b}`, `${a}${b}`] };
   }
 }
 
 export class EscapeSequenceUnicode extends CodeOutputSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     // π ° ♣ ⌘ Ω β √ ½ € ¿
     const char = randChoice(['\\u03C0', '\\u00B0', '\\u2663', '\\u2318', '\\u03A9', '\\u03B2', '\\u221A', '\\u00BD', '\\u20AC', '\\u00BF']);
     const code = char.slice(2);
-    return createQuestion(`print(${toPyStr(char)})`, [code, char], {usesOutput: true}, ctx);
+    return { code: `print(${toPyStr(char)})`, options: [code, char] };
   }
 }
 
 export class EscapeSequenceUnicode2 extends CodeOutputSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     // 😛 😜 😝 😞 😟 😠 😡 😢 😣 😤
     const char = randChoice(['\\U0001F61B', '\\U0001F61C', '\\U0001F61D', '\\U0001F61E', '\\U0001F61F', '\\U0001F620', '\\U0001F621', '\\U0001F622', '\\U0001F623', '\\U0001F624']);
     const code = char.slice(2);
-    return createQuestion(`print(${toPyStr(char)})`, [code, `\\U${code}`], {usesOutput: true}, ctx);
+    return { code: `print(${toPyStr(char)})`, options: [code, `\\U${code}`] };
   }
 }
 

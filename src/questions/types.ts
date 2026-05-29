@@ -1,5 +1,5 @@
 import type { Answer } from '../topics';
-import type { PyType } from '../python';
+import type { Exception, PyType } from '../python';
 
 export type QuestionKind =
   | 'eval-last-line'
@@ -10,9 +10,11 @@ export type QuestionKind =
   | 'trace-order'
   | 'conceptual';
 
-export interface GenerateContext {
-  sharedCode?: string;
-  mode: 'learning' | 'quiz';
+export class TopicContext {
+  sharedCode: string|undefined = undefined;
+  constructor(sharedCode: string|undefined = undefined) {
+    this.sharedCode = sharedCode;
+  }
 }
 
 interface QuestionBase<K extends QuestionKind> {
@@ -29,8 +31,8 @@ export interface EvalLastLineQuestion extends QuestionBase<'eval-last-line'> {
 
 export interface CodeOutputQuestion extends QuestionBase<'code-output'> {
   code: string;
-  correct: string;
-  options: string[];
+  correct: string | Exception;
+  options: (string | Exception)[];
   input?: string[] | string;
 }
 
@@ -78,7 +80,7 @@ export type QuestionFor<K extends QuestionKind> = Extract<Question, { kind: K }>
 
 export type UserAnswerFor<K extends QuestionKind> =
   K extends 'eval-last-line' ? Answer :
-  K extends 'code-output' ? string :
+  K extends 'code-output' ? string | Exception :
   K extends 'code-write' ? string :
   K extends 'func-write' ? string :
   K extends 'code-edit' ? string :

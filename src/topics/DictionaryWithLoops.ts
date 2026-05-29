@@ -1,4 +1,4 @@
-import { Topic, createQuestion, GenerateContext, CodeOutputSubtopic } from '../topics';
+import { Topic, CodeOutputSubtopic, CodeOutputQuestionGen } from '../topics';
 import { randIntNum, randVars } from '../util';
 import { toPyAtom } from '../python';
 import { DICT_BASICS, createDict_StrToInt, toTuples } from './DictionaryBasics';
@@ -16,74 +16,86 @@ function getDictPrints(dict: Map<string, bigint>): string[] {
 }
 
 export class DictForIn extends CodeOutputSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     const [x, y] = randVars(2);
     const dict = createDict_StrToInt(randIntNum(3, 5));
-    return createQuestion(`
-      ${x} = ${toPyAtom(dict)}
-      for ${y} in ${x}:
-          print(${y})
-    `, getDictPrints(dict), {usesOutput: true}, ctx);
+    return { code: `
+        ${x} = ${toPyAtom(dict)}
+        for ${y} in ${x}:
+            print(${y})
+      `,
+      options: getDictPrints(dict),
+    };
   }
 }
 
 export class DictForInKeys extends CodeOutputSubtopic {
-    generateQuestion(ctx: GenerateContext) {
-      const [x, y] = randVars(2);
-      const dict = createDict_StrToInt(randIntNum(3, 5));
-      return createQuestion(`
+  gen(): CodeOutputQuestionGen {
+    const [x, y] = randVars(2);
+    const dict = createDict_StrToInt(randIntNum(3, 5));
+    return { code: `
         ${x} = ${toPyAtom(dict)}
         for ${y} in ${x}.keys():
             print(${y})
-      `, getDictPrints(dict), {usesOutput: true}, ctx);
+      `,
+      options: getDictPrints(dict),
+    };
   }
 }
 
 export class DictForInValues extends CodeOutputSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     const [x, y] = randVars(2);
     const dict = createDict_StrToInt(randIntNum(3, 5));
-    return createQuestion(`
-      ${x} = ${toPyAtom(dict)}
-      for ${y} in ${x}.values():
-          print(${y})
-    `, getDictPrints(dict), {usesOutput: true}, ctx);
+    return { code: `
+        ${x} = ${toPyAtom(dict)}
+        for ${y} in ${x}.values():
+            print(${y})
+      `,
+      options: getDictPrints(dict),
+    };
   }
 }
 
 export class DictForInItems extends CodeOutputSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     const [x, y] = randVars(2);
     const dict = createDict_StrToInt(randIntNum(3, 5));
-    return createQuestion(`
-      ${x} = ${toPyAtom(dict)}
-      for ${y} in ${x}.items():
-          print(${y})
-    `, getDictPrints(dict), {usesOutput: true}, ctx);
+    return { code: `
+        ${x} = ${toPyAtom(dict)}
+        for ${y} in ${x}.items():
+            print(${y})
+      `,
+      options: getDictPrints(dict),
+    };
   }
 }
 
 export class DictForInItems2 extends CodeOutputSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     const [x, y, z] = randVars(3);
     const dict = createDict_StrToInt(randIntNum(3, 5));
-    return createQuestion(`
+    return { code: `
       ${x} = ${toPyAtom(dict)}
-      for ${y}, ${z} in ${x}.items():
-          print(${y}, ${z})
-    `, getDictPrints(dict), {usesOutput: true}, ctx);
+        for ${y}, ${z} in ${x}.items():
+            print(${y}, ${z})
+      `,
+      options: getDictPrints(dict),
+    };
   }
 }
 
 export class DictForValuesUsingKeys extends CodeOutputSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     const [x, y] = randVars(3);
     const dict = createDict_StrToInt(randIntNum(3, 5));
-    return createQuestion(`
+    return { code: `
       ${x} = ${toPyAtom(dict)}
       for ${y} in ${x}:
           print(${x}[${y}])
-    `, getDictPrints(dict), {usesOutput: true}, ctx);
+      `,
+      options: getDictPrints(dict),
+    };
   }
 }
 

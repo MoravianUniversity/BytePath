@@ -1,10 +1,10 @@
-import { Answer, raw, Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Answer, raw, Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen } from '../topics';
 import { randInt, randInts, randChoice, randChoices, randVars, STRINGS } from '../util';
 import { toPyStr } from '../python';
 import { BASIC_VARIABLES } from './BasicVariables';
 
 abstract class StringConcatBase extends EvalLastLineSubtopic {
-  genQuestion(a: string | bigint, b: string | bigint, ctx: GenerateContext, backwards: boolean = false) {
+  genQuestion(a: string | bigint, b: string | bigint, backwards: boolean = false) {
     const [x, y] = randVars(2);
     const options: Answer[] = [
       a + ' ' + b,
@@ -38,17 +38,19 @@ abstract class StringConcatBase extends EvalLastLineSubtopic {
     if (typeof a === 'string' && typeof b === 'string') {
       options.push(a[0] + b[0]);
     }
-    return createQuestion(`
+    return { code: `
       ${x} = ${toPyStr(a.toString())}
       ${y} = ${toPyStr(b.toString())}
-      ${backwards ? y : x} + ${backwards ? x : y}`, options, {}, ctx);
+      ${backwards ? y : x} + ${backwards ? x : y}`,
+      options
+    };
   }
 }
 
 export class StringConcat extends StringConcatBase {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [a, b] = randChoices(STRINGS, 2);
-    return this.genQuestion(a, b, ctx);
+    return this.genQuestion(a, b);
   }
 }
 
@@ -59,25 +61,25 @@ export class StringConcatBackwards extends StringConcatBase {
       message: 'Be careful to read the variables and operation in the correct order.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [a, b] = randChoices(STRINGS, 2);
-    return this.genQuestion(a, b, ctx, true);
+    return this.genQuestion(a, b, true);
   }
 }
 
 export class StringConcat_1IntLike extends StringConcatBase {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const a = randChoice(STRINGS);
     const b = randInt(1n, 9n);
-    return this.genQuestion(a, b, ctx);
+    return this.genQuestion(a, b);
   }
 }
 
 export class StringConcat_1IntLikeBackwards extends StringConcatBase {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const a = randChoice(STRINGS);
     const b = randInt(1n, 9n);
-    return this.genQuestion(a, b, ctx, true);
+    return this.genQuestion(a, b, true);
   }
 }
 
@@ -88,16 +90,16 @@ export class StringConcat_2IntLike extends StringConcatBase {
       message: 'When in quotes, the contents are treated literally, not as numbers.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [a, b] = randInts(1n, 9n, 2);
-    return this.genQuestion(a, b, ctx);
+    return this.genQuestion(a, b);
   }
 }
 
 export class StringConcat_2IntLikeBackwards extends StringConcatBase {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [a, b] = randInts(1n, 9n, 2);
-    return this.genQuestion(a, b, ctx, true);
+    return this.genQuestion(a, b, true);
   }
 }
 

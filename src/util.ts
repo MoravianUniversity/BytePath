@@ -175,3 +175,14 @@ export function *zip<T1, T2>(iterable1: Iterable<T1>, iterable2: Iterable<T2>): 
 //     yield results.map(res => res.value);
 //   }
 // }
+
+// Filter a list to remove duplicates
+export function deduplicate<T>(array: T[], isSame: (a: T, b: T) => boolean = (a, b) => a === b): T[] {
+  const output: T[] = [];
+  for (const item of array) {
+    if (!output.some((o) => isSame(o, item))) {
+      output.push(item);
+    }
+  }
+  return output;
+}

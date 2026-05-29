@@ -1,4 +1,4 @@
-import { Topic, GenerateContext, CodeOutputSubtopic, createQuestion } from '../topics';
+import { Topic, CodeOutputSubtopic, CodeOutputQuestionGen } from '../topics';
 import { randInt, randChoice, randChoices, STRINGS, randVariable } from '../util';
 import { STRING_CONCAT } from './StringConcat';
 
@@ -9,14 +9,14 @@ export class PrintString extends CodeOutputSubtopic {
       message: 'When printing a string, the quotes are not shown in the output and each `print()` ends up on a new line.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     const [a, b] = randChoices(STRINGS, 2);
-    return createQuestion(`
+    return { code: `
       print("${a}")
       print('${b}')
-    `, [
-      a, b,
-      `${a}\n${b}`, 
+    `, options: [
+      `${a}`, `${b}`,
+      `${a}\n${b}`,
       `${b}\n${a}`,
       `"${a}"\n'${b}'`,
       `'${b}'\n"${a}"`,
@@ -25,7 +25,7 @@ export class PrintString extends CodeOutputSubtopic {
       `${a}${b}`,
       `${b}${a}`,
       `${a} ${b}`,
-    ], {usesOutput: true}, ctx);
+    ] };
   }
 }
 
@@ -36,11 +36,11 @@ export class PrintStringMulti extends CodeOutputSubtopic {
       message: 'When printing multiple strings with a single `print()`, they are printed on the same line, separated by a space.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     const [a, b] = randChoices(STRINGS, 2);
-    return createQuestion(`
+    return { code: `
       print('${a}', "${b}")
-    `, [
+    `, options: [
       `${b}\n${a}`,
       `"${a}"\n'${b}'`,
       `'${b}'\n"${a}"`,
@@ -51,7 +51,7 @@ export class PrintStringMulti extends CodeOutputSubtopic {
       `${a}${b}`,
       `${b}${a}`,
       `${a} ${b}`,
-    ], {usesOutput: true}, ctx);
+    ] };
   }
 }
 
@@ -62,19 +62,19 @@ export class PrintStringVar extends CodeOutputSubtopic {
       message: 'When printing a variable, the value of the variable is printed, not the variable name.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
-    return createQuestion(`
+    return { code: `
       ${x} = "${a}"
       print(${x})
-    `, [
+    `, options: [
       x, a,
       `"${x}"`,
       `'${x}'`,
       `"${a}"`,
       `'${a}'`
-    ], {usesOutput: true}, ctx);
+    ] };
   }
 }
 
@@ -85,14 +85,14 @@ export class PrintStringVar2 extends CodeOutputSubtopic {
       message: 'Make sure to pay attention to variables vs string literals.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     const x = randVariable();
     const [a, b] = randChoices(STRINGS, 2);
-    return createQuestion(`
+    return { code: `
       ${x} = "${a}"
       print(${x})
       print("${b}")
-    `, [
+    `, options: [
       `${x}\n${b}`,
       `"${a}"\n'${b}'`,
       `'${b}'\n"${a}"`,
@@ -101,7 +101,7 @@ export class PrintStringVar2 extends CodeOutputSubtopic {
       `${a}${b}`,
       `${b}${a}`,
       `${a} ${b}`,
-    ], {usesOutput: true}, ctx);
+    ] };
   }
 }
 
@@ -112,21 +112,21 @@ export class PrintStringMultiVar extends CodeOutputSubtopic {
       message: 'Make sure to pay attention to variables vs string literals when printing.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     const x = randVariable();
     const [a, b, c] = randChoices(STRINGS, 3);
-    return createQuestion(`
+    return { code: `
       ${x} = "${a}"
       ${b} = "${c}"
       print(${x}, "${b}")
       print("${x}", ${b})
-    `, [
+    `, options: [
       `${x} ${b}\n${x} ${b}`,
       `${x} ${b}\n${x} ${c}`,
       `${x} ${b}\n${a} ${b}`,
       `${x} ${b}\n${a} ${c}`,
       `${x} ${b}\n${a} ${b}`,
-    ], {usesOutput: true}, ctx);
+    ] };
   }
 }
 
@@ -137,22 +137,22 @@ export class PrintStringUpdateVar extends CodeOutputSubtopic {
       message: 'Remember to read each line of code one at a time and update the variable with the new value at the correct time.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     const x = randVariable();
     const [a, b] = randChoices(STRINGS, 2);
-    return createQuestion(`
+    return { code: `
       ${x} = "${a}"
       print(${x})
       ${x} = "${b}"
       print(${x})
-    `, [
+    `, options: [
       `${a}\n${a}`,
       `${b}\n${b}`,
       `${b}\n${a}`,
       `${x}\n${a}`,
       `${x}\n${b}`,
       `${x}\n${x}`,
-    ], {usesOutput: true}, ctx);
+    ] };
   }
 }
 
@@ -163,18 +163,18 @@ export class PrintStringWithMath extends CodeOutputSubtopic {
       message: 'The math expression is evaluated before printing the result.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     const a = randInt(1n, 10n);
     const b = randInt(1n, 10n);
-    return createQuestion(`
+    return { code: `
       print(${a} + ${b})
-    `, [
+    `, options: [
       `${a} + ${b}`,
       `"${a} + ${b}"`,
       `"${a}" + "${b}"`,
       `${a}${b}`,
       `"${a}${b}"`,
-    ], {usesOutput: true}, ctx);
+    ] };
   }
 }
 
@@ -185,18 +185,18 @@ export class PrintStringWithQuotedMath extends CodeOutputSubtopic {
       message: 'Inside a string literal, the math expression is never evaluated since it is literal text.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     const a = randInt(1n, 10n);
     const b = randInt(1n, 10n);
-    return createQuestion(`
+    return { code: `
       print("${a} + ${b}")
-    `, [
-      a + b,
+    `, options: [
+      `${a + b}`,
       `"${a} + ${b}"`,
       `"${a}" + "${b}"`,
       `${a}${b}`,
       `"${a}${b}"`,
-    ], {usesOutput: true}, ctx);
+    ] };
   }
 }
 
@@ -207,18 +207,18 @@ export class PrintStringWithQuotedMath2 extends CodeOutputSubtopic {
       message: 'Remember that string concatenation and not numeric addition is done when the values are string literals.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): CodeOutputQuestionGen {
     const a = randInt(1n, 10n);
     const b = randInt(1n, 10n);
-    return createQuestion(`
+    return { code: `
       print("${a}" + "${b}")
-    `, [
-      a + b,
+    `, options: [
+      `${a + b}`,
       `"${a}" + "${b}"`,
       `"${a} + ${b}"`,
       `${a} + ${b}`,
       `"${a}${b}"`,
-    ], {usesOutput: true}, ctx);
+    ] };
   }
 }
 

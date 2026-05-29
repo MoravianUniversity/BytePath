@@ -1,96 +1,96 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen } from '../topics';
 import { randInts, randInt } from '../util';
 import { BASIC_ARITHMETIC } from './BasicArithmetic';
 
 export class EqualTo_True extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const a = randInt(1n, 10n);
-    return createQuestion(`${a} == ${a}`, [true, false, a], {}, ctx);
+    return { code: `${a} == ${a}`, options: [true, false, a] };
   }
 }
 
 export class EqualTo_False extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [a, b] = randInts(1n, 10n, 2);
-    return createQuestion(`${a} == ${b}`, [true, false, a, b], {}, ctx);
+    return { code: `${a} == ${b}`, options: [true, false, a, b] };
   }
 }
   
 export class NotEqualTo_True extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [a, b] = randInts(1n, 10n, 2);
-    return createQuestion(`${a} != ${b}`, [true, false, a, b], {}, ctx);
+    return { code: `${a} != ${b}`, options: [true, false, a, b] };
   }
 }
 
 export class NotEqualTo_False extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const a = randInt(1n, 10n);
-    return createQuestion(`${a} != ${a}`, [true, false, a], {}, ctx);
+    return { code: `${a} != ${a}`, options: [true, false, a] };
   }
 }
 
 export class LessThan_True extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     let [a, b] = randInts(1n, 10n, 2);
     if (a > b) [a, b] = [b, a];
-    return createQuestion(`${a} < ${b}`, [true, false, a, b], {}, ctx);
+    return { code: `${a} < ${b}`, options: [true, false, a, b] };
   }
 }
 
 export class LessThan_False extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     let [a, b] = randInts(1n, 10n, 2);
     if (a < b) [a, b] = [b, a];
-    return createQuestion(`${a} < ${b}`, [true, false, a, b], {}, ctx);
+    return { code: `${a} < ${b}`, options: [true, false, a, b] };
   }
 }
 
 export class GreaterThan_True extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     let [a, b] = randInts(1n, 10n, 2);
     if (a < b) [a, b] = [b, a];
-    return createQuestion(`${a} > ${b}`, [true, false, a, b], {}, ctx);
+    return { code: `${a} > ${b}`, options: [true, false, a, b] };
   }
 }
 
 export class GreaterThan_False extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     let [a, b] = randInts(1n, 10n, 2);
     if (a > b) [a, b] = [b, a];
-    return createQuestion(`${a} > ${b}`, [true, false, a, b], {}, ctx);
+    return { code: `${a} > ${b}`, options: [true, false, a, b] };
   }
 }
 
 export class LessThanOrEqualTo_True extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     let [a, b] = randInts(1n, 10n, 2, false);
     if (a > b) [a, b] = [b, a];
-    return createQuestion(`${a} <= ${b}`, [true, false, a, b], {}, ctx);
+    return { code: `${a} <= ${b}`, options: [true, false, a, b] };
   }
 }
 
 export class LessThanOrEqualTo_False extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     let [a, b] = randInts(1n, 10n, 2, false);
     if (a <= b) [a, b] = [b, a];
-    return createQuestion(`${a} <= ${b}`, [true, false, a, b], {}, ctx);
+    return { code: `${a} <= ${b}`, options: [true, false, a, b] };
   }
 }
 
 export class GreaterThanOrEqualTo_True extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     let [a, b] = randInts(1n, 10n, 2, false);
     if (a < b) [a, b] = [b, a];
-    return createQuestion(`${a} >= ${b}`, [true, false, a, b], {}, ctx);
+    return { code: `${a} >= ${b}`, options: [true, false, a, b] };
   }
 }
 
 export class GreaterThanOrEqualTo_False extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     let [a, b] = randInts(1n, 10n, 2, false);
     if (a >= b) [a, b] = [b, a];
-    return createQuestion(`${a} >= ${b}`, [true, false, a, b], {}, ctx);
+    return { code: `${a} >= ${b}`, options: [true, false, a, b] };
   }
 }
 

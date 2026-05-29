@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen } from '../topics';
 import { randChoice, randChoices, randIntNum, randInts, randVariable, randVars, STRINGS } from "../util";
 import { toPyStr } from "../python";
 import { BASIC_ARITHMETIC } from "./BasicArithmetic";
@@ -17,41 +17,46 @@ const PHRASES = [
 ];
 
 export class StringSplit extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const s = randChoice(PHRASES);
-    return createQuestion(`
+    return { code: `
       s = ${toPyStr(s)}
-      s.split()`, [s.split(' ').join(''), s.split(' ').join(',')], {}, ctx);
+      s.split()`,
+      options: [s.split(' ').join(''), s.split(' ').join(',')],
+    };
   }
 }
 
 export class StringSplitLen extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const s = randChoice(PHRASES);
     const n = BigInt(s.split(' ').length);
-    return createQuestion(`
+    return { code: `
       s = ${toPyStr(s)}
       len(s.split())`,
-      [BigInt(s.split(' ').join('').length), BigInt(s.split(' ').join(',').length), BigInt(s.length), n, n-1n, n+1n], {}, ctx);
+      options: [BigInt(s.split(' ').join('').length), BigInt(s.split(' ').join(',').length), BigInt(s.length), n, n-1n, n+1n],
+    };
   }
 }
 
 export class StringSplitChar extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     let s = randChoice(PHRASES);
     let c = randChoice([...s]);
     while (c === ' ' || s.split(c).length <= 3) {
       s = randChoice(PHRASES);
       c = randChoice([...s]);
     }
-    return createQuestion(`
+    return { code: `
       s = ${toPyStr(s)}
-      s.split('${c}')`, [s.split(c).join(''), s.split(c).join(','), c], {}, ctx);
+      s.split('${c}')`,
+      options: [s.split(c).join(''), s.split(c).join(','), c],
+    };
   }
 }
 
 export class StringSplitCharLen extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     let s = randChoice(PHRASES);
     let c = randChoice([...s]);
     let n = s.split(c).length;
@@ -60,65 +65,76 @@ export class StringSplitCharLen extends EvalLastLineSubtopic {
       c = randChoice([...s]);
       n = s.split(c).length;
     }
-    return createQuestion(`
+    return { code: `
       s = ${toPyStr(s)}
       len(s.split('${c}'))`,
-      [BigInt(s.length), BigInt(s.split(c).join('').length), BigInt(n), BigInt(n-1), BigInt(n+1)], {}, ctx);
+      options: [BigInt(s.length), BigInt(s.split(c).join('').length), BigInt(n), BigInt(n-1), BigInt(n+1)],
+    };
   }
 }
 
 export class StringSplitVars extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 9n, 2);
     const str = `${a},${b}`;
-    return createQuestion(`
+    return { code: `
       ${x}, ${y} = ${toPyStr(str)}.split(',')
       ${x} + ${y}`,
-      [a+b, a, b, str, `${a}${b}`, `${b}${a}`, `${x}${y}`, `${y}${x}`], {}, ctx);
+      options: [a+b, a, b, str, `${a}${b}`, `${b}${a}`, `${x}${y}`, `${y}${x}`],
+    };
   }
 }
 
 const SYMBOLS = ['-', ',', '~', '_', '+'];
 
 export class StringJoinList extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const sym = randChoice(SYMBOLS);
     const strs = randChoices(STRINGS, randIntNum(3, 5));
     const quoted = strs.map(s => `"${s}"`);
     const list = "[" + quoted.join(', ') + "]";
-    return createQuestion(`${toPyStr(sym)}.join(${list})`, [strs.join(sym), strs.join(''), strs, quoted.join(sym), quoted.join(''), quoted], {}, ctx);
+    return {
+      code: `${toPyStr(sym)}.join(${list})`,
+      options: [strs.join(sym), strs.join(''), strs, quoted.join(sym), quoted.join(''), quoted],
+    };
   }
 }
 
 export class StringJoinStr extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const sym = randChoice(SYMBOLS);
     const str = randChoice(STRINGS);
     const chars = [...str];
-    return createQuestion(`${toPyStr(sym)}.join(${toPyStr(str)})`, [chars.join(sym), chars.join(''), chars], {}, ctx);
+    return {
+      code: `${toPyStr(sym)}.join(${toPyStr(str)})`,
+      options: [chars.join(sym), chars.join(''), chars],
+    };
   }
 }
 
 export class StringSplitJoin extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const s = randChoice(PHRASES);
-    return createQuestion(`
+    return { code: `
       ${x} = ${toPyStr(s)}
       ${toPyStr('')}.join(${x}.split())`,
-      [s.split('').join(''), s.split(' ').join(','), s, s.split(' ')], {}, ctx);
+      options: [s.split('').join(''), s.split(' ').join(','), s, s.split(' ')],
+    };
   }
 }
 
 export class StringSplitJoinSym extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const s = randChoice(PHRASES);
     const sym = randChoice(SYMBOLS);
-    return createQuestion(`
+    return { code: `
       ${x} = ${toPyStr(s)}
-      ${toPyStr(sym)}.join(${x}.split())`, [s.split('').join(sym), s.split(' ').join(sym), s, s.split(' ')], {}, ctx);
+      ${toPyStr(sym)}.join(${x}.split())`,
+      options: [s.split('').join(sym), s.split(' ').join(sym), s, s.split(' ')],
+    };
   }
 }
 

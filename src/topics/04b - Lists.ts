@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen } from '../topics';
 import { randChoice, randVars, randVariable, randIntNum, STRINGS, maybeNot, range, randChoices } from '../util';
 import { toPyStr, toPyAtom } from '../python';
 import { BASIC_PRINTS } from './BasicPrints';
@@ -8,53 +8,69 @@ import { LIST_SLICING, ListSlicingToVar } from './ListSlicing';
 import { TUPLES } from './Tuples';
 
 export class ConcatSlices extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoices(STRINGS, randIntNum(5, 8));
     const i = randIntNum(1, a.length - 1);
     const j = randIntNum(i+2, a.length - 2);
-    return createQuestion(`
-      ${x} = ${toPyAtom(a)}
-      ${x}[:${i}] + ${x}[${j}:]`, [
+    return {
+      code: `
+        ${x} = ${toPyAtom(a)}
+        ${x}[:${i}] + ${x}[${j}:]
+      `,
+      options: [
         a, a.slice(0, i), a.slice(j), [...a.slice(0, i), ...a.slice(j)],
         [...a.slice(0, i+1), ...a.slice(j)], [...a.slice(0, i), ...a.slice(j+1)],
-      ], {}, ctx);
+      ],
+    };
   }
 }
 
 export class LengthOfListItem extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const [a, item] = randListAndString();
     const i = a.indexOf(item);
-    return createQuestion(`
-      ${x} = ${toPyAtom(a)}
-      len(${x}[${i}])`, range(0n, 8n), {}, ctx);
+    return {
+      code: `
+        ${x} = ${toPyAtom(a)}
+        len(${x}[${i}])
+      `,
+      options: range(0n, 8n),
+    };
   }
 }
 
 export class LengthOfListItemConcat extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, item] = randListAndString();
     const str = randChoice(STRINGS);
     const i = a.indexOf(item);
-    return createQuestion(`
-      ${x} = ${toPyAtom(a)}
-      ${y} = ${toPyStr(str)}
-      len(${x}[${i}]+${y})`, range(0n, 10n), {}, ctx);
+    return {
+      code: `
+        ${x} = ${toPyAtom(a)}
+        ${y} = ${toPyStr(str)}
+        len(${x}[${i}]+${y})
+      `,
+      options: range(0n, 10n),
+    };
   }
 }
 
 export class CharInListItem extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const [a, item] = randListAndString();
     const i = a.indexOf(item);
     const char = item[0];
-    return createQuestion(`
-      ${x} = ${toPyAtom(a)}
-      ${toPyAtom(char)} ${maybeNot()}in ${x}[${i}]`, [true, false], {}, ctx);
+    return {
+      code: `
+        ${x} = ${toPyAtom(a)}
+        ${toPyAtom(char)} ${maybeNot()}in ${x}[${i}]
+      `,
+      options: [true, false],
+    };
   }
 }
 

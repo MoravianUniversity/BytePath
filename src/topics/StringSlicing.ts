@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen } from '../topics';
 import { randInt, randVariable, randVars, randIntNum, randChoice } from "../util";
 import { toPyStr } from "../python";
 import { STRING_LENGTH } from "./StringLength";
@@ -19,62 +19,63 @@ export function makeComment(s: string): string {
 }
 
 export class StringIndex1 extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
-    return createQuestion(`
+    return { code: `
       ${makeComment(a)}
       ${x} = ${toPyStr(a)}
       ${x}[1]
-    `, [a[0], a[1], a[a.length-1], a[a.length-2]], {}, ctx);
+    `, options: [a[0], a[1], a[a.length-1], a[a.length-2]] };
   }
 }
 
 export abstract class StringSlicingBase extends EvalLastLineSubtopic {
   genQuestion(
-    ctx: GenerateContext,
     start: (s: string) => [string, number] = DEFAULT_START,
     end: (s: string, start: number, x: string) => [string, number] = DEFAULT_END
-  ) {
+  ): EvalLastLineQuestionGen {
     const x = randVariable();
     const s = randChoice(STRINGS);
     const [a, a_] = start(s);
     const [b, b_] = end(s, a_, x);
-    return createQuestion(`
+    return { code: `
       ${makeComment(s)}
       ${x} = ${toPyStr(s)}
-      ${x}[${a}:${b}]`, [
+      ${x}[${a}:${b}]`,
+      options: [
         s, x,
         s[a_], s[a_-1], s[a_+1], s[b_-1], s[b_], s[b_+1],
         s.slice(a_, b_), s.slice(a_, b_+1), s.slice(a_+1, b_), s.slice(a_+1, b_+1),
-      ], {}, ctx);
+      ],
+    };
   }
 }
 
 export class StringSlicing extends StringSlicingBase {
-  generateQuestion(ctx: GenerateContext) { return this.genQuestion(ctx); }
+  gen(): EvalLastLineQuestionGen { return this.genQuestion(); }
 }
 
 export class StringSlicingMake1Char extends StringSlicingBase {
-  generateQuestion(ctx: GenerateContext) { return this.genQuestion(ctx, (s) => toTuple(randIntNum(1, s.length-2)), (_, start) => toTuple(start+1)); }
+  gen(): EvalLastLineQuestionGen { return this.genQuestion((s) => toTuple(randIntNum(1, s.length-2)), (_, start) => toTuple(start+1)); }
 }
 
 export class StringSlicingMakeEmpty extends StringSlicingBase {
-  generateQuestion(ctx: GenerateContext) { return this.genQuestion(ctx, (s) => toTuple(randIntNum(1, s.length-2)), (_, start) => toTuple(start)); }
+  gen(): EvalLastLineQuestionGen { return this.genQuestion((s) => toTuple(randIntNum(1, s.length-2)), (_, start) => toTuple(start)); }
 }
 
 export class StringSlicingFrom0 extends StringSlicingBase {
-  generateQuestion(ctx: GenerateContext) { return this.genQuestion(ctx, () => ['0', 0]); }
+  gen(): EvalLastLineQuestionGen { return this.genQuestion(() => ['0', 0]); }
 }
 
 export class StringSlicingToLen extends StringSlicingBase {
-  generateQuestion(ctx: GenerateContext) {
-    return this.genQuestion(ctx, DEFAULT_START, (s, _, x) => [`len(${x})`, s.length]);
+  gen(): EvalLastLineQuestionGen {
+    return this.genQuestion(DEFAULT_START, (s, _, x) => [`len(${x})`, s.length]);
   }
 }
 
 export class StringSlicingChained extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     let s = randChoice(STRINGS);
     let [a, a_] = DEFAULT_START(s);
@@ -88,65 +89,71 @@ export class StringSlicingChained extends EvalLastLineSubtopic {
     }
     let [c, c_] = toTuple(randIntNum(1, sub.length-3));
     let [d, d_] = toTuple(randIntNum(c_+2, sub.length-1));
-    return createQuestion(`
+    return { code: `
       ${makeComment(s)}
       ${x} = ${toPyStr(s)}
       ${y} = ${x}[${a}:${b}]
       ${y}[${c}:${d}]
-      `, [
+      `,
+      options: [
         s, sub,
         sub.slice(c_, d_), sub.slice(c_, d_-1), sub.slice(c_, d_+1),
         sub.slice(c_+1, d_), sub.slice(c_+1, d_-1), sub.slice(c_+1, d_+1),
         sub.slice(c_-1, d_), sub.slice(c_-1, d_-1), sub.slice(c_-1, d_+1),
-      ], {}, ctx);
+      ],
+    };
   }
 }
 
 export class StringIndexLenMinus1 extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
-    return createQuestion(`
-      ${makeComment(a)}
-      ${x} = ${toPyStr(a)}
-      ${x}[len(${x})-1]
-    `, [a[0], a[1], a[a.length-1], a[a.length-2]], {}, ctx);
+    return { code: `
+        ${makeComment(a)}
+        ${x} = ${toPyStr(a)}
+        ${x}[len(${x})-1]
+      `,
+      options: [a[0], a[1], a[a.length-1], a[a.length-2]],
+    };
   }
 }
 
 export class StringIndexLenMinus2 extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
-    return createQuestion(`
-      ${makeComment(a)}
-      ${x} = ${toPyStr(a)}
-      ${x}[len(${x})-2]
-    `, [a[0], a[1], a[a.length-1], a[a.length-2], a[a.length-3]], {}, ctx);
+    return { code: `
+        ${makeComment(a)}
+        ${x} = ${toPyStr(a)}
+        ${x}[len(${x})-2]
+      `,
+      options: [a[0], a[1], a[a.length-1], a[a.length-2], a[a.length-3]],
+    };
   }
 }
 
 export class StringSlicingToLenMinus1 extends StringSlicingBase {
-  generateQuestion(ctx: GenerateContext) {
-    return this.genQuestion(ctx, DEFAULT_START, (s, _, x) => [`len(${x})-1`, s.length - 1]);
+  gen(): EvalLastLineQuestionGen {
+    return this.genQuestion(DEFAULT_START, (s, _, x) => [`len(${x})-1`, s.length - 1]);
   }
 }
 
 export class StringSlicingToNone extends StringSlicingBase {
-  generateQuestion(ctx: GenerateContext) {
-    return this.genQuestion(ctx, DEFAULT_START, (s) => ['', s.length]);
+  gen(): EvalLastLineQuestionGen {
+    return this.genQuestion(DEFAULT_START, (s) => ['', s.length]);
   }
 }
 
 export class StringSlicingFromNone extends StringSlicingBase {
-  generateQuestion(ctx: GenerateContext) {
-    return this.genQuestion(ctx, () => ['', 0]);
+  gen(): EvalLastLineQuestionGen {
+    return this.genQuestion(() => ['', 0]);
   }
 }
 
 export class StringSlicingFromNoneToNone extends StringSlicingBase {
-  generateQuestion(ctx: GenerateContext) {
-    return this.genQuestion(ctx, () => ['', 0], (s) => ['', s.length]);
+  gen(): EvalLastLineQuestionGen {
+    return this.genQuestion(() => ['', 0], (s) => ['', s.length]);
   }
 }
 

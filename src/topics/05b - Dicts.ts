@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen } from '../topics';
 import { randInts, randIntNum, STRINGS, randChoices, randVars, range, shuffle, ASCII_LETTERS } from '../util';
 import { toPyAtom, toPyStr, tuple, PyType, Immutable } from '../python.ts';
 
@@ -37,73 +37,99 @@ function createCode(): {code: string, dict: Map<Immutable, PyType>, vars: string
 }
 
 class DictLen extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const {code, vars} = createCode();
-    return createQuestion(code + `len(${vars[3]})`, range(3n, 12n), {}, ctx);
+    return {
+      code: code + `len(${vars[3]})`,
+      options: range(3n, 12n),
+    };
   }
 }
 
 class DictIndexStr extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const {code, dict, vars} = createCode();
-    return createQuestion(code + `${vars[3]}[${toPyStr(vars[0])}]`, [...dict.values(), ...dict.keys()], {}, ctx);
+    return {
+      code: code + `${vars[3]}[${toPyStr(vars[0])}]`,
+      options: [...dict.values(), ...dict.keys()],
+    };
   }
 }
 
 class DictIndexVar extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const {code, dict, vars} = createCode();
-    return createQuestion(code + `${vars[3]}[${vars[0]}]`, [...dict.values(), ...dict.keys()], {}, ctx);
+    return {
+      code: code + `${vars[3]}[${vars[0]}]`,
+      options: [...dict.values(), ...dict.keys()],
+    };
   }
 }
 
 class DictIndexInt extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const {code, dict, vars, vals} = createCode();
-    return createQuestion(code + `${vars[3]}[${vals[0]}]`, [...dict.values(), ...dict.keys()], {}, ctx);
+    return {
+      code: code + `${vars[3]}[${vals[0]}]`,
+      options: [...dict.values(), ...dict.keys()],
+    };
   }
 }
 
 class DictVarIn extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const {code, vars} = createCode();
-    return createQuestion(code + `${vars[1]} in ${vars[3]}`, [true, false], {}, ctx);
+    return {
+      code: code + `${vars[1]} in ${vars[3]}`,
+      options: [true, false],
+    };
   }
 }
 
 class DictStrIn extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const {code, vars} = createCode();
-    return createQuestion(code + `${toPyStr(vars[1])} in ${vars[3]}`, [true, false], {}, ctx);
+    return {
+      code: code + `${toPyStr(vars[1])} in ${vars[3]}`,
+      options: [true, false],
+    };
   }
 }
 class DictVarIn2 extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const {code, vars} = createCode();
-    return createQuestion(code + `${vars[2]} in ${vars[3]}`, [true, false], {}, ctx);
+    return {
+      code: code + `${vars[2]} in ${vars[3]}`,
+      options: [true, false],
+    };
   }
 }
 
 class DictStrIn2 extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const {code, vars} = createCode();
-    return createQuestion(code + `${toPyStr(vars[2])} in ${vars[3]}`, [true, false], {}, ctx);
+    return {
+      code: code + `${toPyStr(vars[2])} in ${vars[3]}`,
+      options: [true, false],
+    };
   }
 }
 
 class LongRead extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y, z] = randVars(3);
     const dict = createDict([...ASCII_LETTERS], [2n, 3n, 4n], randIntNum(4, 7), false);
-    return createQuestion(`
-      ${x} = ${toPyAtom(dict)}
-      ${y} = {}
-      for ${z} in ${x}:
-          if ${x}[${z}] not in ${y}:
-              ${y}[${x}[${z}]] = []
-          ${y}[${x}[${z}]].append(${z})
-      ${y}
-    `, [], {}, ctx);
+    return {
+      code: `
+        ${x} = ${toPyAtom(dict)}
+        ${y} = {}
+        for ${z} in ${x}:
+            if ${x}[${z}] not in ${y}:
+                ${y}[${x}[${z}]] = []
+            ${y}[${x}[${z}]].append(${z})
+        ${y}
+      `
+    };
   }
 }
 

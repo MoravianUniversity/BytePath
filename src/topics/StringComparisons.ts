@@ -1,124 +1,124 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen } from '../topics';
 import { randChoice, randChoices, randIntNum, shuffle, STRINGS, capitalize } from "../util";
 import { toPyStr } from "../python";
 import { BASIC_RELATIONAL_OPERATORS } from "./BasicRelationalOperators";
 import { MEMBERSHIP_OPERATORS } from "./MembershipOperator";
 
 export class StringEqualsFalse extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [a, b] = randChoices(STRINGS, 2);
-    return createQuestion(`${toPyStr(a)} == ${toPyStr(b)}`, [true, false], {}, ctx);
+    return { code: `${toPyStr(a)} == ${toPyStr(b)}`, options: [true, false] };
   }
 }
 
 export class StringEqualsTrue extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const a = randChoice(STRINGS);
-    return createQuestion(`"${a}" == '${a}'`, [true, false], {}, ctx);
+    return { code: `"${a}" == '${a}'`, options: [true, false] };
   }
 }
 
 export class StringEqualsCapitalized extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const a = randChoice(STRINGS);
-    return createQuestion(`"${a}" == '${capitalize(a)}'`, [true, false], {}, ctx);
+    return { code: `"${a}" == '${capitalize(a)}'`, options: [true, false] };
   }
 }
 
 export class StringLessThanFalse extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     let [a, b] = randChoices(STRINGS, 2);
     while (a <= b) { [a, b] = randChoices(STRINGS, 2); }
-    return createQuestion(`${toPyStr(a)} < ${toPyStr(b)}`, [true, false], {}, ctx);
+    return { code: `${toPyStr(a)} < ${toPyStr(b)}`, options: [true, false] };
   }
 }
 
 export class StringLessThanTrue extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     let [a, b] = randChoices(STRINGS, 2);
     while (a >= b) { [a, b] = randChoices(STRINGS, 2); }
-    return createQuestion(`${toPyStr(a)} < ${toPyStr(b)}`, [true, false], {}, ctx);
+    return { code: `${toPyStr(a)} < ${toPyStr(b)}`, options: [true, false] };
   }
 }
 
 export class StringLessThanLonger extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     let a = randChoice(STRINGS);
-    return createQuestion(`${toPyStr(a)} <= ${toPyStr(a + 's')}`, [true, false], {}, ctx);
+    return { code: `${toPyStr(a)} <= ${toPyStr(a + 's')}`, options: [true, false] };
   }
 }
 
 export class StringLessThanCapitalized extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const a = randChoice(STRINGS);
-    return createQuestion(`${toPyStr(a)} < ${toPyStr(capitalize(a))}`, [true, false], {}, ctx);
+    return { code: `${toPyStr(a)} < ${toPyStr(capitalize(a))}`, options: [true, false] };
   }
 }
 
 export class StringLessThanOtherCaps extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     let [a, b] = randChoices(STRINGS, 2);
     while (a >= b) { [a, b] = randChoices(STRINGS, 2); }
-    return createQuestion(`${toPyStr(a)} < ${toPyStr(capitalize(b))}`, [true, false], {}, ctx);
+    return { code: `${toPyStr(a)} < ${toPyStr(capitalize(b))}`, options: [true, false] };
   }
 }
 
 export class StringLessThanBothCapsTrue extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     let [a, b] = randChoices(STRINGS, 2);
     while (a >= b) { [a, b] = randChoices(STRINGS, 2); }
-    return createQuestion(`${toPyStr(capitalize(a))} < ${toPyStr(capitalize(b))}`, [true, false], {}, ctx);
+    return { code: `${toPyStr(capitalize(a))} < ${toPyStr(capitalize(b))}`, options: [true, false] };
   }
 }
 
 export class StringLessThanBothCapsFalse extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     let [a, b] = randChoices(STRINGS, 2);
     while (a <= b) { [a, b] = randChoices(STRINGS, 2); }
-    return createQuestion(`${toPyStr(capitalize(a))} < ${toPyStr(capitalize(b))}`, [true, false], {}, ctx);
+    return { code: `${toPyStr(capitalize(a))} < ${toPyStr(capitalize(b))}`, options: [true, false] };
   }
 }
 
 export class StringLessThanOtherCapsTrue extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     let [a, b] = randChoices(STRINGS, 2);
     while (a >= b) { [a, b] = randChoices(STRINGS, 2); }
-    return createQuestion(`${toPyStr(a)} < ${toPyStr(capitalize(b))}`, [true, false], {}, ctx);
+    return { code: `${toPyStr(a)} < ${toPyStr(capitalize(b))}`, options: [true, false] };
   }
 }
 
 export class StringCharMembershipTrue extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const a = randChoice(STRINGS);
     const b = randChoice([...a]);
-    return createQuestion(`${toPyStr(b)} in ${toPyStr(a)}`, [true, false], {}, ctx);
+    return { code: `${toPyStr(b)} in ${toPyStr(a)}`, options: [true, false] };
   }
 }
 
 export class StringCharMembershipFalse extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const a = randChoice(STRINGS);
     const b = randChoice([...a]);
-    return createQuestion(`${toPyStr(capitalize(b))} in ${toPyStr(a)}`, [true, false], {}, ctx);
+    return { code: `${toPyStr(capitalize(b))} in ${toPyStr(a)}`, options: [true, false] };
   }
 }
 
 export class StringMembershipTrue extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const a = randChoice(STRINGS);
     const i = randIntNum(0, a.length - 3);
     const b = a.slice(i, i + 3);
-    return createQuestion(`${toPyStr(b)} in ${toPyStr(a)}`, [true, false], {}, ctx);
+    return { code: `${toPyStr(b)} in ${toPyStr(a)}`, options: [true, false] };
   }
 }
 
 export class StringMembershipFalse extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const a = randChoice(STRINGS);
     const i = randIntNum(0, a.length - 3);
     let b = a.slice(i, i + 3);
     while (a.includes(b)) { b = shuffle(b.split('')).join(''); }
-    return createQuestion(`${toPyStr(b)} in ${toPyStr(a)}`, [true, false], {}, ctx);
+    return { code: `${toPyStr(b)} in ${toPyStr(a)}`, options: [true, false] };
   }
 }
 

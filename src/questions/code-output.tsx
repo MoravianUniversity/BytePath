@@ -1,7 +1,9 @@
 import React from 'react';
-import type { CodeOutputQuestion, UserAnswerFor } from './types.ts';
+import type { CodeOutputQuestion, TopicContext, UserAnswerFor } from './types.ts';
 import type { QuestionTypeDef, QuestionViewProps, SerializedResponse } from './registry.ts';
 import { QuestionAnswerOptions, QuestionCodeBlock, QuestionInput, QuestionPrompt, QuestionQuizInputAnswerDisplay, QuestionQuizInputMultiLine } from './QuestionComponents.tsx';
+import { createCodeQuestionCore, prepareOptions, type BuildCodeQuestionOpts } from './utils.ts';
+import { Exception, runGrabOutput } from '../python.ts';
 
 function parseQuizAnswer(raw: string): string | undefined {
   const trimmed = raw.trim();
@@ -15,14 +17,20 @@ function checkAnswer(
   return answer === question.correct;  // TODO: more advanced checking?
 }
 
+function answerToString(answer: string | Exception | null): string {
+  if (answer == null) { return ""; }
+  if (answer instanceof Error) { return answer.message; }
+  return answer;
+}
+
 function serialize(
   question: CodeOutputQuestion,
   user: UserAnswerFor<'code-output'> | null,
 ): SerializedResponse {
   return {
     questionPayload: question.code,
-    studentAnswer: user,
-    correctAnswer: question.correct,
+    studentAnswer: answerToString(user),
+    correctAnswer: answerToString(question.correct),
   };
 }
 
@@ -107,3 +115,21 @@ export const codeOutputDef: QuestionTypeDef<'code-output'> = {
   serializeResponse: serialize,
   View: CodeOutputView,
 };
+
+export function createCodeOutputQuestion(
+  code: string,
+  options: (string | Exception | undefined)[],
+  opts: BuildCodeQuestionOpts<string | Exception>,
+  ctx: TopicContext,
+): CodeOutputQuestion {
+  const { code: cleaned_code, correct, input } = createCodeQuestionCore(
+    code, opts, runGrabOutput, (a, b) => a === b, ctx
+  );
+  return {
+    kind: 'code-output',
+    code: cleaned_code,
+    correct: correct,
+    options: prepareOptions(correct, options),
+    input,
+  };
+}

@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen } from '../topics';
 import { randInts, randFunc, randVars, range } from '../util';
 import { BASIC_FUNCTIONS } from './BasicFunctions';
 import { randOperation } from './BasicVariables';
@@ -11,14 +11,16 @@ export class Func2ArgsAdd extends EvalLastLineSubtopic {
       message: 'When a function is called with multiple arguments, the arguments are substituted for the parameters in the function body in the order they are given.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 5n, 2, false);
     const func = randFunc();
-    return createQuestion(`
+    return { code: `
       def ${func}(${x}, ${y}):
           return ${x} + ${y}
-      ${func}(${a}, ${b})`, range(0n, 10n), {}, ctx);
+      ${func}(${a}, ${b})`,
+      options: range(0n, 10n),
+    };
   }
 }
 
@@ -29,14 +31,16 @@ export class Func2ArgsSub extends EvalLastLineSubtopic {
       message: 'When a function is called with multiple arguments, the arguments are substituted for the parameters in the function body in the order they are given.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 5n, 2);
     const func = randFunc();
-    return createQuestion(`
+    return { code: `
       def ${func}(${x}, ${y}):
           return ${x} - ${y}
-      ${func}(${a}, ${b})`, range(0n, 10n), {}, ctx);
+      ${func}(${a}, ${b})`,
+      options: range(0n, 10n),
+    };
   }
 }
 
@@ -47,14 +51,16 @@ export class Func2ArgsSubBackwards extends EvalLastLineSubtopic {
       message: 'Make sure to read the variables and operation in the correct order.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 5n, 2);
     const func = randFunc();
-    return createQuestion(`
+    return { code: `
       def ${func}(${x}, ${y}):
           return ${y} - ${x}
-      ${func}(${a}, ${b})`, range(0n, 10n), {}, ctx);
+      ${func}(${a}, ${b})`,
+      options: range(0n, 10n),
+    };
   }
 }
 
@@ -65,50 +71,56 @@ export class Func2ArgsMult extends EvalLastLineSubtopic {
       message: 'When a function is called with multiple arguments, the arguments are substituted for the parameters in the function body in the order they are given.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 4n, 2);
     const func = randFunc();
-    return createQuestion(`
+    return { code: `
       def ${func}(${x}, ${y}):
           return ${x} * ${y}
-      ${func}(${a}, ${b})`, range(0n, 16n), {}, ctx);
+      ${func}(${a}, ${b})`,
+      options: range(0n, 16n),
+    };
   }
 }
 
 export class Func2ArgsVar extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [a, b, c] = randInts(1n, 5n, 3);
     const func = randFunc();
     const op1 = randOperation();
     const op2 = randOperation();
     const [var1, var2, var3] = randVars(3);
-    return createQuestion(`
+    return { code: `
       def ${func}(${var1}, ${var2}):
           ${var3} = ${var1} ${op1} ${c}
           return ${var3} ${op2} ${var2}
-      ${func}(${a}, ${b})`, range(-15n, 15n), {}, ctx);
+      ${func}(${a}, ${b})`,
+      options: range(-15n, 15n),
+    };
   }
 }
 
 export class Func2ArgsReassign extends EvalLastLineSubtopic {
   readonly help = [
     {
-      afterFailedAttempts: 2,
+      afterFailedAttempts: 1,
       message: 'Parameters are like variables that can be reassigned within the function body.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [a, b, c] = randInts(1n, 5n, 3);
     const func = randFunc();
     const op1 = randOperation();
     const op2 = randOperation();
     const [var1, var2] = randVars(2);
-    return createQuestion(`
+    return { code: `
       def ${func}(${var1}, ${var2}):
           ${var2} = ${var1} ${op1} ${c}
           return ${var2} ${op2} ${var1}
-      ${func}(${a}, ${b})`, range(-15n, 15n), {}, ctx);
+      ${func}(${a}, ${b})`,
+      options: range(-15n, 15n),
+    };
   }
 }
 

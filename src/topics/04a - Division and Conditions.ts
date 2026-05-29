@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen } from '../topics';
 import { randInt, randIntNum, randChoice, randVars, randVariable, STRINGS } from '../util';
 import { toPyStr } from '../python';
 import { Exponentiation } from './BasicArithmetic';
@@ -10,26 +10,32 @@ import { BASIC_RELATIONAL_OPERATORS, LessThan_True, LessThanOrEqualTo_False } fr
 import { BOOLEAN_OPERATORS, BooleanOpsWithRelOps, BooleanOpsWithRelOpsAndVars, BooleanOpsWithRelOpsAndVars2 } from './BooleanOperators';
 
 export class CharAtIs extends EvalLastLineSubtopic {
-    generateQuestion(ctx: GenerateContext) {
+    gen(): EvalLastLineQuestionGen {
         const [x, y] = randVars(2);
         const a = randChoice(STRINGS);
         const i = randInt(2n, BigInt(a.length - 2));
-        return createQuestion(`
+        return {
+          code: `
             ${x} = ${toPyStr(a)}
             ${y} = ${i}
             ${x}[${y}] == '${a[Number(i + randInt(-1n, 1n))]}'
-        `, [true, false], {}, ctx);
+          `,
+          options: [true, false],
+        };
     }
 }
 
 export class LenIs extends EvalLastLineSubtopic {
-    generateQuestion(ctx: GenerateContext) {
+    gen(): EvalLastLineQuestionGen {
         const x = randVariable();
         const a = randChoice(STRINGS);
-        return createQuestion(`
+        return {
+          code: `
             ${x} = ${toPyStr(a)}
             len(${x}) ${randChoice(['==', '!='])} ${a.length + randIntNum(-1, 1)}
-        `, [true, false], {}, ctx);
+          `,
+          options: [true, false],
+        };
     }
 }
 

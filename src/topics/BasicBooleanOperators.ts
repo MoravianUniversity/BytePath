@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen } from '../topics';
 import { randBool, randBools } from '../util';
 import { toPyBool } from '../python';
 import { BASIC_ARITHMETIC } from './BasicArithmetic';
@@ -6,103 +6,87 @@ import { BASIC_ARITHMETIC } from './BasicArithmetic';
 export class BooleanOperator extends EvalLastLineSubtopic {
   op: string;
   constructor(op: string) { super(); this.op = op; }
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [a, b] = randBools(2);
-    return createQuestion(`
-      ${toPyBool(a)} ${this.op} ${toPyBool(b)}`, [true, false], {}, ctx);
+    return {
+      code: `${toPyBool(a)} ${this.op} ${toPyBool(b)}`,
+      options: [true, false],
+    };
   }
 }
 
-export class AndOperator_True_True extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
-    const a = true;
-    const b = true;
-    return createQuestion(`
-      ${toPyBool(a)} and ${toPyBool(b)}`, [true, false], {}, ctx);
+export class BooleanOperatorFixed extends EvalLastLineSubtopic {
+  op: string;
+  a: boolean;
+  b: boolean;
+  constructor(op: string, a: boolean, b: boolean) { super(); this.op = op; this.a = a; this.b = b; }
+  gen(): EvalLastLineQuestionGen {
+    return {
+      code: `${toPyBool(this.a)} ${this.op} ${toPyBool(this.b)}`,
+      options: [true, false],
+    };
   }
 }
 
-export class AndOperator_True_False extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
-    const a = true;
-    const b = false;
-    return createQuestion(`
-      ${toPyBool(a)} and ${toPyBool(b)}`, [true, false], {}, ctx);
-  }
+export class AndOperator_True_True extends BooleanOperatorFixed {
+  constructor() { super('and', true, true); }
 }
 
-export class AndOperator_False_True extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
-    const a = false;
-    const b = true;
-    return createQuestion(`
-      ${toPyBool(a)} and ${toPyBool(b)}`, [true, false], {}, ctx);
-  }
+export class AndOperator_True_False extends BooleanOperatorFixed {
+  constructor() { super('and', true, false); }
 }
 
-export class AndOperator_False_False extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
-    const a = false;
-    const b = false;
-    return createQuestion(`
-      ${toPyBool(a)} and ${toPyBool(b)}`, [true, false], {}, ctx);
-  }
+export class AndOperator_False_True extends BooleanOperatorFixed {
+  constructor() { super('and', false, true); }
 }
 
-export class OrOperator_True_True extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
-    const a = true;
-    const b = true;
-    return createQuestion(`
-      ${toPyBool(a)} or ${toPyBool(b)}`, [true, false], {}, ctx);
-  }
+export class AndOperator_False_False extends BooleanOperatorFixed {
+  constructor() { super('and', false, false); }
 }
 
-export class OrOperator_True_False extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
-    const a = true;
-    const b = false;
-    return createQuestion(`
-      ${toPyBool(a)} or ${toPyBool(b)}`, [true, false], {}, ctx);
-  }
+export class OrOperator_True_True extends BooleanOperatorFixed {
+  constructor() { super('or', true, true); }
 }
 
-export class OrOperator_False_True extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
-    const a = false;
-    const b = true;
-    return createQuestion(`
-      ${toPyBool(a)} or ${toPyBool(b)}`, [true, false], {}, ctx);
-  }
+export class OrOperator_True_False extends BooleanOperatorFixed {
+  constructor() { super('or', true, false); }
 }
 
-export class OrOperator_False_False extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
-    const a = false;
-    const b = false;
-    return createQuestion(`
-      ${toPyBool(a)} or ${toPyBool(b)}`, [true, false], {}, ctx);
-  }
+export class OrOperator_False_True extends BooleanOperatorFixed {
+  constructor() { super('or', false, true); }
+}
+
+export class OrOperator_False_False extends BooleanOperatorFixed {
+  constructor() { super('or', false, false); }
 }
 
 export class NotOperator extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const a = randBool();
-    return createQuestion(`not ${toPyBool(a)}`, [true, false], {}, ctx);
+    return {
+      code: `not ${toPyBool(a)}`,
+      options: [true, false],
+    };
   }
 }
 
 export class NotOperator_True extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const a = true;
-    return createQuestion(`not ${toPyBool(a)}`, [true, false], {}, ctx);
+    return {
+      code: `not ${toPyBool(a)}`,
+      options: [true, false],
+    };
   }
 }
 
 export class NotOperator_False extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const a = false;
-    return createQuestion(`not ${toPyBool(a)}`, [true, false], {}, ctx);
+    return {
+      code: `not ${toPyBool(a)}`,
+      options: [true, false],
+    };
   }
 }
 
@@ -112,6 +96,7 @@ export const BASIC_BOOLEAN_OPERATORS = new Topic('basic-boolean-operators', 'Bas
     new AndOperator_True_False(),
     new AndOperator_False_True(),
     new AndOperator_False_False(),
+    new BooleanOperator('or'),
     new OrOperator_True_True(),
     new OrOperator_True_True(), // twice for practice
     new OrOperator_True_False(),

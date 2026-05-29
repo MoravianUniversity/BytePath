@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen } from '../topics';
 import { randChoice, randVars, randVariable, randIntNum, VARS, randFloat, STRINGS } from '../util';
 import { toPyStr, toPyFloat } from '../python';
 import { BASIC_ARITHMETIC } from './BasicArithmetic';
@@ -16,39 +16,51 @@ import { STRING_NEG_INDEX, StringIndexNeg1 } from './StringNegIndex';
 import { StringLenOfIndex } from './03a - Basic Reading';
 
 export class ConcatSlices extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
     const i = randIntNum(1, a.length - 4);
     const j = randIntNum(i+2, a.length - 2);
-    return createQuestion(`
-      ${x} = ${toPyStr(a)}
-      ${x}[:${i}] + ${x}[${j}:]`, [a, a[i] + a[j]], {}, ctx);
+    return {
+      code: `
+        ${x} = ${toPyStr(a)}
+        ${x}[:${i}] + ${x}[${j}:]
+      `,
+      options: [a, a[i] + a[j]],
+    };
   }
 }
 
 export class CharNotInString extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
       const x = randVariable();
       const a = randChoice(STRINGS);
       const char = randChoice([...a, ...VARS]);
-      return createQuestion(`
-        ${x} = ${toPyStr(a)}
-        ${toPyStr(char)} not in ${x}`, [true, false], {}, ctx);
+      return {
+        code: `
+          ${x} = ${toPyStr(a)}
+          ${toPyStr(char)} not in ${x}
+        `,
+        options: [true, false],
+      };
   }
 }
 
 export class FancyFString extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const a = randChoice(STRINGS);
     const b = randFloat(1, 10, 1);
-    return createQuestion(`
-      ${x} = ${toPyStr(a)}
-      ${y} = ${toPyFloat(b, 1)}
-      f"{${y}:.2f}+{${x}}"`, [
+    return {
+      code: `
+        ${x} = ${toPyStr(a)}
+        ${y} = ${toPyFloat(b, 1)}
+        f"{${y}:.2f}+{${x}}"
+      `,
+      options: [
         a, b, `${b.toFixed(1)}+${a}`, `${b.toFixed(0)}.2f+${a}`, `${b.toFixed(0)}${a}`, `${b.toFixed(0)}.2f${a}`
-      ], {}, ctx);
+      ],
+    };
   }
 }
 

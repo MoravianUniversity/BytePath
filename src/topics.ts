@@ -1,15 +1,16 @@
 /**
  * Classes, types, and helper functions for creating topics
  */
-import { PyType, toPyAtom } from './python';
+import { Exception, PyType, toPyAtom } from './python';
 import { randChoice, isClose } from './util';
-import type { QuestionKind, QuestionFor, GenerateContext, Question } from './questions/types';
+import type { QuestionKind, Question, QuestionFor } from './questions/types';
+import { TopicContext } from './questions/types';
+import { createEvalLastLineQuestion } from './questions/eval-last-line';
+import { createCodeOutputQuestion } from './questions/code-output';
+import { BuildCodeQuestionOpts } from './questions/utils';
 
-export type { Question, QuestionKind, GenerateContext };
-export {
-  buildCodeQuestion,
-  createQuestion,
-} from './questions/buildCodeQuestion';
+export type { Question, QuestionKind };
+export { TopicContext };
 
 // Special case for raw contents that aren't parsed like normal types
 export type RawAnswer = {
@@ -74,17 +75,6 @@ export function isAnswerSame(ans1: Answer, ans2: Answer): boolean {
   return false;
 }
 
-// Filter a list to remove duplicates
-export function deduplicateAnswers(answers: Answer[]): Answer[] {
-  const output: Answer[] = [];
-  for (const answer of answers) {
-    if (!output.some((o: Answer) => isAnswerSame(o, answer))) {
-      output.push(answer);
-    }
-  }
-  return output;
-}
-
 // Convert an answer to a string (mostly using toPyAtom() except for special cases)
 export function formatAnswer(answer: Answer): string {
   if (answer === undefined) { return ''; }
@@ -108,15 +98,29 @@ export abstract class Subtopic<K extends QuestionKind = QuestionKind> {
     return getActiveHelpMessage(this.help, this.failedAttempts);
   }
 
-  abstract generateQuestion(ctx: GenerateContext): QuestionFor<K>;
+  abstract generateQuestion(ctx: TopicContext): QuestionFor<K>;
 }
 
+export type EvalLastLineQuestionGen = {code: string, options?: (Answer | undefined)[], opts?: BuildCodeQuestionOpts<Answer>};
 export abstract class EvalLastLineSubtopic extends Subtopic<'eval-last-line'> {
   readonly kind = 'eval-last-line' as const;
+  generateQuestion(ctx: TopicContext): QuestionFor<'eval-last-line'> {
+    const gen = this.gen(ctx);
+    const {code, options, opts} = typeof gen === 'string' ? {code: gen, options: [], opts: {}} : gen;
+    return createEvalLastLineQuestion(code, options || [], opts || {}, ctx);
+  }
+  abstract gen(ctx: TopicContext): EvalLastLineQuestionGen|string
 }
 
+export type CodeOutputQuestionGen = {code: string, options?: (string | Exception | undefined)[], opts?: BuildCodeQuestionOpts<string | Exception>};
 export abstract class CodeOutputSubtopic extends Subtopic<'code-output'> {
   readonly kind = 'code-output' as const;
+  generateQuestion(ctx: TopicContext): QuestionFor<'code-output'> {
+    const gen = this.gen(ctx);
+    const {code, options, opts} = typeof gen === 'string' ? {code: gen, options: [], opts: {}} : gen;
+    return createCodeOutputQuestion(code, options || [], opts || {}, ctx);
+  }
+  abstract gen(ctx: TopicContext): CodeOutputQuestionGen|string
 }
 
 export abstract class CodeWriteSubtopic extends Subtopic<'code-write'> {
@@ -136,18 +140,23 @@ export class Topic {
   subtopics: Subtopic[];
   dependencies: Topic[];
   order: 'random' | 'random-beginning' | 'sequential' = 'random-beginning';
-  sharedCode?: string;
   forceQuiz: boolean = false;
+  generateContext: () => TopicContext;
 
   constructor(id: string, name: string, subtopics: Subtopic[], dependencies: Topic[] = [],
-    {order = 'random-beginning', sharedCode, forceQuiz = false}: {order?: 'random' | 'random-beginning' | 'sequential', sharedCode?: string, forceQuiz?: boolean} = {}) {
+    {order = 'random-beginning',
+      forceQuiz = false,
+      generateContext = () => new TopicContext()}:
+    {order?: 'random' | 'random-beginning' | 'sequential',
+      forceQuiz?: boolean,
+      generateContext?: () => TopicContext} = {}) {
     this.id = id;
     this.name = name;
     this.subtopics = subtopics;
     this.dependencies = dependencies;
     this.order = order;
-    this.sharedCode = sharedCode;
     this.forceQuiz = forceQuiz;
+    this.generateContext = generateContext;
   }
 
   // Get a random subtopic that needs work
@@ -188,8 +197,6 @@ export class Topic {
   isAccessible(completedTopics: Set<string>): boolean {
     return this.dependencies.length === 0 || this.dependencies.every(dep => completedTopics.has(dep.id));
   }
-
-  start(): void { } // override to do something when the topic is started
 
   reset(): void {
     this.subtopics.forEach(subtopic => {

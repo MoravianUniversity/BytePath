@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen } from '../topics';
 import { randInts, randVariable, randVars, range, STRINGS, randChoices } from '../util';
 import { BASIC_ARITHMETIC } from './BasicArithmetic';
 import { BASIC_VARIABLES } from './BasicVariables';
@@ -11,14 +11,14 @@ export class CompoundAdd extends EvalLastLineSubtopic {
             message: 'The compound operator += is equivalent to the simple operator (+) followed by an assignment (=).',
         },
     ];
-    generateQuestion(ctx: GenerateContext) {
+    gen(): EvalLastLineQuestionGen {
         const var1 = randVariable();
         const [a, b] = randInts(1n, 5n, 2);
         const op = '+';
-        return createQuestion(`
+        return { code: `
             ${var1} = ${a}
             ${var1} ${op}= ${b}
-            ${var1}`, [a, b, a + b, var1, Symbol(var1), ...range(0n, 10n)], {}, ctx);
+            ${var1}`, options: [a, b, a + b, var1, Symbol(var1), ...range(0n, 10n)] };
     }
 }
 
@@ -26,17 +26,19 @@ export class CompoundSubtract extends EvalLastLineSubtopic {
     readonly help = [
         {
             afterFailedAttempts: 2,
-            message: 'The compound operator -= is equivalent to the simple operator (-) followed by an assignment (=).',
+            message: 'The compound operator -= is equivalent to the simple operator (-) followed by an assignment (=). Make sure to subtract the right side from the left side.',
         },
     ];
-    generateQuestion(ctx: GenerateContext) {
+    gen(): EvalLastLineQuestionGen {
         const var1 = randVariable();
         const [a, b] = randInts(1n, 5n, 2);
         const op = '-';
-        return createQuestion(`
+        return { code: `
             ${var1} = ${a}
             ${var1} ${op}= ${b}
-            ${var1}`, [a, b, a - b, var1, Symbol(var1), ...range(-5n, 5n)], {}, ctx);
+            ${var1}`,
+            options: [a, b, a - b, var1, Symbol(var1), ...range(-5n, 5n)],
+        };
     }
 }
 
@@ -47,14 +49,14 @@ export class CompoundMultiply extends EvalLastLineSubtopic {
             message: 'The compound operator *= is equivalent to the simple operator (*) followed by an assignment (=).',
         },
     ];
-    generateQuestion(ctx: GenerateContext) {
+    gen(): EvalLastLineQuestionGen {
         const var1 = randVariable();
         const [a, b] = randInts(1n, 3n, 2);
         const op = '*';
-        return createQuestion(`
+        return { code: `
             ${var1} = ${a}
             ${var1} ${op}= ${b}
-            ${var1}`, [a, b, a * b, var1, Symbol(var1), ...range(0n, 10n)], {}, ctx);
+            ${var1}`, options: [a, b, a * b, var1, Symbol(var1), ...range(0n, 10n)] };
     }
 }
 
@@ -65,13 +67,15 @@ export class CompoundMulti extends EvalLastLineSubtopic {
             message: 'You must evaluate the expression on the right side of the compound operator before performing the multiplication and assignment.',
         },
     ];
-    generateQuestion(ctx: GenerateContext) {
+    gen(): EvalLastLineQuestionGen {
         const var1 = randVariable();
         const [a, b, c] = randInts(1n, 4n, 3);
-        return createQuestion(`
+        return { code: `
             ${var1} = ${a}
             ${var1} *= ${b} + ${c}
-            ${var1}`, [a, b, c, a * (b + c), ...range(0n, 10n)], {}, ctx);
+            ${var1}`,
+            options: [a, b, c, a * (b + c), ...range(0n, 10n)],
+        };
     }
 }
 
@@ -82,40 +86,46 @@ export class CompoundConcat extends EvalLastLineSubtopic {
             message: 'Remember that + with strings concatenates the strings, not adds.',
         },
     ];
-    generateQuestion(ctx: GenerateContext) {
+    gen(): EvalLastLineQuestionGen {
         const var1 = randVariable();
         const [a, b] = randChoices(STRINGS, 2);
         const op = '+';
-        return createQuestion(`
+        return { code: `
             ${var1} = "${a}"
             ${var1} ${op}= "${b}"
-            ${var1}`, [a, b, a + b, var1, Symbol(var1), b + a], {}, ctx);
+            ${var1}`,
+            options: [a, b, a + b, var1, Symbol(var1), b + a],
+        };
     }
 }
 
 export class CompoundAddVar extends EvalLastLineSubtopic {
-    generateQuestion(ctx: GenerateContext) {
+    gen(): EvalLastLineQuestionGen {
         const [var1, var2] = randVars(2);
         const [a, b] = randInts(1n, 5n, 2);
         const op = '+';
-        return createQuestion(`
+        return { code: `
             ${var1} = ${a}
             ${var2} = ${b}
             ${var1} ${op}= ${var2}
-            ${var1}`, [a, b, a + b, var1, Symbol(var1), var2, Symbol(var2), var1 + var2, Symbol(var1 + var2), ...range(0n, 10n)], {}, ctx);
+            ${var1}`,
+            options: [a, b, a + b, var1, Symbol(var1), var2, Symbol(var2), var1 + var2, Symbol(var1 + var2), ...range(0n, 10n)],
+        };
     }
 }
 
 export class CompoundConcatVar extends EvalLastLineSubtopic {
-    generateQuestion(ctx: GenerateContext) {
+    gen(): EvalLastLineQuestionGen {
         const [var1, var2] = randVars(2);
         const [a, b] = randChoices(STRINGS, 2);
         const op = '+';
-        return createQuestion(`
+        return { code: `
             ${var1} = "${a}"
             ${var2} = "${b}"
             ${var1} ${op}= ${var2}
-            ${var1}`, [a, b, a + b, b + a, var1, Symbol(var1), var2, Symbol(var2), var1 + var2, Symbol(var1 + var2)], {}, ctx);
+            ${var1}`,
+            options: [a, b, a + b, b + a, var1, Symbol(var1), var2, Symbol(var2), var1 + var2, Symbol(var1 + var2)],
+        };
     }
 }
 

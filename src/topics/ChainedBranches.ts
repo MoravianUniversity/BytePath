@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen } from '../topics';
 import { randInts, randVars, randChoice, evalRelOp } from '../util';
 import { BASIC_BRANCHING } from './BasicBranching';
 
@@ -16,12 +16,12 @@ export function getFalseOp(a: bigint, b: bigint): string {
 }
 
 export class ChainedFirst extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f, g] = randInts(1n, 15n, 7);
     let op1 = getTrueOp(a, c);
     let op2 = getFalseOp(a, e);
-    return createQuestion(`
+    return { code: `
       ${x} = ${a}
       ${y} = ${b}
       if ${x} ${op1} ${c}:
@@ -31,17 +31,17 @@ export class ChainedFirst extends EvalLastLineSubtopic {
       else:
         ${y} = ${g}
       ${y}
-    `, [a, b, c, d, e, f, g], {}, ctx);
+    `, options: [a, b, c, d, e, f, g] };
   }
 }
 
 export class ChainedSecond extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f, g] = randInts(1n, 15n, 7);
     let op1 = getFalseOp(a, c);
     let op2 = getTrueOp(a, e);
-    return createQuestion(`
+    return { code: `
       ${x} = ${a}
       ${y} = ${b}
       if ${x} ${op1} ${c}:
@@ -51,17 +51,19 @@ export class ChainedSecond extends EvalLastLineSubtopic {
       else:
         ${y} = ${g}
       ${y}
-    `, [a, b, c, d, e, f, g], {}, ctx);
+    `,
+      options: [a, b, c, d, e, f, g],
+    };
   }
 }
 
 export class ChainedBoth extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f, g] = randInts(1n, 15n, 7);
     let op1 = getTrueOp(a, c);
     let op2 = getTrueOp(a, e);
-    return createQuestion(`
+    return { code: `
       ${x} = ${a}
       ${y} = ${b}
       if ${x} ${op1} ${c}:
@@ -71,17 +73,19 @@ export class ChainedBoth extends EvalLastLineSubtopic {
       else:
         ${y} = ${g}
       ${y}
-    `, [a, b, c, d, e, f, g], {}, ctx);
+    `,
+      options: [a, b, c, d, e, f, g],
+    };
   }
 }
 
 export class ChainedNeither extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f, g] = randInts(1n, 15n, 7);
     let op1 = getFalseOp(a, c);
     let op2 = getFalseOp(a, e);
-    return createQuestion(`
+    return { code: `
       ${x} = ${a}
       ${y} = ${b}
       if ${x} ${op1} ${c}:
@@ -91,17 +95,19 @@ export class ChainedNeither extends EvalLastLineSubtopic {
       else:
         ${y} = ${g}
       ${y}
-    `, [a, b, c, d, e, f, g], {}, ctx);
+    `,
+      options: [a, b, c, d, e, f, g],
+    };
   }
 }
 
 export class ChainedSecondNoElse extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f] = randInts(1n, 15n, 6);
     let op1 = getFalseOp(a, c);
     let op2 = getTrueOp(a, e);
-    return createQuestion(`
+    return { code: `
       ${x} = ${a}
       ${y} = ${b}
       if ${x} ${op1} ${c}:
@@ -109,17 +115,19 @@ export class ChainedSecondNoElse extends EvalLastLineSubtopic {
       elif ${x} ${op2} ${e}:
         ${y} = ${f}
       ${y}
-    `, [a, b, c, d, e, f], {}, ctx);
+    `,
+      options: [a, b, c, d, e, f],
+    };
   }
 }
 
 export class ChainedNeitherNoElse extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f] = randInts(1n, 15n, 6);
     let op1 = getFalseOp(a, c);
     let op2 = getFalseOp(a, e);
-    return createQuestion(`
+    return { code: `
       ${x} = ${a}
       ${y} = ${b}
       if ${x} ${op1} ${c}:
@@ -127,18 +135,20 @@ export class ChainedNeitherNoElse extends EvalLastLineSubtopic {
       elif ${x} ${op2} ${e}:
         ${y} = ${f}
       ${y}
-    `, [a, b, c, d, e, f], {}, ctx);
+    `,
+      options: [a, b, c, d, e, f],
+    };
   }
 }
 
 export class ChainedExtraElifEntered extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f, g, h] = randInts(1n, 15n, 8);
     let op1 = getFalseOp(a, c);
     let op2 = getFalseOp(a, e);
     let op3 = getTrueOp(a, g);
-    return createQuestion(`
+    return { code: `
       ${x} = ${a}
       ${y} = ${b}
       if ${x} ${op1} ${c}:
@@ -148,18 +158,20 @@ export class ChainedExtraElifEntered extends EvalLastLineSubtopic {
       elif ${x} ${op3} ${g}:
         ${y} = ${h}
       ${y}
-    `, [a, b, c, d, e, f, g, h], {}, ctx);
+    `,
+      options: [a, b, c, d, e, f, g, h],
+    };
   }
 }
 
 export class ChainedExtraElifNotEntered extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f, g, h] = randInts(1n, 15n, 8);
     let op1 = getFalseOp(a, c);
     let op2 = getFalseOp(a, e);
     let op3 = getFalseOp(a, g);
-    return createQuestion(`
+    return { code: `
       ${x} = ${a}
       ${y} = ${b}
       if ${x} ${op1} ${c}:
@@ -169,17 +181,17 @@ export class ChainedExtraElifNotEntered extends EvalLastLineSubtopic {
       elif ${x} ${op3} ${g}:
         ${y} = ${h}
       ${y}
-    `, [a, b, c, d, e, f, g, h], {}, ctx);
+    `, options: [a, b, c, d, e, f, g, h] };
   }
 }
 
 export class ChainedSeparateChainsBoth extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f] = randInts(1n, 15n, 6);
     let op1 = getTrueOp(a, c);
     let op2 = getTrueOp(a, e);
-    return createQuestion(`
+    return { code: `
       ${x} = ${a}
       ${y} = ${b}
       if ${x} ${op1} ${c}:
@@ -187,18 +199,20 @@ export class ChainedSeparateChainsBoth extends EvalLastLineSubtopic {
       if ${x} ${op2} ${e}:
         ${y} = ${f}
       ${y}
-    `, [a, b, c, d, e, f], {}, ctx);
+    `,
+      options: [a, b, c, d, e, f],
+    };
   }
 }
 
 export class ChainedSeparateChainsMost extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f, g, h] = randInts(1n, 15n, 8);
     let op1 = getTrueOp(a, c);
     let op2 = getFalseOp(a, e);
     let op3 = getTrueOp(a, g);
-    return createQuestion(`
+    return { code: `
       ${x} = ${a}
       ${y} = ${b}
       if ${x} ${op1} ${c}:
@@ -208,17 +222,19 @@ export class ChainedSeparateChainsMost extends EvalLastLineSubtopic {
       if ${x} ${op3} ${g}:
         ${y} = ${h}
       ${y}
-    `, [a, b, c, d, e, f, g, h], {}, ctx);
+    `,
+      options: [a, b, c, d, e, f, g, h],
+    };
   }
 }
 
 export class ChainedSeparateChainsElse extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f, h] = randInts(1n, 15n, 7);
     let op1 = getTrueOp(a, c);
     let op2 = getFalseOp(a, e);
-    return createQuestion(`
+    return { code: `
       ${x} = ${a}
       ${y} = ${b}
       if ${x} ${op1} ${c}:
@@ -228,17 +244,19 @@ export class ChainedSeparateChainsElse extends EvalLastLineSubtopic {
       else:
         ${y} = ${h}
       ${y}
-    `, [a, b, c, d, e, f, h], {}, ctx);
+    `,
+      options: [a, b, c, d, e, f, h],
+    };
   }
 }
 
 export class ChainedSeparateChainsElseB extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f, h] = randInts(1n, 15n, 7);
     let op1 = getTrueOp(a, c);
     let op2 = getTrueOp(a, e);
-    return createQuestion(`
+    return { code: `
       ${x} = ${a}
       ${y} = ${b}
       if ${x} ${op1} ${c}:
@@ -248,17 +266,19 @@ export class ChainedSeparateChainsElseB extends EvalLastLineSubtopic {
       else:
         ${y} = ${h}
       ${y}
-    `, [a, b, c, d, e, f, h], {}, ctx);
+    `,
+      options: [a, b, c, d, e, f, h],
+    };
   }
 }
 
 export class ChainedChangeBoth extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f] = randInts(1n, 15n, 6);
     let op1 = getFalseOp(a, c);
     let op2 = getTrueOp(e, b);
-    return createQuestion(`
+    return { code: `
       ${x} = ${a}
       ${y} = ${b}
       if ${x} ${op1} ${c}:
@@ -266,7 +286,9 @@ export class ChainedChangeBoth extends EvalLastLineSubtopic {
       elif ${y} ${op2} ${e}:
         ${x} = ${f}
       ${y}
-    `, [a, b, c, d, e, f], {}, ctx);
+    `,
+      options: [a, b, c, d, e, f],
+    };
   }
 }
 

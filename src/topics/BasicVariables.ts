@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen } from '../topics';
 import { randInt, randInts, randChoice, randVariable, randVars, math } from '../util';
 import { BASIC_ARITHMETIC } from './BasicArithmetic';
 
@@ -7,34 +7,38 @@ export const OPS = ['+', '-'];
 export function randOperation(): string { return randChoice(OPS); }
 
 export class VariableAssignment extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const correct = randInt(1n, 10n); 
     const variable = randVariable();
-    return createQuestion(`
+    return { code: `
         ${variable} = ${correct}
-        ${variable}`, [correct, variable, Symbol(variable)], {correct}, ctx);
+        ${variable}`,
+      options: [correct, variable, Symbol(variable)],
+      opts: {correct},
+    };
   }
 }
 export class VariableOp extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [a, b] = randInts(1n, 10n, 2);
     const op = randOperation();
     const variable = randVariable();
     const correct = math(a, op, b);
-    return createQuestion(`
+    return { code: `
         ${variable} = ${a}
         ${variable} ${op} ${b}`,
-      [
+        options: [
         correct + randInt(1n, 3n),
         correct - randInt(1n, 3n),
         a, b, a + b, a - b, b - a,
         variable, Symbol(variable),
       ],
-      {correct}, ctx);
+      opts: {correct},
+    };
   }     
 }
 export class TwoVariableOp extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 10n, 2);
     const op = randOperation();
@@ -44,15 +48,15 @@ export class TwoVariableOp extends EvalLastLineSubtopic {
       ${x} ${op} ${y}
     `;  
     const correct = math(a, op, b);
-    return createQuestion(
-      code,
-      [
+    return { code,
+      options: [
         correct + randInt(1n, 3n),
         correct - randInt(1n, 3n),
         a, b, a + b, a - b, b - a,
         x, y, x+y, Symbol(x), Symbol(y), Symbol(x+y),
       ],
-      {correct}, ctx);
+      opts: {correct},
+    };
   }
 }
 
@@ -63,7 +67,7 @@ export class TwoVariableOpBackwards extends EvalLastLineSubtopic {
       message: 'Be careful to read the variables and operation in the correct order.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b] = randInts(1n, 10n, 2);
     const op = randOperation();
@@ -73,15 +77,15 @@ export class TwoVariableOpBackwards extends EvalLastLineSubtopic {
       ${y} ${op} ${x}
     `;
     const correct = math(b, op, a);
-    return createQuestion(
-      code,
-      [
+    return { code,
+      options: [
         correct + randInt(1n, 3n),
         correct - randInt(1n, 3n),
         a, b, a + b, a - b, b - a,
         x, y, x+y, Symbol(x), Symbol(y), Symbol(x+y),
       ],
-      {correct}, ctx);
+      opts: {correct},
+    };
   }
 }
 
@@ -92,7 +96,7 @@ export class VariableReassignment extends EvalLastLineSubtopic {
       message: 'Reassigning a variable replaces the previous value with the new value.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const [a, b, c] = randInts(1n, 10n, 3);
     const op = randOperation();
@@ -102,20 +106,20 @@ export class VariableReassignment extends EvalLastLineSubtopic {
       ${x} ${op} ${c}
     `;
     const correct = math(b, op, c);
-    return createQuestion(
-      code,
-      [
+    return { code,
+      options: [
         correct + randInt(1n, 3n),
         correct - randInt(1n, 3n),
         a, b, c, a + b, a - b, b - a, a + c, a - c, c - a, b + c, b - c, c - b,
         x, Symbol(x),
       ],
-      {correct}, ctx);
+      opts: {correct},
+    };
   }
 }
 
 export class VariableReassignmentBackwards extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const [a, b, c] = randInts(1n, 10n, 3);
     const op = randOperation();
@@ -125,15 +129,15 @@ export class VariableReassignmentBackwards extends EvalLastLineSubtopic {
       ${c} ${op} ${x}
     `;
     const correct = math(c, op, b);
-    return createQuestion(
-      code,
-      [
+    return { code,
+      options: [
         correct + randInt(1n, 3n),
         correct - randInt(1n, 3n),
         a, b, c, a + b, a - b, b - a, a + c, a - c, c - a, b + c, b - c, c - b,
         x, Symbol(x),
       ],
-      {correct}, ctx);
+      opts: {correct},
+    };
   }
 }
 
@@ -144,7 +148,7 @@ export class VariableReassignmentOp extends EvalLastLineSubtopic {
       message: 'Read each line of code one at a time, updating the variable with the new value as you go.',
     },
   ];
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const [a, b, c] = randInts(1n, 6n, 3);
     const op = randOperation();
@@ -155,20 +159,19 @@ export class VariableReassignmentOp extends EvalLastLineSubtopic {
       ${x} ${op2} ${c}
     `;
     const correct = math(math(a, op, b), op2, c);
-    return createQuestion(
-      code,
-      [
+    return { code,
+      options: [
         correct + randInt(1n, 3n),
         correct - randInt(1n, 3n),
         a, b, c, a + b + c, a - b + c, a + b - c, a - b - c,
         x, Symbol(x),
-      ],
-      {correct}, ctx);
+      ], opts: {correct},
+    };
   }
 }
 
 export class VariableReassignmentOpBackwards extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const [a, b, c] = randInts(1n, 6n, 3);
     const op = randOperation();
@@ -179,20 +182,20 @@ export class VariableReassignmentOpBackwards extends EvalLastLineSubtopic {
       ${x} ${op2} ${c}
     `;
     const correct = math(math(b, op, a), op2, c);
-    return createQuestion(
-      code,
-      [
+    return { code,
+      options: [
         correct + randInt(1n, 3n),
         correct - randInt(1n, 3n),
         a, b, c, a + b + c, a - b + c, a + b - c, a - b - c,
         x, Symbol(x),
       ],
-      {correct}, ctx);
+      opts: {correct},
+    };
   }
 }
 
 export class TwoVariableReassignmentOp extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c] = randInts(1n, 6n, 3);
     const op = randOperation();
@@ -205,9 +208,8 @@ export class TwoVariableReassignmentOp extends EvalLastLineSubtopic {
       ${x} ${op3} ${y}
     `;
     const correct = math(math(a, op2, c), op3, math(a, op, b));
-    return createQuestion(
-      code,
-      [
+    return { code,
+      options: [
         correct + randInt(1n, 3n),
         correct - randInt(1n, 3n),
         a + c + a + c + b,
@@ -220,7 +222,8 @@ export class TwoVariableReassignmentOp extends EvalLastLineSubtopic {
         a - c - a - c - b,
         x, y, x+y, Symbol(x), Symbol(y), Symbol(x+y),
       ],
-      {correct}, ctx);
+      opts: {correct},
+    };
   }
 }
 

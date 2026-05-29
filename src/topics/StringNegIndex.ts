@@ -1,4 +1,4 @@
-import { Topic, createQuestion, EvalLastLineSubtopic, GenerateContext } from '../topics';
+import { Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen } from '../topics';
 import { randVariable, randIntNum, randChoice } from "../util";
 import { toPyStr } from "../python";
 import { STRING_LENGTH } from "./StringLength";
@@ -16,40 +16,42 @@ function makeComment(s: string): string {
 }
 
 export class StringIndexNeg1 extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
-    return createQuestion(`
-      ${makeComment(a)}
-      ${x} = ${toPyStr(a)}
-      ${x}[-1]
-    `, [a[0], a[1], a[a.length-1], a[a.length-2]], {}, ctx);
+    return { code: `
+        ${makeComment(a)}
+        ${x} = ${toPyStr(a)}
+        ${x}[-1]
+      `,
+      options: [a[0], a[1], a[a.length-1], a[a.length-2]],
+    };
   }
 }
 
 export class StringIndexNeg2 extends EvalLastLineSubtopic {
-  generateQuestion(ctx: GenerateContext) {
+  gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
-    return createQuestion(`
-      ${makeComment(a)}
-      ${x} = ${toPyStr(a)}
-      ${x}[-2]
-    `, [a[0], a[1], a[a.length-1], a[a.length-2], a[a.length-3]], {}, ctx);
+    return { code: `
+        ${makeComment(a)}
+        ${x} = ${toPyStr(a)}
+        ${x}[-2]
+      `,
+      options: [a[0], a[1], a[a.length-1], a[a.length-2], a[a.length-3]],
+    };
   }
 }
 
 export class StringSlicingToNeg1 extends StringSlicingBase {
-  generateQuestion(ctx: GenerateContext) {
-    return this.genQuestion(ctx, DEFAULT_START, (s) => [`-1`, s.length - 1]);
+  gen(): EvalLastLineQuestionGen {
+    return this.genQuestion(DEFAULT_START, (s) => [`-1`, s.length - 1]);
   }
 }
 
 export class StringSlicingFromNegToNeg extends StringSlicingBase {
-  generateQuestion(ctx: GenerateContext) {
-    return this.genQuestion(
-      ctx,
-      (s) => {
+  gen(): EvalLastLineQuestionGen {
+    return this.genQuestion((s) => {
         const n = randIntNum(3, Math.min(6, s.length - 1));
         return [`-${n}`, s.length - n];
       },
@@ -59,14 +61,14 @@ export class StringSlicingFromNegToNeg extends StringSlicingBase {
 }
 
 export class StringSlicingFromNoneToNeg1 extends StringSlicingBase {
-  generateQuestion(ctx: GenerateContext) {
-    return this.genQuestion(ctx, () => ['', 0], (s) => ['-1', s.length - 1]);
+  gen(): EvalLastLineQuestionGen {
+    return this.genQuestion(() => ['', 0], (s) => ['-1', s.length - 1]);
   }
 }
 
 export class StringSlicingFromNegToNone extends StringSlicingBase {
-  generateQuestion(ctx: GenerateContext) {
-    return this.genQuestion(ctx, (s) => {
+  gen(): EvalLastLineQuestionGen {
+    return this.genQuestion((s) => {
       const n = randIntNum(3, Math.min(5, s.length - 2));
       return [`-${n}`, s.length - n];
     }, (s) => ['', s.length]);
@@ -74,8 +76,8 @@ export class StringSlicingFromNegToNone extends StringSlicingBase {
 }
 
 export class StringSlicingFromPosToNeg extends StringSlicingBase {
-  generateQuestion(ctx: GenerateContext) {
-    return this.genQuestion(ctx, DEFAULT_START, (s, start) => {
+  gen(): EvalLastLineQuestionGen {
+    return this.genQuestion(DEFAULT_START, (s, start) => {
       const n = s.length - randIntNum(start + 1, s.length - 1);
       return [`-${n}`, s.length - n];
     });
@@ -83,10 +85,8 @@ export class StringSlicingFromPosToNeg extends StringSlicingBase {
 }
 
 export class StringSlicingFromNegToPos extends StringSlicingBase {
-  generateQuestion(ctx: GenerateContext) {
-    return this.genQuestion(
-      ctx,
-      (s) => {
+  gen(): EvalLastLineQuestionGen {
+    return this.genQuestion((s) => {
         const n = randIntNum(3, Math.min(5, s.length - 2));
         return [`-${n}`, s.length - n];
       }
