@@ -7,11 +7,6 @@ import { toPyAtom, runLastLine, PyType, runGrabOutput } from '../python.ts';
 import { SKIPPED } from '../App.tsx';
 import { zip } from '../util.ts';
 
-function parseQuizAnswer(raw: string): string | undefined {
-  const trimmed = raw.trim();
-  return trimmed === '' ? undefined : trimmed;
-};
-
 function* testResults(question: FuncWriteQuestion, answer: string): Generator<PyType | undefined, void, unknown> {
   const testCases = question.testCases;
   const testsUseOutput = question.testsUseOutput;
@@ -118,7 +113,6 @@ const FuncWriteView: React.FC<QuestionViewProps<'func-write'>> = ({
           ) : (
             <QuestionQuizInputMultiLine
               onSubmit={onAnswer}
-              parseAnswer={parseQuizAnswer}
               placeholder="Write the function definition."
             />
           )}

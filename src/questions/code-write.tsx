@@ -7,11 +7,6 @@ import { toPyAtom, runLastLine, PyType, runGrabOutput } from '../python.ts';
 import { SKIPPED } from '../App.tsx';
 import { zip } from '../util.ts';
 
-function parseQuizAnswer(raw: string): string | undefined {
-  const trimmed = raw.trim();
-  return trimmed === '' ? undefined : trimmed;
-};
-
 function* testResults(question: CodeWriteQuestion, answer: string): Generator<PyType | undefined, void, unknown> {
   const variables = question.variables;
   const testCases = question.testCases;
@@ -132,7 +127,6 @@ const CodeWriteView: React.FC<QuestionViewProps<'code-write'>> = ({
           ) : (
             <QuestionQuizInputSingleLine
               onSubmit={onAnswer}
-              parseAnswer={parseQuizAnswer}
               placeholder="Write the line of code."
             />
           )}

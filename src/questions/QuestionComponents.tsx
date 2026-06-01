@@ -6,6 +6,11 @@ import { SKIPPED } from '../App';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faForwardFast } from '@fortawesome/free-solid-svg-icons';
 
+function defaultParseQuizAnswer(raw: string): string | undefined {
+  const trimmed = raw.trim();
+  return trimmed === '' ? undefined : trimmed;
+};
+
 export const getCorrectClass = (answer: any | typeof SKIPPED | undefined, isCorrect: boolean) => {
   const cn = answer instanceof Error ? 'exception ' : '';
   if (answer === undefined) { return cn; }
@@ -122,9 +127,9 @@ export const QuestionAnswerOptions: React.FC<{
 
 export const QuestionQuizInputSingleLine: React.FC<{
   onSubmit: (element: EventTarget | null, answer: any) => void,
-  parseAnswer: (inputValue: string) => any,
-  placeholder: string,
-}> = ({onSubmit, parseAnswer, placeholder = ''}) => {
+  parseAnswer?: (inputValue: string) => any,
+  placeholder?: string,
+}> = ({onSubmit, parseAnswer = defaultParseQuizAnswer, placeholder = ''}) => {
   const [inputValue, setInputValue] = useState('');
   return (
     <>
@@ -150,9 +155,9 @@ export const QuestionQuizInputSingleLine: React.FC<{
 
 export const QuestionQuizInputMultiLine: React.FC<{
   onSubmit: (element: EventTarget | null, answer: any) => void,
-  parseAnswer: (inputValue: string) => any,
-  placeholder: string,
-}> = ({onSubmit, parseAnswer, placeholder = ''}) => {
+  parseAnswer?: (inputValue: string) => any,
+  placeholder?: string,
+}> = ({onSubmit, parseAnswer = defaultParseQuizAnswer, placeholder = ''}) => {
   const [inputValue, setInputValue] = useState('');
   return (
     <>

@@ -173,6 +173,26 @@ export abstract class FuncWriteSubtopic extends Subtopic<'func-write'> {
   abstract gen(ctx: TopicContext): FuncWriteQuestionGen;
 }
 
+export type ConceptualQuestionGen = {
+  prompt: string;
+  correct: string | string[];
+  options?: string[];
+};
+export abstract class ConceptualSubtopic extends Subtopic<'conceptual'> {
+  readonly kind = 'conceptual' as const;
+  generateQuestion(ctx: TopicContext): QuestionFor<'conceptual'> {
+    const {prompt, correct, options = []} = this.gen(ctx);
+    const singleCorrect = typeof correct === 'string' ? correct : randChoice(correct);
+    return {
+      kind: 'conceptual' as const,
+      prompt,
+      correct,
+      options: prepareOptions(singleCorrect, options || []),
+    };
+  }
+  abstract gen(ctx: TopicContext): ConceptualQuestionGen;
+}
+
 /**
  * Topic: a topic is a collection of subtopics.
  */

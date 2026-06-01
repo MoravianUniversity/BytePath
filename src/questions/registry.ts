@@ -10,7 +10,7 @@ import { evalLastLineDef } from './eval-last-line';
 import { codeOutputDef } from './code-output';
 import { codeWriteDef } from './code-write.tsx';
 import { funcWriteDef } from './func-write.tsx';
-import { codeEditDef, traceOrderDef, conceptualDef } from './stubs';
+import { conceptualDef } from './conceptual.tsx';
 import { SKIPPED } from '../App';
 
 export interface SerializedResponse {
@@ -47,8 +47,6 @@ export const QUESTION_TYPES: { [K in QuestionKind]: QuestionTypeDef<K> } = {
   'code-output': codeOutputDef,
   'code-write': codeWriteDef,
   'func-write': funcWriteDef,
-  'code-edit': codeEditDef,
-  'trace-order': traceOrderDef,
   'conceptual': conceptualDef,
 };
 

@@ -5,11 +5,6 @@ import { QuestionAnswerOptions, QuestionCodeBlock, QuestionInput, QuestionPrompt
 import { createCodeQuestionCore, prepareOptions, type BuildCodeQuestionOpts } from './utils.ts';
 import { Exception, normalizeOutputContainers, runGrabOutput } from '../python.ts';
 
-function parseQuizAnswer(raw: string): string | undefined {
-  const trimmed = raw.trim();
-  return trimmed === '' ? undefined : trimmed;
-};
-
 function correctOutputString(correct: CodeOutputQuestion['correct']): string {
   return correct instanceof Error ? correct.name : correct;
 }
@@ -104,7 +99,6 @@ const CodeOutputView: React.FC<QuestionViewProps<'code-output'>> = ({
           ) : (
             <QuestionQuizInputMultiLine
               onSubmit={onAnswer}
-              parseAnswer={parseQuizAnswer}
               placeholder="Enter the output to the user."
             />
           )}

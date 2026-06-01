@@ -6,8 +6,6 @@ export type QuestionKind =
   | 'code-output'
   | 'code-write'
   | 'func-write'
-  | 'code-edit'
-  | 'trace-order'
   | 'conceptual';
 
 export class TopicContext {
@@ -54,19 +52,11 @@ export interface FuncWriteQuestion extends QuestionBase<'func-write'> {
   testsUseOutput?: boolean;
 }
 
-export interface CodeEditQuestion extends QuestionBase<'code-edit'> {
-  starterCode: string;
-}
-
-export interface TraceOrderQuestion extends QuestionBase<'trace-order'> {
-  items: string[];
-  correctOrder: number[];
-}
-
 export interface ConceptualQuestion extends QuestionBase<'conceptual'> {
   prompt: string;
-  correct: string;
+  correct: string | string[];
   options: string[];
+  fuzzyMatch?: boolean;
 }
 
 export type Question =
@@ -74,8 +64,6 @@ export type Question =
   | CodeOutputQuestion
   | CodeWriteQuestion
   | FuncWriteQuestion
-  | CodeEditQuestion
-  | TraceOrderQuestion
   | ConceptualQuestion;
 
 export type QuestionFor<K extends QuestionKind> = Extract<Question, { kind: K }>;
@@ -85,8 +73,6 @@ export type UserAnswerFor<K extends QuestionKind> =
   K extends 'code-output' ? string | Exception :
   K extends 'code-write' ? string :
   K extends 'func-write' ? string :
-  K extends 'code-edit' ? string :
-  K extends 'trace-order' ? number[] :
   K extends 'conceptual' ? string :
   never;
 
