@@ -3,7 +3,7 @@ import type { FuncWriteQuestion, UserAnswerFor } from './types.ts';
 import type { QuestionTypeDef, QuestionViewProps, SerializedResponse } from './registry.ts';
 import { QuestionAnswerOptions, QuestionPrompt, QuestionQuizInputAnswerDisplay, QuestionQuizInputMultiLine, QuestionSkipButton } from './QuestionComponents.tsx';
 import { isAnswerSame } from '../topics.ts';
-import { toPyAtom, runLastLine, PyType, runGrabOutput } from '../python.ts';
+import { toPyAtom, runLastLine, PyType, runGrabOutput, createException } from '../python.ts';
 import { SKIPPED } from '../App.tsx';
 import { zip } from '../util.ts';
 
@@ -15,6 +15,14 @@ function* testResults(question: FuncWriteQuestion, answer: string): Generator<Py
         answer + '\n' +
         `${question.name}(${testCase.args.map((value) => toPyAtom(value)).join(', ')})`
     );
+
+    // Make sure the function is defined
+    const match = /^def\s+${question.name}\s*\(.*\)(\s*->[^:]*)?\s*:\s*$/.test(answer);
+    if (!match) {
+      yield createException('SyntaxError', 'Your function must be defined. Add a `def function_name(...):` statement and try again.');
+      continue;
+    }
+
     if (testsUseOutput) {
       yield runGrabOutput(code);
     } else {
