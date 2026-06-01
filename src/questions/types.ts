@@ -17,7 +17,6 @@ export class TopicContext {
 
 interface QuestionBase<K extends QuestionKind> {
   kind: K;
-  forceQuiz?: boolean;
 }
 
 export interface EvalLastLineQuestion extends QuestionBase<'eval-last-line'> {
