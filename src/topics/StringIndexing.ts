@@ -1,4 +1,3 @@
-import { CodeWriteQuestion } from '../questions/types';
 import { Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen, CodeWriteSubtopic, CodeWriteQuestionGen } from '../topics';
 import { randChoice, randChoices, randVariable, randVars, randIntNum, randIntsNum, randInt, STRINGS } from '../util';
 import { STRING_CONCAT } from './StringConcat';

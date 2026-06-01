@@ -24,7 +24,7 @@ function parseQuizAnswer(raw: string): Answer | undefined {
     if (rem !== '') { return createException('Invalid syntax', answer); }
     return py_atom;
   } catch {
-    return createException('Invalid syntax', answer);
+    return createException('Invalid syntax: ' + answer);
   }
 }
 
