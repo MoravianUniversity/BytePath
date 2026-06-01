@@ -154,6 +154,14 @@ export function maybeNot(probability: number = 0.2): string { return Math.random
 // Capitalize the first character of a string
 export function capitalize(s: string): string { return s.charAt(0).toUpperCase() + s.slice(1); }
 
+// Write a list of values, separated by commas and/or and as appropriate
+export function written_list_of_values(values: any[]): string {
+  if (values.length === 0) { return ''; }
+  if (values.length === 1) { return values[0].toString(); }
+  if (values.length === 2) { return values[0].toString() + ' and ' + values[1].toString(); }
+  return values.slice(0, -1).map(value => value.toString()).join(', ') + ', and ' + values[values.length - 1].toString();
+}
+
 // Zip two iterables into a generator of pairs
 export function *zip<T1, T2>(iterable1: Iterable<T1>, iterable2: Iterable<T2>): Generator<[T1, T2], void, unknown> {
   const iter1 = iterable1[Symbol.iterator]();

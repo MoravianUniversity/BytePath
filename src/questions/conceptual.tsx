@@ -6,6 +6,12 @@ function checkAnswer(
   question: ConceptualQuestion,
   answer: UserAnswerFor<'conceptual'>,
 ): boolean {
+  // Check if the correct answer using a check function
+  if (typeof question.correct === 'object' && 'check' in question.correct) {
+    return question.correct.check(answer);
+  }
+
+  // Get the correct answers as a lowercase array
   answer = answer.toLowerCase();
   const correct = (typeof question.correct === 'string' ?
     [question.correct.toLowerCase()] : question.correct.map(c => c.toLowerCase()));
@@ -20,11 +26,14 @@ function checkAnswer(
   return false;
 }
 
-function correctAnswerString(correct: string | string[]): string {
+function correctAnswerString(correct: string | string[] | { display: string, check: (answer: string) => boolean }): string {
   if (typeof correct === 'string') { return correct; }
-  if (correct.length === 1) { return correct[0]; }
-  if (correct.length === 2) { return correct.join(' or '); }
-  return correct.slice(0, -1).join(', ') + ', or ' + correct[correct.length - 1];
+  if (Array.isArray(correct)) {
+    if (correct.length === 1) { return correct[0]; }
+    if (correct.length === 2) { return correct.join(' or '); }
+    return correct.slice(0, -1).join(', ') + ', or ' + correct[correct.length - 1];
+  }
+  return correct.display;
 }
 
 function serialize(

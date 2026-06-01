@@ -27,7 +27,7 @@ code.inline-code {
   padding: 0.1em 0.4em;
   margin: 0 0.05em;
   font-size: 0.88em;
-  white-space: nowrap;
+  white-space: pre-wrap;
   vertical-align: baseline;
 }
 

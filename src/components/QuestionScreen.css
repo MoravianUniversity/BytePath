@@ -234,6 +234,11 @@ input.quiz-input, textarea.quiz-input {
   color: var(--syntax-outline);
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
+.conceptual .quiz-input {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  background: var(--overlay-primary-20);
+  color: var(--text-on-primary);
+} 
 .submit-button {
   display: inline-block;
   box-sizing: border-box;

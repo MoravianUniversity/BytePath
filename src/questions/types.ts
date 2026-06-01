@@ -41,6 +41,7 @@ export interface CodeWriteQuestion extends QuestionBase<'code-write'> {
   variables: string[];
   testCases: { values: PyType[], expected: PyType }[];
   testsUseOutput?: boolean;
+  transform?: (answer: string) => string;
 }
 
 export interface FuncWriteQuestion extends QuestionBase<'func-write'> {
@@ -54,7 +55,7 @@ export interface FuncWriteQuestion extends QuestionBase<'func-write'> {
 
 export interface ConceptualQuestion extends QuestionBase<'conceptual'> {
   prompt: string;
-  correct: string | string[];
+  correct: string | string[] | { display: string, check: (answer: string) => boolean };
   options: string[];
   fuzzyMatch?: boolean;
 }

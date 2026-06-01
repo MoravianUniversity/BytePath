@@ -130,11 +130,12 @@ export type CodeWriteQuestionGen = {
   variables?: string[],
   testCases: { values: PyType[], expected: PyType }[],
   testsUseOutput?: boolean;
+  transform?: (answer: string) => string;
 };
 export abstract class CodeWriteSubtopic extends Subtopic<'code-write'> {
   readonly kind = 'code-write' as const;
   generateQuestion(ctx: TopicContext): QuestionFor<'code-write'> {
-    const {prompt, correct, options = [], variables = [], testCases, testsUseOutput = false} = this.gen(ctx);
+    const {prompt, correct, options = [], variables = [], testCases, testsUseOutput = false, transform = undefined} = this.gen(ctx);
     return {
       kind: 'code-write' as const,
       prompt,
@@ -143,6 +144,7 @@ export abstract class CodeWriteSubtopic extends Subtopic<'code-write'> {
       variables,
       testCases,
       testsUseOutput,
+      transform,
     };
   }
   abstract gen(ctx: TopicContext): CodeWriteQuestionGen;
@@ -175,14 +177,14 @@ export abstract class FuncWriteSubtopic extends Subtopic<'func-write'> {
 
 export type ConceptualQuestionGen = {
   prompt: string;
-  correct: string | string[];
+  correct: string | string[] | { display: string, check: (answer: string) => boolean };
   options?: string[];
 };
 export abstract class ConceptualSubtopic extends Subtopic<'conceptual'> {
   readonly kind = 'conceptual' as const;
   generateQuestion(ctx: TopicContext): QuestionFor<'conceptual'> {
     const {prompt, correct, options = []} = this.gen(ctx);
-    const singleCorrect = typeof correct === 'string' ? correct : randChoice(correct);
+    const singleCorrect = typeof correct === 'string' ? correct : Array.isArray(correct) ? randChoice(correct) : correct.display;
     return {
       kind: 'conceptual' as const,
       prompt,

@@ -3,7 +3,7 @@ import type { CodeWriteQuestion, UserAnswerFor } from './types.ts';
 import type { QuestionTypeDef, QuestionViewProps, SerializedResponse } from './registry.ts';
 import { QuestionAnswerOptions, QuestionPrompt, QuestionQuizInputAnswerDisplay, QuestionQuizInputSingleLine, QuestionSkipButton } from './QuestionComponents.tsx';
 import { isAnswerSame } from '../topics.ts';
-import { toPyAtom, runLastLine, PyType, runGrabOutput } from '../python.ts';
+import { toPyAtom, runLastLine, PyType, runGrabOutput, createException } from '../python.ts';
 import { SKIPPED } from '../App.tsx';
 import { zip } from '../util.ts';
 
@@ -16,11 +16,38 @@ function* testResults(question: CodeWriteQuestion, answer: string): Generator<Py
       Array.from(zip(variables, testCase.values).map(
         ([variable, value]) => `${variable} = ${toPyAtom(value)}`
       )).join('\n')
-    ) + '\n' + answer;
+    ) + '\n' + (question.transform ? question.transform(answer) : answer);
+    const lines = code.trimEnd().split('\n');
+
+    // Check for pseudo-syntax errors in the last line
+    const lastLine = lines[lines.length - 1].trim();
+    const keywordMatch = lastLine.match(/^(return|if|else|elif|while|for|def)[\s(]/);
+    if (keywordMatch !== null) {
+      yield createException('SyntaxError', `Your code must end with a simple expression, not a ${keywordMatch[1]} statement. Remove the ${keywordMatch[1]} and try again.`);
+      continue;
+    }
+    if (/^\(?[a-zA-Z_][a-zA-Z0-9_]*(,\s*[a-zA-Z_][a-zA-Z0-9_]*)*\)?\s*=/.test(lastLine)) {
+      yield createException('SyntaxError', `Your code must end with a simple expression, not an assignment statement. Remove the assignment and try again.`);
+      continue;
+    }
+    if (lastLine.endsWith(':')) {
+      yield createException('SyntaxError', `Your code must end with a simple expression, not a line with a colon. Remove the colon and try again.`);
+      continue;
+    }
+
+    const printMatch = /^print\s*\(/.test(lastLine);
     if (testsUseOutput) {
-      yield runGrabOutput(code);
+      if (!printMatch) {
+        yield createException('SyntaxError', `Your code must end with a print statement. Add a print statement and try again.`);
+      } else {
+        yield runGrabOutput(code);
+      }
     } else {
-      yield runLastLine(code);
+      if (printMatch) {
+        yield createException('SyntaxError', `Your code must end with a simple expression, not a print statement. Remove the print statement and try again.`);
+      } else {
+        yield runLastLine(code);
+      }
     }
   }
 }
@@ -96,13 +123,14 @@ const CodeWriteView: React.FC<QuestionViewProps<'code-write'>> = ({
         return <><code className="language-python inline-code">{variable}</code> = <code className="language-python inline-code">{toPyAtom(value)}</code>{joiner}</>;
       }
     );
+    const input_vars = n > 0 ? <> for the {input} {vars}</> : '';
     const expected = <code className="language-python inline-code">{toPyAtom(testCase.expected)}</code>;
     if (result === undefined || result === null) {
-      failureMessage = <>no result instead of the correct value {expected} for the {input} {vars}.</>;
+      failureMessage = <>no result instead of the correct value {expected}{input_vars}.</>;
     } else if (result instanceof Error) {
-      failureMessage = <>an error instead of the correct value {expected} for the {input} {vars}: <code className="inline-code exception">{result.message}</code>.</>;
+      failureMessage = <>an error instead of the correct value {expected}{input_vars}: <code className="inline-code exception">{result.name}: {result.message}</code></>;
     } else {
-      failureMessage = <>the value <code className="language-python inline-code">{toPyAtom(result)}</code> instead of the correct value {expected} for the {input} {vars}.</>;
+      failureMessage = <>the value <code className="language-python inline-code">{toPyAtom(result)}</code> instead of the correct value {expected}{input_vars}.</>;
     }
   }
   if (firstFailure !== null) {
