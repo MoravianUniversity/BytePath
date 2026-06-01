@@ -124,6 +124,7 @@ export class Func2ArgsReassign extends EvalLastLineSubtopic {
   }
 }
 
+import { WriteCallLine, WriteDefLine } from './FunctionMastery';
 
 export const FUNC_WITH_MULTIPLE_ARGS: Topic = new Topic('func-with-multiple-args', 'Functions with Multiple Arguments', [
     new Func2ArgsAdd(),
@@ -133,4 +134,6 @@ export const FUNC_WITH_MULTIPLE_ARGS: Topic = new Topic('func-with-multiple-args
     new Func2ArgsVar(),
     new Func2ArgsVar(),  // practice
     new Func2ArgsReassign(),
+    new WriteCallLine(),
+    new WriteDefLine(),
 ], [BASIC_FUNCTIONS]);

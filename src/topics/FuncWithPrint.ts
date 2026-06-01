@@ -1,4 +1,4 @@
-import { Topic, EvalLastLineSubtopic, CodeOutputSubtopic, EvalLastLineQuestionGen, CodeOutputQuestionGen } from '../topics';
+import { Topic, EvalLastLineSubtopic, CodeOutputSubtopic, EvalLastLineQuestionGen, CodeOutputQuestionGen, ConceptualQuestionGen, ConceptualSubtopic, QuestionHelp } from '../topics';
 import { randVariable, randVars, randFunc, randChoice, STRINGS } from '../util';
 import { FUNC_WITH_MULTIPLE_ARGS } from './FuncWithMultipleArgs';
 import { BASIC_PRINTS } from './BasicPrints';
@@ -86,9 +86,26 @@ class FuncWithPrintLastLine extends EvalLastLineSubtopic {
     }
 }
 
+class FuncWithPrintReturnType extends ConceptualSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Remember that a function that does not have an explicit return statement returns the special value `None`.',
+    },
+  ];
+  gen(): ConceptualQuestionGen {
+    return {
+      prompt: 'What value does a function that only calls \`print()\` return?',
+      correct: '`None`',
+      options: ['`0`', 'Empty string', '`false`', 'Raises an error', '`None`', 'The value given to \`print()\`'],
+    };
+  }
+}
+
 export const FUNC_WITH_PRINT: Topic = new Topic('func-with-print', 'Functions with Print', [
   new FuncWithPrint(),
   new FuncWithPrintReturn(),
   new FuncWithPrintAround(),
   new FuncWithPrintLastLine(),
+  new FuncWithPrintReturnType(),
 ], [FUNC_WITH_MULTIPLE_ARGS, BASIC_PRINTS]);

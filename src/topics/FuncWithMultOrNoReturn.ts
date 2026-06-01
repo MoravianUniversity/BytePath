@@ -1,4 +1,4 @@
-import { Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen } from '../topics';
+import { Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen, ConceptualSubtopic, ConceptualQuestionGen } from '../topics';
 import { randVariable, randVars, randFunc, range, randInts } from '../util';
 import { FUNC_WITH_MULTIPLE_ARGS } from './FuncWithMultipleArgs';
 
@@ -126,6 +126,16 @@ class FuncWithNoReturnNamedOutside extends EvalLastLineSubtopic {
     }
 }
 
+class FuncWithNoReturnWhatType extends ConceptualSubtopic {
+  gen(): ConceptualQuestionGen {
+    return {
+      prompt: 'What value does a function that does not have an explicit return statement return?',
+      correct: '`None`',
+      options: ['`0`', 'Empty string', '`false`', 'Raises an error', '`None`'],
+    };
+  }
+}
+
 export const FUNC_WITH_MULT_OR_NO_RETURN: Topic = new Topic('func-with-mult-or-no-return', 'Functions with Multiple/No Return', [
   new FuncWithMultReturnFirst(),
   new FuncWithMultReturnSecond(),
@@ -133,4 +143,5 @@ export const FUNC_WITH_MULT_OR_NO_RETURN: Topic = new Topic('func-with-mult-or-n
   new FuncWithNoReturn(),
   new FuncWithNoReturnNamed(),
   new FuncWithNoReturnNamedOutside(),
+  new FuncWithNoReturnWhatType(),
 ], [FUNC_WITH_MULTIPLE_ARGS]);

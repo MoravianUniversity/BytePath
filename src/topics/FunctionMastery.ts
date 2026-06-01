@@ -38,25 +38,39 @@ class FunctionMasteryContext extends TopicContext {
   }
 }
 
+const COMMON_MISTAKES = `Common mistakes:
+
+* When in quotes, the string is literally those characters, when not in quotes, the string is the variable name.
+* Be careful with the order of the arguments to a function compared to the order of the parameters in the function definition.
+* When there are multiple function calls, evaluate inside parentheses first, using return values from one call as the argument for the next function call.`;
+
 class FunctionMastery1 extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: COMMON_MISTAKES }];
   gen(ctx: FunctionMasteryContext): string {
     return (ctx.n_args == 1) ? `${ctx.fun}("${ctx.var1}")` : `${ctx.fun}("${ctx.var1}", "${ctx.var2}")`;
   }
 }
 
 class FunctionMastery2 extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: COMMON_MISTAKES }];
   gen(ctx: FunctionMasteryContext): string {
     return (ctx.n_args == 1) ? `${ctx.fun}(${ctx.var1})` : `${ctx.fun}(${ctx.var1}, ${ctx.var2})`;
   }
 }
 
 class FunctionMastery3 extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: COMMON_MISTAKES }];
   gen(ctx: FunctionMasteryContext): string {
     return (ctx.n_args == 1) ? `${ctx.fun}(${ctx.fun}(${ctx.var2}))` : `${ctx.fun}(${ctx.var2}, ${ctx.fun}(${ctx.var1}, ${ctx.var2}))`;
   }
 }
 
 class ReadFunctionCode extends CodeOutputSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: COMMON_MISTAKES + `
+* When printing a string, its contents are printed (without quotes).
+* When printing multiple values, they are printed on the same line, separated by a space.
+* Every function call has its own variables and are not shared with other function calls.
+` }];
   gen(): string {
     const function_name = randChoice(["perim", "area", "circum", "volume", "surface"])
     const function2_name = randChoice(["foo", "bar", "baz"])
@@ -107,6 +121,9 @@ function tryRemove(array: string[], item: string): void {
 }
 
 export class WriteCallLine extends CodeWriteSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: `The error message will be cryptic if you get this wrong due to the auto-checker.
+    
+The answer should be a single line assignment statement: \`variable = function(...)\`. There is no \`def\` or \`return\` in the answer.` }];
   gen(): CodeWriteQuestionGen {
     const str_arguments = ["hi", "star", "fred", "bat", "cat", "dog", "fish", "goat", "horse",
                            "jellyfish", "kangaroo", "llama", "monkey", "newt", "owl", "penguin",
@@ -156,8 +173,7 @@ export class WriteCallLine extends CodeWriteSubtopic {
     const args = written_list_of_values(func_arguments.map((a) => `\`${a}\``));
     const question = `The function \`${function_name}()\` takes ${num} arguments and returns a single ` +
                      `value. Write a statement that calls \`${function_name}()\` with the values ${args} ` +
-                     `and stores the returned values in the variable \`${out_var}\`.` + 
-                     '\n\nNote: the error message will be cryptic if you get this wrong due to the auto-checker.';
+                     `and stores the returned values in the variable \`${out_var}\`.`;
     const answer = `${out_var} = ${function_name}(${func_arguments.join(', ')})`;
     const params = ASCII_LOWER.slice(0, num_args).join(', ');
 
@@ -180,6 +196,9 @@ export class WriteCallLine extends CodeWriteSubtopic {
 }
 
 export class WriteDefLine extends CodeWriteSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: `The error message will be cryptic if you get this wrong due to the auto-checker.
+    
+    The answer should be a single line \`def\` statement: \`def function(...):\`. No need to write the body of the function.` }];
   gen(): CodeWriteQuestionGen {
     const func = randFunc();
     const num_args = randIntNum(2, 4);
