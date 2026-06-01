@@ -87,12 +87,18 @@ export function formatAnswer(answer: Answer): string {
  */
 export abstract class Subtopic<K extends QuestionKind = QuestionKind> {
   abstract readonly kind: K;
+  /** Whether the subtopic is completed. */
   completed: boolean = false;
+  /** Whether the last answer was incorrect. */
   incorrectLastTime: boolean = false;
+  /** Force quiz mode for this subtopic. */
+  forceQuiz: boolean = false;
   /** Incorrect answers on this question type (used for progressive help). */
   failedAttempts: number = 0;
   /** Optional progressive help; hidden on first show, then unlocked by failed attempts. */
   readonly help?: QuestionHelp;
+  /** Whether to show the workspace for this question type. */
+  showWorkspace?: boolean;
 
   getActiveHelpMessage(): string | undefined {
     return getActiveHelpMessage(this.help, this.failedAttempts);

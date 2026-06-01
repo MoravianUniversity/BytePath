@@ -574,6 +574,28 @@ select.dashboard-button option {
   max-width: 650px;
 }
 
+/* Shrink-wrap to content; max-width caps growth when workspace opens. */
+.questions-container > .question-screen {
+  align-self: flex-start;
+  box-sizing: border-box;
+  width: fit-content;
+  max-width: min(100%, calc(650px + 3rem));
+  transition: max-width 0.3s ease;
+}
+
+@media (min-width: 769px) {
+  .questions-container > .question-screen.has-workspace {
+    max-width: min(100%, calc(650px + 3rem + 1.25rem + 22rem));
+  }
+}
+
+@media (max-width: 768px) {
+  .questions-container > .question-screen,
+  .questions-container > .question-screen.has-workspace {
+    max-width: 650px;
+  }
+}
+
 .welcome-screen {
   text-align: center;
   max-width: 650px;

@@ -964,8 +964,13 @@ function App() {
                       question={question}
                       userAnswer={questionAnswers[index]}
                       onAnswerSelect={handleAnswerSelect}
-                      isQuiz={mode === 'quiz' || currentTopic!.forceQuiz || !!question.forceQuiz}
+                      isQuiz={mode === 'quiz' || (currentTopic?.forceQuiz ?? false) || (currentSubtopic?.forceQuiz ?? false)}
                       canSkip={completedTopics.has(currentTopic?.id || '')}
+                      workspaceDefaultOpen={
+                        (currentSubtopic?.showWorkspace ?? false) &&
+                        questionAnswers[index] === undefined &&
+                        index === questionList.length - 1
+                      }
                       helpMessage={
                         questionAnswers[index] === undefined &&
                         index === questionList.length - 1 &&
