@@ -940,7 +940,7 @@ function App() {
 
               {currentScreen === 'question' && (
                 <div className="topic-container">
-                  {context?.sharedCode && (
+                  {context?.sharedCode && questionList.length > 0 && questionList[0] !== null && (
                     <div className="shared-code">
                   <div className="shared-code-header">Code shared by all questions in this topic:</div>
                   <code className="language-python">

@@ -537,7 +537,6 @@ select.dashboard-button option {
 }
 
 .shared-code {
-  max-width: calc(650px + 3rem);
   padding: 2rem;
   position: sticky;
   top: 0;
@@ -545,6 +544,9 @@ select.dashboard-button option {
   mask: linear-gradient(to top, transparent, black 1.5rem);
   backdrop-filter: blur(15px);
   padding-bottom: 2rem;
+}
+.shared-code > * {
+  max-width: calc(650px + 1rem);
 }
 .shared-code-header {
   font-size: 1.1rem;
