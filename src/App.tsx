@@ -88,7 +88,7 @@ function App() {
   useEffect(() => { localStorage.setItem('mode', mode); }, [mode]);
   let [currentTopic, setCurrentTopic] = useState<Topic | null>(null);
   const [allTopics] = useState<Topic[]>(getAllTopics());
-  const [context, setContext] = useState<TopicContext | null>(null);
+  let [context, setContext] = useState<TopicContext | null>(null);
   const [currentSubtopic, setCurrentSubtopic] = useState<Subtopic | null>(null);
   const [completedTopics, setCompletedTopics] = useState<Set<string>>(() => {
     let saved = localStorage.getItem('completedTopics');
@@ -508,7 +508,8 @@ function App() {
   };
 
   function startTopic() {
-    setContext(currentTopic?.generateContext() ?? null);
+    context = currentTopic?.generateContext() ?? new TopicContext();
+    setContext(context);
     setQuestionList([]);
     setQuestionAnswers([]);
     addQuestion();
