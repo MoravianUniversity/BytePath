@@ -2,6 +2,7 @@ import { Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen } from '../topics'
 import { randInts, randFunc, randVars, range } from '../util';
 import { BASIC_FUNCTIONS } from './BasicFunctions';
 import { randOperation } from './BasicVariables';
+import { WriteCallLine, WriteDefLine } from './FunctionWriteExercises';
 
 
 export class Func2ArgsAdd extends EvalLastLineSubtopic {
@@ -123,8 +124,6 @@ export class Func2ArgsReassign extends EvalLastLineSubtopic {
     };
   }
 }
-
-import { WriteCallLine, WriteDefLine } from './FunctionMastery';
 
 export const FUNC_WITH_MULTIPLE_ARGS: Topic = new Topic('func-with-multiple-args', 'Functions with Multiple Arguments', [
     new Func2ArgsAdd(),
