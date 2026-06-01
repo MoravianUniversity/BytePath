@@ -66,6 +66,7 @@ class FunctionMastery3 extends EvalLastLineSubtopic {
 }
 
 class ReadFunctionCode extends CodeOutputSubtopic {
+  readonly showWorkspace = true;
   readonly help = [{ afterFailedAttempts: 1, message: COMMON_MISTAKES + `
 * When printing a string, its contents are printed (without quotes).
 * When printing multiple values, they are printed on the same line, separated by a space.

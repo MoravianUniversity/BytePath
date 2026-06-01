@@ -95,6 +95,7 @@ function args(numArgs: number, fixedArgs: string[] = []): string {
 
 
 class FuncCallsAdd extends EvalLastLineSubtopic {
+  readonly showWorkspace = true;
   readonly help = [
     {
       afterFailedAttempts: 2,
@@ -113,6 +114,7 @@ class FuncCallsAdd extends EvalLastLineSubtopic {
 }
 
 class FuncCallsSub extends EvalLastLineSubtopic {
+  readonly showWorkspace = true;
   readonly help = [
     {
       afterFailedAttempts: 2,
@@ -131,6 +133,7 @@ class FuncCallsSub extends EvalLastLineSubtopic {
 }
 
 class FuncCallsNested extends EvalLastLineSubtopic {
+  readonly showWorkspace = true;
   readonly help = [
     {
       afterFailedAttempts: 2,
@@ -149,6 +152,7 @@ class FuncCallsNested extends EvalLastLineSubtopic {
 }
 
 class FuncCallsNested2 extends EvalLastLineSubtopic {
+  readonly showWorkspace = true;
   readonly help = [
     {
       afterFailedAttempts: 2,
@@ -170,6 +174,7 @@ class FuncCallsNested2 extends EvalLastLineSubtopic {
 }
 
 class FuncCallsNested2Both extends EvalLastLineSubtopic {
+  readonly showWorkspace = true;
   readonly help = [
     {
       afterFailedAttempts: 2,
@@ -192,6 +197,7 @@ class FuncCallsNested2Both extends EvalLastLineSubtopic {
 }
 
 class FuncCallsAddNested extends EvalLastLineSubtopic {
+  readonly showWorkspace = true;
   readonly help = [
     {
       afterFailedAttempts: 2,
@@ -211,6 +217,7 @@ class FuncCallsAddNested extends EvalLastLineSubtopic {
 }
 
 class FuncCallsNestedAdd extends EvalLastLineSubtopic {
+  readonly showWorkspace = true;
   readonly help = [
     {
       afterFailedAttempts: 2,
@@ -230,6 +237,7 @@ class FuncCallsNestedAdd extends EvalLastLineSubtopic {
 }
 
 class Func2CallsAdd extends EvalLastLineSubtopic {
+  readonly showWorkspace = true;
   readonly help = [
     {
       afterFailedAttempts: 2,
@@ -252,6 +260,7 @@ class Func2CallsAdd extends EvalLastLineSubtopic {
 }
 
 class Func2CallsAddBackwards extends EvalLastLineSubtopic {
+  readonly showWorkspace = true;
   readonly help = [
     {
       afterFailedAttempts: 2,
@@ -274,6 +283,7 @@ class Func2CallsAddBackwards extends EvalLastLineSubtopic {
 }
 
 class Func2CallsNested extends EvalLastLineSubtopic {
+  readonly showWorkspace = true;
   readonly help = [
     {
       afterFailedAttempts: 2,
@@ -296,6 +306,7 @@ class Func2CallsNested extends EvalLastLineSubtopic {
 }
 
 class Func2CallsNestedBackwards extends EvalLastLineSubtopic {
+  readonly showWorkspace = true;
   readonly help = [
     {
       afterFailedAttempts: 2,

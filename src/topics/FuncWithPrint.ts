@@ -1,4 +1,4 @@
-import { Topic, EvalLastLineSubtopic, CodeOutputSubtopic, EvalLastLineQuestionGen, CodeOutputQuestionGen, ConceptualQuestionGen, ConceptualSubtopic, QuestionHelp } from '../topics';
+import { Topic, EvalLastLineSubtopic, CodeOutputSubtopic, EvalLastLineQuestionGen, CodeOutputQuestionGen, ConceptualQuestionGen, ConceptualSubtopic } from '../topics';
 import { randVariable, randVars, randFunc, randChoice, STRINGS } from '../util';
 import { FUNC_WITH_MULTIPLE_ARGS } from './FuncWithMultipleArgs';
 import { BASIC_PRINTS } from './BasicPrints';

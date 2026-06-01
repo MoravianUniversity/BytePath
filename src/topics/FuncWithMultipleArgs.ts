@@ -103,6 +103,7 @@ export class Func2ArgsVar extends EvalLastLineSubtopic {
 }
 
 export class Func2ArgsReassign extends EvalLastLineSubtopic {
+  readonly showWorkspace = true;
   readonly help = [
     {
       afterFailedAttempts: 1,
