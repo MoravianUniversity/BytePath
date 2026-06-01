@@ -1,5 +1,6 @@
 import { Topic, CodeOutputSubtopic, CodeOutputQuestionGen } from '../topics';
-import { randVars, randFuncs, randInts } from '../util';
+import { randVars, randFuncs, randInts, randChoices, STRINGS } from '../util';
+import { toPyAtom, input } from '../python';
 import { PRACTICE_03A_BASIC_FUNCTIONS } from './03a - Basic Functions';
 
 
@@ -18,6 +19,7 @@ import { PRACTICE_03A_BASIC_FUNCTIONS } from './03a - Basic Functions';
 //     main()
 
 export class Functions1 extends CodeOutputSubtopic {
+  readonly showWorkspace = true;
   gen(): CodeOutputQuestionGen {
     const [x, y, z] = randVars(3);
     const [a, b] = randInts(2n, 5n, 2);
@@ -59,6 +61,7 @@ export class Functions1 extends CodeOutputSubtopic {
 //     main()
 
 export class Functions2 extends CodeOutputSubtopic {
+  readonly showWorkspace = true;
   gen(): CodeOutputQuestionGen {
     const [x, y, z] = randVars(3);
     const [a, b] = randInts(2n, 5n, 2);
@@ -105,6 +108,7 @@ export class Functions2 extends CodeOutputSubtopic {
 
 
 export class Functions3 extends CodeOutputSubtopic {
+  readonly showWorkspace = true;
   gen(): CodeOutputQuestionGen {
     const [x, y] = randVars(2);
     const [f, g] = randFuncs(2);
@@ -150,38 +154,47 @@ export class Functions3 extends CodeOutputSubtopic {
 //     main()
 
 
-// TODO: this does not work in quiz mode (they cannot type the echoed input correctly)
-//  also the wrong answers don't have the correct echos either
-// class Functions4 extends CodeOutputSubtopic {
-//   gen(): CodeOutputQuestionGen {
-//     const [x, y] = randVars(2);
-//     const [f, g] = randFuncs(2);
-//     const [a, b] = randChoices(STRINGS, 2);
-//     const [c, d] = randInts(2n, 5n, 2);
-//     return {
-//       code: `
-//       def ${f}(${x}):
-//           ${y} = int(input(${x}+" ${x}: "))
-//           return ${y}
+class Functions4 extends CodeOutputSubtopic {
+  readonly showWorkspace = true;
+  gen(): CodeOutputQuestionGen {
+    const [x, y] = randVars(2);
+    const [f, g] = randFuncs(2);
+    const [a, b] = randChoices(STRINGS, 2);
+    const [c, d] = randInts(2n, 5n, 2).map(x => toPyAtom(x));
+    return {
+      code: `
+      def ${f}(${x}):
+          ${y} = int(input(${x}+" ${x}: "))
+          return ${y}
 
-//       def ${g}(${x}, ${y}):
-//           return ${x} + ${y}
+      def ${g}(${x}, ${y}):
+          return ${x} + ${y}
 
-//       def main():
-//           ${x} = ${g}(${f}("${a}"), ${f}("${b}"))
-//           print(${x})
+      def main():
+          ${x} = ${g}(${f}("${a}"), ${f}("${b}"))
+          print(${x})
 
-//       if __name__ == "__main__":
-//           main()
-//       `,
-//       options: [`${a}, ${b}`, `${b}, ${a}`, `${a} ${b}`, `${b} ${a}`],
-//     };
-//   }
-// }
+      if __name__ == "__main__":
+          main()
+      `,
+      opts: {input: [c, d]},
+      options: [
+        `${c+d}`, x,
+        `${g}(${f}("${a}"), ${f}("${b}"))`,
+        `${a}: ${input(c)}\n${b}: ${input(d)}\n${x}`,
+        `${a}: ${input(c)}\n${b}: ${input(d)}\n${c+d}`,
+        `${a}: ${input(c)}\n${b}: ${input(d)}\n${a+b}`,
+        `${a} ${x}: ${input(c)}\n${b} ${x}: ${input(d)}\n${x}`,
+        `${a} ${x}: ${input(c)}\n${b} ${x}: ${input(d)}\n${c+d}`,
+        `${a} ${x}: ${input(c)}\n${b} ${x}: ${input(d)}\n${a+b}`,
+      ],
+    };
+  }
+}
 
 export const PRACTICE_03A_FUNCTIONS: Topic = new Topic('practice-03a-functions', '03a Functions', [
   new Functions1(),
   new Functions2(),
   new Functions3(),
-  // new Functions4(),
+  new Functions4(),
 ], [PRACTICE_03A_BASIC_FUNCTIONS]);

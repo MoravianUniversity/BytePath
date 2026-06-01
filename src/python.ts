@@ -80,12 +80,12 @@ function loadPython(): Promise<any> {
       pyodide.setStdin({stdin: () => {
         const val = stdin.shift();
         if (val !== undefined) {
-          stdout += '\x02'; // use a special character to indicate that the input was echoed
+          stdout += INPUT_START; // use a special character to indicate that the input was echoed
           stdout += val;
           if (!val.endsWith('\n')) {
             stdout += '\n';
           }
-          stdout += '\x03'; // use a special character to indicate the end of the input
+          stdout += INPUT_END; // use a special character to indicate the end of the input
         }
         return val;
       }});
@@ -438,6 +438,38 @@ function runMatch(re: RegExp, s: string, convert: (x: string) => PyType): [PyTyp
   return undefined;
 }
 
+export const INPUT_START = '\x02';
+export const INPUT_END = '\x03';
+export function input(text: string): string {
+  return `${INPUT_START}${text}${INPUT_END}`;
+}
+
+export function injectInputEcho(s: string, inputs: string[]): [string, string[]] {
+  let result = '';
+  inputs = inputs.slice();
+  let inpt = inputs.shift();
+  for (const line of s.split('\n')) {
+    if (inpt !== undefined && line.endsWith(inpt)) {
+      result += line.slice(0, line.length - inpt.length) + input(inpt + '\n');
+      inpt = inputs.shift();
+    } else {
+      result += line + '\n';
+    }
+  }
+  if (inpt !== undefined) { inputs.unshift(inpt); }
+  return [result, inputs];
+}
+
+/**
+ * Remove input echos from a string, but preserve the newlines in the input echo.
+ * @param s - The string to remove input echos from.
+ * @returns The string with input echos removed.
+ */
+export function removeInputEcho(s: string): string {
+  s = s.replace(new RegExp(`${INPUT_START}[^${INPUT_END}\n]*\n${INPUT_END}`, 'g'), '\n');
+  s = s.replace(new RegExp(`${INPUT_START}[^${INPUT_END}\n]*${INPUT_END}`, 'g'), '');
+  return s;
+}
 
 
 /**

@@ -23,7 +23,7 @@ export const QuestionCodeBlock: React.FC<{code: string, language?: string}> = (
 ) => {
   return (
     <div className="code-block">
-        <code className={`language-${language}`}>{code}</code>
+      <code className={`language-${language}`}>{code}</code>
     </div>
   );
 };
@@ -110,7 +110,7 @@ export const QuestionAnswerOptions: React.FC<{
     return null;
   }
   return (
-    <div className="answer-options">
+    <div key="answer-options" className="answer-options">
       {options.map((option, index) => (
         <button
           key={index}
@@ -194,10 +194,10 @@ export const QuestionQuizInputAnswerDisplay: React.FC<{
   if (userAnswer === SKIPPED) {
     return (
       <>
-        <div className={'quiz-input ' + getCorrectClass(correctAnswer, true)}>
+        <div key="correct-answer" className={'quiz-input ' + getCorrectClass(correctAnswer, true)}>
           {formatAnswer(correctAnswer)}
         </div>
-        <button className='feedback submit-button skipped' disabled>
+        <button key="feedback-button" className='feedback submit-button skipped' disabled>
           <FontAwesomeIcon icon={faForwardFast} />
         </button>
       </>
@@ -206,15 +206,15 @@ export const QuestionQuizInputAnswerDisplay: React.FC<{
   const correctClass = getCorrectClass(userAnswer, isCorrect);
   return (
     <>
-      <div className={'quiz-input ' + correctClass}>
+      <div key="user-answer" className={'quiz-input ' + correctClass}>
         {formatAnswer(userAnswer!)}
       </div>
-      <button className={'feedback submit-button ' + correctClass} disabled>
+      <button key="feedback-button" className={'feedback submit-button ' + correctClass} disabled>
         {isCorrect ? '✓' : '✗'}
       </button>
       {children}
       {!isCorrect && (
-        <div className={'quiz-input ' + getCorrectClass(correctAnswer, true)}>
+        <div key="correct-answer" className={'quiz-input ' + getCorrectClass(correctAnswer, true)}>
           {formatAnswer(correctAnswer)}
         </div>
       )}

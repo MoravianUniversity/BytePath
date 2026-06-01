@@ -241,6 +241,14 @@
   font-weight: 600;
   margin-bottom: 0;
 }
+.question-input {
+  margin-bottom: 0.5rem;
+}
+.question-prompt small {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: normal;
+}
 .question-prompt-row {
   display: flex;
   align-items: center;
@@ -337,6 +345,9 @@
 .markdown pre code .token { text-shadow: none !important; }
 .question-input code, .input-echo {
   color: var(--color-success-bright) !important;
+  font-weight: 800;
+  font-style: italic;
+  font-synthesis: style weight position;
 }
 .quiz-input.exception, .answer-option.exception, .answer-option.exception.correct, .first-failure .exception {
   color: var(--color-error) !important;

@@ -1,10 +1,11 @@
-import { Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen } from '../topics';
+import { Topic, EvalLastLineSubtopic, EvalLastLineQuestionGen, CodeOutputSubtopic, CodeOutputQuestionGen } from '../topics';
 import { randInt, randVars, randInts, randVariable, randChoice, STRINGS } from '../util';
 import { BASIC_ARITHMETIC, Addition, AdditionWithNegative } from './BasicArithmetic';
 import { BASIC_VARIABLES, VariableAssignment, VariableOp, TwoVariableOp, TwoVariableOpBackwards } from './BasicVariables';
 import { STRING_CONCAT, StringConcat, StringConcatBackwards, StringConcat_1IntLike, StringConcat_1IntLikeBackwards, StringConcat_2IntLike, StringConcat_2IntLikeBackwards } from './StringConcat';
 import { STRING_LENGTH, StringLen, StringLenVar, StringLenMultiVar } from './StringLength';
 import { BASIC_PRINTS, PrintString, PrintStringMulti, PrintStringVar, PrintStringVar2, PrintStringMultiVar } from './BasicPrints';
+import { input } from '../python';
 
 export class ConvertString extends EvalLastLineSubtopic {
   gen(): EvalLastLineQuestionGen {
@@ -130,18 +131,23 @@ class InputInt extends EvalLastLineSubtopic {
   }
 }
 
-// TODO: this does not work in quiz mode (they cannot type the echoed input correctly)
-//  also the wrong answers don't have the correct echos either
-// class InputOutputTest extends CodeOutputSubtopic {
-//   gen(): CodeOutputQuestionGen {
-//     const x = randVariable();
-//     const a = randChoice(STRINGS);
-//     return { code: `
-//       name = input("What is your name? ")
-//       print(f"Hello {name}!")
-//     `, options: [a, x, `Hello ${a}!`], opts: {input: a} };
-//   }
-// }
+class InputOutputTest extends CodeOutputSubtopic {
+  gen(): CodeOutputQuestionGen {
+    const x = randVariable();
+    const a = randChoice(STRINGS);
+    return { code: `
+      ${x} = input("What is your name? ")
+      print(f"Hello {${x}}!")
+    `,
+    options: [
+      a, x, `Hello ${a}!`, `Hello ${x}!`, `Hello {${x}}!`,
+      `What is your name? ${input(x)}\nHello ${a}!`,
+      `What is your name? ${input(x)}\nHello ${x}!`,
+      `What is your name? ${input(a)}\nHello ${x}!`,
+      `What is your name? ${input(a)}\nHello ${a}!`,
+    ], opts: {input: a} };
+  }
+}
 
 export const QUIZ_3: Topic = new Topic('quiz-3', 'Quiz 3 Practice', [
   new Addition(),
@@ -173,5 +179,5 @@ export const QUIZ_3: Topic = new Topic('quiz-3', 'Quiz 3 Practice', [
   new Input(),
   new InputStrOfInt(),
   new InputInt(),
-  // new InputOutputTest(),
+  new InputOutputTest(),
 ], [BASIC_ARITHMETIC, BASIC_VARIABLES, STRING_CONCAT, STRING_LENGTH, BASIC_PRINTS], {order: 'random'});
