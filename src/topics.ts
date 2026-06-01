@@ -185,17 +185,19 @@ export type ConceptualQuestionGen = {
   prompt: string;
   correct: string | string[] | { display: string, check: (answer: string) => boolean };
   options?: string[];
+  fuzzyMatch?: boolean;
 };
 export abstract class ConceptualSubtopic extends Subtopic<'conceptual'> {
   readonly kind = 'conceptual' as const;
   generateQuestion(ctx: TopicContext): QuestionFor<'conceptual'> {
-    const {prompt, correct, options = []} = this.gen(ctx);
+    const {prompt, correct, options = [], fuzzyMatch = true} = this.gen(ctx);
     const singleCorrect = typeof correct === 'string' ? correct : Array.isArray(correct) ? randChoice(correct) : correct.display;
     return {
       kind: 'conceptual' as const,
       prompt,
       correct,
       options: prepareOptions(singleCorrect, options || []),
+      fuzzyMatch,
     };
   }
   abstract gen(ctx: TopicContext): ConceptualQuestionGen;

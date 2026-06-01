@@ -1,4 +1,5 @@
 import { QuestionAnswerOptions, QuestionPrompt, QuestionQuizInputAnswerDisplay, QuestionQuizInputSingleLine, QuestionSkipButton } from "./QuestionComponents";
+import { fuzzyMatch } from "./fuzzyMatch";
 import { QuestionTypeDef, QuestionViewProps, SerializedResponse } from "./registry";
 import { ConceptualQuestion, UserAnswerFor } from "./types";
 
@@ -21,7 +22,7 @@ function checkAnswer(
 
   // Fuzzy match
   if (question.fuzzyMatch) {
-    // TODO: return correct.some(c => fuzzyMatch(answer, c));
+    return correct.some(c => fuzzyMatch(answer, c));
   }
   return false;
 }
