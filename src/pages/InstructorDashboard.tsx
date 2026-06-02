@@ -11,6 +11,7 @@ import {
   type TopicReport,
   type QuestionAnalyticsResponse,
 } from '../services/reports';
+import './Dashboards.css';
 import './InstructorDashboard.css';
 
 type DifficultyLevel = 'very-hard' | 'hard' | 'medium' | 'easy';

@@ -107,6 +107,7 @@
   --border-card: rgba(var(--color-primary-rgb), 0.2);
   --border-hover: rgba(var(--color-accent-rgb), 0.5);
   --border-subtle: rgba(var(--color-white-rgb), 0.1);
+  --border-subtle-dark: rgba(var(--color-black-rgb), 0.1);
   --border-on-gradient: rgba(var(--color-white-rgb), 0.2);
   --border-on-gradient-strong: rgba(var(--color-white-rgb), 0.3);
   --border-input-light: rgba(31, 41, 55, 0.15);
@@ -129,7 +130,9 @@
   /* ── Semantic tinted overlays ── */
   --overlay-primary-20: rgba(var(--color-primary-rgb), 0.2);
   --overlay-primary-25: rgba(var(--color-primary-rgb), 0.25);
+  --overlay-primary-35: rgba(var(--color-primary-rgb), 0.35);
   --overlay-primary-40: rgba(var(--color-primary-rgb), 0.4);
+  --overlay-primary-45: rgba(var(--color-primary-rgb), 0.45);
   --overlay-primary-55: rgba(var(--color-primary-rgb), 0.55);
   --overlay-primary-60: rgba(var(--color-primary-rgb), 0.6);
   --overlay-primary-70: rgba(var(--color-primary-rgb), 0.7);
@@ -204,16 +207,6 @@
     var(--overlay-primary-60),
     rgba(var(--color-primary-light-rgb), 0.6)
   );
-  --gradient-accent: linear-gradient(
-    135deg,
-    var(--overlay-accent-20) 0%,
-    var(--overlay-warning-20) 100%
-  );
-  --gradient-success: linear-gradient(
-    135deg,
-    var(--overlay-success-20) 0%,
-    rgba(var(--color-success-rgb), 0.2) 100%
-  );
   --gradient-success-bright: linear-gradient(
     135deg,
     var(--color-success-bright),
@@ -236,7 +229,7 @@
   --black-50: #00000080;
   --shadow-color: var(--black-10);
   --shadow-card: 0 4px 20px var(--shadow-color);
-  --shadow-primary-glow: 0 18px 40px rgba(var(--color-primary-rgb), 0.35);
+  --shadow-primary-glow: 0 18px 40px rgba(var(--color-primary-rgb), 0.5);
   --shadow-primary-soft: 0 12px 26px rgba(var(--color-primary-rgb), 0.25);
   --shadow-success-glow: 0 4px 15px var(--overlay-success-bright-30);
   --shadow-on-gradient: 0 10px 20px rgba(var(--color-white-rgb), 0.35);
@@ -303,6 +296,7 @@
   --border-hover: rgba(var(--color-accent-rgb), 0.4);
 
   --shadow-card: 0 4px 20px #0000004d;
+  --shadow-primary-glow: 0 18px 40px #00000050;
 
   --bg-dashboard-card: rgba(var(--color-white-rgb), 0.1);
   --bg-dashboard-card-hover: rgba(var(--color-white-rgb), 0.15);

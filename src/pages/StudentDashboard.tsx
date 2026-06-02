@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { User } from '../services/auth';
 import { progressService, type TopicProgress } from '../services/progress';
 import { responsesService, type StudentResponse } from '../services/responses';
+import './Dashboards.css';
 import './StudentDashboard.css';
 
 interface StudentDashboardProps {

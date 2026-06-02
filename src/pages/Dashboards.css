@@ -1,0 +1,232 @@
+/* Shared dashboard stat cards (see also .stat-card variants below) */
+.stat-card__content {
+  flex: 1;
+}
+
+.stat-card__label {
+  margin: 0;
+  font-size: 0.8rem;
+  opacity: 0.75;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.stat-card__value {
+  margin: 0.35rem 0;
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.stat-card__detail {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+.stat-card {
+  background: var(--bg-dashboard-card);
+  border-radius: 10px;
+  padding: 1rem;
+  border: 1px solid var(--border-dashboard-card);
+  transition: box-shadow 0.2s, background 0.2s;
+  color: var(--text-dashboard);
+  display: flex;
+}
+
+.stat-card:hover {
+  box-shadow: var(--shadow-elevated);
+  background: var(--bg-dashboard-card-hover);
+}
+
+.stat-card--large {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.stat-card--primary {
+  background: var(--overlay-primary-20);
+  border-color: var(--overlay-primary-35);
+}
+
+.stat-card--primary:hover {
+  background: var(--overlay-primary-35);
+  border-color: var(--overlay-primary-45);
+}
+
+.stat-card--accent {
+  background: var(--overlay-accent-20);
+  border-color: var(--overlay-accent-35);
+}
+
+.stat-card--accent:hover {
+  background: var(--overlay-accent-35);
+  border-color: var(--overlay-accent-45);
+}
+
+.stat-card--success {
+  background: var(--overlay-success-20);
+  border-color: var(--overlay-success-35);
+}
+
+.stat-card--success:hover {
+  background: var(--overlay-success-35);
+  border-color: var(--overlay-success-45);
+}
+
+/* Shared topic cards */
+.topic-card {
+  background: var(--bg-dashboard-card);
+  padding: 1.25rem;
+  border: 2px solid var(--border-dashboard-card);
+  color: var(--text-dashboard);
+}
+
+.topic-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.topic-card__header h3 {
+  margin: 0;
+}
+
+.topic-stat,
+.metric {
+  display: flex;
+  flex-direction: column;
+}
+
+.topic-stat__value,
+.metric__value {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.topic-stat__label,
+.metric__label {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--gradient-primary-horizontal);
+  transition: width 0.3s;
+}
+
+/* Shared empty / activity / response patterns (student topic review) */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: var(--bg-dashboard-card);
+  border-radius: 14px;
+  border: 2px dashed var(--border-dashboard-card);
+  color: var(--text-dashboard);
+}
+
+.empty-state p {
+  margin: 0.5rem 0;
+}
+
+.empty-state__hint {
+  opacity: 0.7;
+  font-size: 0.9rem;
+}
+
+.activity-item__indicator {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.activity-item__indicator--correct {
+  background: var(--overlay-success-bright-18);
+  color: var(--color-success-bright);
+  border: 2px solid var(--overlay-success-70);
+}
+
+.activity-item__indicator--incorrect {
+  background: var(--overlay-error-18);
+  color: var(--color-error);
+  border: 2px solid var(--overlay-error-70);
+}
+
+.activity-item__indicator--skipped {
+  background: var(--overlay-neutral-18);
+  color: var(--color-neutral);
+  border: 2px solid var(--overlay-neutral-70);
+}
+
+.response-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.5rem;
+  border-radius: 8px;
+}
+
+.response-row--incorrect {
+  background: var(--overlay-error-12);
+}
+
+.response-row--skipped {
+  background: var(--overlay-neutral-06);
+}
+
+.response-row__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.response-row__subtopic {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-dashboard);
+}
+
+.response-row__code {
+  margin: 0.3rem 0 0.4rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-code);
+  color: var(--text-code);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-family: monospace;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.response-row__answers {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.response-row__student {
+  color: var(--color-error);
+}
+
+.response-row__skipped {
+  color: var(--color-warning);
+}
+
+.response-row__correct {
+  color: var(--color-success-bright);
+}
+
+.response-row__time {
+  font-size: 0.8rem;
+  opacity: 0.55;
+  white-space: nowrap;
+}
