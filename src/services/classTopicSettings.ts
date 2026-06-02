@@ -2,9 +2,15 @@ import api from './api';
 
 export interface ClassTopicSetting {
   topic_id: string;
+  section?: string | null;
   is_enabled?: boolean;
   available_at?: string | null;
   effective_enabled: boolean;
+}
+
+export interface ClassTopicSettingsResponse {
+  global_settings: ClassTopicSetting[];
+  section_overrides: Record<string, ClassTopicSetting[]>;
 }
 
 export interface ClassTopicSettingInput {
@@ -15,16 +21,27 @@ export interface ClassTopicSettingInput {
 }
 
 export const classTopicSettingsService = {
-  async getSettings(classId: number): Promise<ClassTopicSetting[]> {
+  async getSettings(classId: number): Promise<ClassTopicSettingsResponse> {
     const response = await api.get(`classes/${classId}/topic-settings`);
-    return response.data.settings ?? [];
+    return {
+      global_settings: response.data.global_settings ?? [],
+      section_overrides: response.data.section_overrides ?? {},
+    };
   },
 
   async updateSettings(
     classId: number,
     settings: ClassTopicSettingInput[],
-  ): Promise<ClassTopicSetting[]> {
-    const response = await api.put(`classes/${classId}/topic-settings`, { settings });
-    return response.data.settings ?? [];
+    options?: { section?: string | null; replace_scope?: boolean },
+  ): Promise<ClassTopicSettingsResponse> {
+    const response = await api.put(`classes/${classId}/topic-settings`, {
+      settings,
+      section: options?.section ?? null,
+      replace_scope: options?.replace_scope ?? false,
+    });
+    return {
+      global_settings: response.data.global_settings ?? [],
+      section_overrides: response.data.section_overrides ?? {},
+    };
   },
 };

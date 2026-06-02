@@ -265,7 +265,7 @@ function App() {
     classTopicSettingsService
       .getSettings(currentClass.id)
       .then((settings) => {
-        setTopicAvailability(buildAvailabilityMap(settings));
+        setTopicAvailability(buildAvailabilityMap(settings.global_settings));
       })
       .catch(() => {
         setTopicAvailability(new Map());

@@ -181,9 +181,10 @@ export const studentsService = {
     return res.json();
   },
 
-  async listSections(classId?: number | null): Promise<string[]> {
+  async listSections(classId?: number | null, includeEmpty = false): Promise<string[]> {
     const params = new URLSearchParams();
     if (classId != null) params.set('class_id', String(classId));
+    if (includeEmpty) params.set('include_empty', 'true');
     const qs = params.toString();
     const res = await fetch(`${API_BASE}/students/sections${qs ? `?${qs}` : ''}`);
     if (!res.ok) throw new Error(`Failed to fetch sections (${res.status})`);

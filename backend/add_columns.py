@@ -138,13 +138,42 @@ with app.app_context():
                     id INTEGER NOT NULL PRIMARY KEY,
                     class_id INTEGER NOT NULL REFERENCES classes(id),
                     topic_id VARCHAR(100) NOT NULL REFERENCES topics(id),
+                    section VARCHAR(64),
                     is_enabled BOOLEAN NOT NULL DEFAULT 1,
                     available_at DATETIME,
                     updated_at DATETIME,
-                    UNIQUE (class_id, topic_id)
+                    UNIQUE (class_id, topic_id, section)
                 )
             """))
             conn.commit()
+    else:
+        cts_cols = [col['name'] for col in inspector.get_columns('class_topic_settings')]
+        print(f"class_topic_settings columns: {cts_cols}")
+        with db.engine.connect() as conn:
+            if 'section' not in cts_cols:
+                print("Recreating class_topic_settings with section support...")
+                conn.execute(db.text("""
+                    CREATE TABLE class_topic_settings_new (
+                        id INTEGER NOT NULL PRIMARY KEY,
+                        class_id INTEGER NOT NULL REFERENCES classes(id),
+                        topic_id VARCHAR(100) NOT NULL REFERENCES topics(id),
+                        section VARCHAR(64),
+                        is_enabled BOOLEAN NOT NULL DEFAULT 1,
+                        available_at DATETIME,
+                        updated_at DATETIME,
+                        UNIQUE (class_id, topic_id, section)
+                    )
+                """))
+                conn.execute(db.text("""
+                    INSERT INTO class_topic_settings_new
+                        (id, class_id, topic_id, section, is_enabled, available_at, updated_at)
+                    SELECT id, class_id, topic_id, NULL as section, is_enabled, available_at, updated_at
+                    FROM class_topic_settings
+                """))
+                conn.execute(db.text("DROP TABLE class_topic_settings"))
+                conn.execute(db.text("ALTER TABLE class_topic_settings_new RENAME TO class_topic_settings"))
+                conn.commit()
+                print("class_topic_settings recreated with section support.")
 
     # ── create any new tables (classes, upload_history, etc.) ────────────────
     db.create_all()

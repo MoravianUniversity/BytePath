@@ -20,7 +20,8 @@ students_bp = Blueprint("students", __name__, url_prefix="/api/students")
 @students_bp.get("/sections")
 def list_sections():
     class_id = request.args.get("class_id", default=None, type=int)
-    sections = student_service.list_sections(class_id=class_id)
+    include_empty = request.args.get("include_empty", default=False, type=bool)
+    sections = student_service.list_sections(class_id=class_id, include_empty=include_empty)
     return jsonify({"sections": sections})
 
 

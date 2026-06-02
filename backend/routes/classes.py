@@ -243,7 +243,7 @@ def get_class_topic_settings(id: int):
         return jsonify({"error": "Not authenticated"}), 401
     if not _can_view_class(id, user_id):
         return jsonify({"error": "Forbidden"}), 403
-    return jsonify({"settings": ClassTopicSettingsService.list_settings(id)}), 200
+    return jsonify(ClassTopicSettingsService.list_settings(id)), 200
 
 
 @classes_bp.put("/<int:id>/topic-settings")
@@ -256,6 +256,8 @@ def put_class_topic_settings(id: int):
 
     payload = request.get_json(silent=True) or {}
     settings = payload.get("settings")
+    section = payload.get("section")
+    replace_scope = bool(payload.get("replace_scope", False))
     if not isinstance(settings, list):
         return jsonify({"error": "settings must be an array"}), 400
 
@@ -266,10 +268,15 @@ def put_class_topic_settings(id: int):
             return jsonify({"error": f"settings[{i}].is_enabled must be a boolean"}), 400
 
     try:
-        saved = ClassTopicSettingsService.bulk_upsert(id, settings)
+        saved = ClassTopicSettingsService.bulk_upsert(
+            id,
+            settings,
+            section=section,
+            replace_scope=replace_scope,
+        )
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
-    return jsonify({"settings": saved}), 200
+    return jsonify(saved), 200
 
 
 @classes_bp.patch("/<int:id>/topic-settings/<string:topic_id>")
@@ -281,11 +288,12 @@ def patch_class_topic_settings(id: int, topic_id: str):
         return jsonify({"error": "Forbidden"}), 403
 
     payload = request.get_json(silent=True) or {}
+    section = payload.get("section")
     if "is_enabled" in payload and not isinstance(payload["is_enabled"], bool):
         return jsonify({"error": "is_enabled must be a boolean"}), 400
 
     try:
-        saved = ClassTopicSettingsService.update_one(id, topic_id, payload)
+        saved = ClassTopicSettingsService.update_one(id, topic_id, payload, section=section)
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
     return jsonify({"setting": saved}), 200

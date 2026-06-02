@@ -112,11 +112,14 @@ class ClassTopicSetting(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     class_id = db.Column(db.Integer, db.ForeignKey("classes.id"), nullable=False)
     topic_id = db.Column(db.String(100), db.ForeignKey("topics.id"), nullable=False)
+    section = db.Column(db.String(64), nullable=True, default=None)
     is_enabled = db.Column(db.Boolean, default=True, nullable=False)
     available_at = db.Column(db.DateTime, nullable=True)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    __table_args__ = (db.UniqueConstraint("class_id", "topic_id", name="_class_topic_uc"),)
+    __table_args__ = (
+        db.UniqueConstraint("class_id", "topic_id", "section", name="_class_topic_section_uc"),
+    )
 
 
 class StudentResponse(db.Model):

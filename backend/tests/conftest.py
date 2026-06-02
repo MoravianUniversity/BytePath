@@ -198,7 +198,7 @@ def _install_fake_report_service(app):
             self.s2_id = s2_id
             self.topic_id = "test-topic-1"
 
-        def get_student_report(self, student_id: int):
+        def get_student_report(self, student_id: int, class_id=None, section=None):
             if student_id not in {self.s1_id, self.s2_id}:
                 return None
             return {
@@ -230,7 +230,7 @@ def _install_fake_report_service(app):
                 "performance_over_time": [],
             }
 
-        def get_topic_report(self, topic_id: str):
+        def get_topic_report(self, topic_id: str, class_id=None, section=None):
             if topic_id != self.topic_id:
                 return None
             return {
@@ -248,7 +248,7 @@ def _install_fake_report_service(app):
                 "most_missed_questions": [],
             }
 
-        def get_class_overview(self):
+        def get_class_overview(self, class_id=None, section=None):
             return {
                 "total_students": 2,
                 "active_students_last_week": 2,
@@ -277,12 +277,13 @@ def _install_fake_report_service(app):
                         "student_email": "student2@test.com",
                     },
                 ],
+                "sections": ["", "A", "B"],
                 "top_performers": [],
                 "struggling_students": [],
                 "recent_activity": [],
             }
 
-        def get_question_analytics(self, topic_id: str, subtopic_type=None):
+        def get_question_analytics(self, topic_id: str, subtopic_type=None, class_id=None, section=None):
             if topic_id != self.topic_id:
                 return {"topic": topic_id, "analytics": []}
             return {

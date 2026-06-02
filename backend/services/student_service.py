@@ -112,18 +112,15 @@ def list_students(
     }
 
 
-def list_sections(class_id: int | None = None) -> list[str]:
+def list_sections(class_id: int | None = None, include_empty: bool = False) -> list[str]:
     """Distinct non-empty section names for a class roster."""
-    query = (
-        db.session.query(RosterStudent.section)
-        .filter(RosterStudent.deleted_at.is_(None))
-        .filter(RosterStudent.section != "")
-    )
+    query = db.session.query(RosterStudent.section).filter(RosterStudent.deleted_at.is_(None))
     if class_id is not None:
         query = query.filter(RosterStudent.class_id == class_id)
 
-    sections = {normalize_section(row[0]) for row in query.distinct().all() if row[0]}
-    sections.discard("")
+    sections = {normalize_section(row[0]) for row in query.distinct().all()}
+    if not include_empty:
+        sections.discard("")
     return sorted(sections)
 
 
