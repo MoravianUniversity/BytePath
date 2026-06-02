@@ -68,13 +68,16 @@ const getAllTopics = (): Topic[] => {
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState<AppScreen>(() => {
+    const user = authService.getCurrentUser();
+    const isStudent = user?.role !== 'instructor';
     const routeScreen = getScreenFromPath(window.location.pathname);
     if (routeScreen) {
-      return routeScreen;
+      return routeScreen === 'dashboard' && isStudent ? 'welcome' : routeScreen;
     }
     const saved = localStorage.getItem('currentScreen');
     const normalizedSaved = saved === 'students' ? 'roster' : saved;
-    return (normalizedSaved as AppScreen) ?? 'welcome';
+    const restored = (normalizedSaved as AppScreen) ?? 'welcome';
+    return restored === 'dashboard' && isStudent ? 'welcome' : restored;
   });
   const [instructorDashboardTab, setInstructorDashboardTab] = useState<DashboardTab>(() => getDashboardTabFromPath(window.location.pathname));
   useEffect(() => { localStorage.setItem('currentScreen', currentScreen); }, [currentScreen]);
@@ -282,6 +285,17 @@ function App() {
     }
   }, [isInstructor]);
 
+  // Student dashboard lives on the welcome screen (with the topic sidebar).
+  useEffect(() => {
+    if (!isInstructor && currentScreen === 'dashboard') {
+      setCurrentScreen('welcome');
+      setCurrentTopic(null);
+      setCurrentSubtopic(null);
+      clearUrlHash();
+      syncPathForScreen('welcome', instructorDashboardTab, { replace: true });
+    }
+  }, [isInstructor, currentScreen]);
+
   // Prevent instructors from landing on student-only screens unless they enable practice mode.
   useEffect(() => {
     if (!isInstructor) return;
@@ -302,6 +316,10 @@ function App() {
     const handlePopState = () => {
       const routeScreen = getScreenFromPath(window.location.pathname);
       if (routeScreen) {
+        if (routeScreen === 'dashboard' && !isInstructor) {
+          setCurrentScreen('welcome');
+          return;
+        }
         setCurrentScreen(routeScreen);
         if (routeScreen === 'dashboard') {
           setInstructorDashboardTab(getDashboardTabFromPath(window.location.pathname));
@@ -647,6 +665,8 @@ function App() {
             setCurrentScreen('dashboard');
           } else {
             setCurrentScreen('welcome');
+            setCurrentTopic(null);
+            setCurrentSubtopic(null);
           }
           clearUrlHash();
         }} style={{ cursor: 'pointer' }}><tbody>
@@ -663,14 +683,14 @@ function App() {
                 className={`toggle-button ${mode === 'learning' ? 'active' : ''}`}
                 onClick={() => {
                   setMode('learning');
-                  if (currentScreen === 'dashboard') setCurrentScreen('welcome');
+                  if (isInstructor && currentScreen === 'dashboard') setCurrentScreen('welcome');
                 }}
               >📚<span className="dashboard-button-label"> Learning</span></button>
               <button 
                 className={`toggle-button ${mode === 'quiz' ? 'active' : ''}`}
                 onClick={() => {
                   setMode('quiz');
-                  if (currentScreen === 'dashboard') setCurrentScreen('welcome');
+                  if (isInstructor && currentScreen === 'dashboard') setCurrentScreen('welcome');
                 }}
               >✏️<span className="dashboard-button-label"> Quiz</span></button>
             </div>
@@ -690,18 +710,23 @@ function App() {
             )}
             <button
               onClick={() => {
-                if (!isInstructor && currentScreen === 'dashboard') {
-                  setCurrentScreen('welcome'); 
-                } else {
+                if (isInstructor) {
                   setCurrentScreen('dashboard');
-                  if (isInstructor) {
-                    setInstructorPractice(false);
-                    setInstructorDashboardTab('analytics');
-                    clearUrlHash();
-                  }
+                  setInstructorPractice(false);
+                  setInstructorDashboardTab('analytics');
+                  clearUrlHash();
+                } else {
+                  setCurrentScreen('welcome');
+                  setCurrentTopic(null);
+                  setCurrentSubtopic(null);
+                  clearUrlHash();
                 }
               }}
-              className={`dashboard-button ${currentScreen === 'dashboard' ? 'active' : ''}`}
+              className={`dashboard-button ${
+                (isInstructor ? currentScreen === 'dashboard' : currentScreen === 'welcome')
+                  ? 'active'
+                  : ''
+              }`}
             >
               <FontAwesomeIcon icon={faTachographDigital} aria-hidden="true" />
               <span className="dashboard-button-label">Dashboard</span>
@@ -759,17 +784,13 @@ function App() {
       </header>
 
       <main className="App-main">
-        {currentScreen === 'dashboard' ? (
-          currentUser.role === 'instructor' ? (
-            <InstructorDashboard
-              classId={currentClass?.id ?? null}
-              className={currentClass?.class_name ?? null}
-              activeTab={instructorDashboardTab}
-              onTabChange={setInstructorDashboardTab}
-            />
-          ) : (
-            <StudentDashboard user={currentUser} currentClassId={currentClass?.id ?? null} />
-          )
+        {currentScreen === 'dashboard' && isInstructor ? (
+          <InstructorDashboard
+            classId={currentClass?.id ?? null}
+            className={currentClass?.class_name ?? null}
+            activeTab={instructorDashboardTab}
+            onTabChange={setInstructorDashboardTab}
+          />
         ) : isLoading ? (
           <div className="loading-screen">
             <div className="loading-content">
@@ -905,6 +926,8 @@ function App() {
                   ))}
                 </div>
               </div>
+            ) : !isInstructor ? (
+              <StudentDashboard user={currentUser} currentClassId={currentClass?.id ?? null} />
             ) : (
               <div className="welcome-screen">
                 <h2>Welcome to Bytepath</h2>

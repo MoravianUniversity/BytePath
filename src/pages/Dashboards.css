@@ -87,7 +87,7 @@
 .topic-card__header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .topic-card__header h3 {
@@ -104,6 +104,7 @@
 .metric__value {
   font-size: 1.25rem;
   font-weight: 600;
+  word-spacing: -2px;
 }
 
 .topic-stat__label,

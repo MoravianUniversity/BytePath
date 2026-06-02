@@ -130,49 +130,50 @@
   }
 }
 
-.topic-card {
-  border-radius: 10px;
-  transition: all 0.3s;
-  cursor: pointer;
-}
+.instructor-dashboard {
+  .topic-card {
+    border-radius: 10px;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
 
-.topic-card:hover {
-  box-shadow: var(--shadow-elevated);
-}
+  .topic-card:hover {
+    box-shadow: var(--shadow-elevated);
+  }
 
-.topic-card:focus-visible {
-  outline: 2px solid var(--border-dashboard-card);
-  outline-offset: 3px;
-}
+  .topic-card:focus-visible {
+    outline: 2px solid var(--border-dashboard-card);
+    outline-offset: 3px;
+  }
 
-.topic-card--very-hard {
-  border-color: var(--overlay-error-50);
-  background: var(--overlay-error-12);
-}
+  .topic-card--very-hard {
+    border-color: var(--overlay-error-50);
+    background: var(--overlay-error-12);
+  }
 
-.topic-card--hard {
-  border-color: var(--overlay-warning-50);
-  background: var(--overlay-warning-12);
-}
+  .topic-card--hard {
+    border-color: var(--overlay-warning-50);
+    background: var(--overlay-warning-12);
+  }
 
-.topic-card--medium {
-  border-color: var(--overlay-info-50);
-  background: var(--overlay-info-12);
-}
+  .topic-card--medium {
+    border-color: var(--overlay-info-50);
+    background: var(--overlay-info-12);
+  }
 
-.topic-card--easy {
-  border-color: var(--overlay-success-55);
-  background: var(--overlay-success-12);
-}
+  .topic-card--easy {
+    border-color: var(--overlay-success-55);
+    background: var(--overlay-success-12);
+  }
 
-.topic-card__header {
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
-}
+  .topic-card__header {
+    gap: 0.5rem;
+  }
 
-.topic-card__header h3 {
-  font-size: 0.95rem;
-  line-height: 1.3;
+  .topic-card__header h3 {
+    font-size: 0.95rem;
+    line-height: 1.3;
+  }
 }
 
 .difficulty-badge {
@@ -213,7 +214,7 @@
   margin-bottom: 0.25rem;
 }
 
-.topic-card__stats {
+.instructor-dashboard .topic-card__stats {
   display: flex;
   gap: 0.5rem;
   font-size: 0.8rem;
