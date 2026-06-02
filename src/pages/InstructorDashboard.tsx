@@ -22,6 +22,29 @@ const describeDifficulty = (accuracy: number): { level: DifficultyLevel; label: 
   return { level: 'very-hard', label: 'Critical' };
 };
 
+const sanitizeFilenamePart = (value: string) =>
+  value
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-zA-Z0-9._-]/g, '')
+    .slice(0, 80) || 'unknown';
+
+const formatExportTimestamp = (date: Date) => {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}_${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}`;
+};
+
+const buildExportFilename = (courseName: string | null, section: string | null) => {
+  const course = sanitizeFilenamePart(courseName ?? 'class');
+  const sectionPart =
+    section === null
+      ? 'All-Sections'
+      : section === ''
+        ? 'No-Section'
+        : sanitizeFilenamePart(section);
+  return `${course}_${sectionPart}_${formatExportTimestamp(new Date())}.json`;
+};
+
 const createDownload = (data: unknown, filename: string) => {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const link = document.createElement('a');
@@ -42,7 +65,9 @@ export default function InstructorDashboard({
   activeTab?: 'analytics' | 'roster' | 'topics';
   onTabChange?: (tab: 'analytics' | 'roster' | 'topics') => void;
 }) {
+  const ALL_SECTIONS_VALUE = '__all_sections__';
   const [classOverview, setClassOverview] = useState<ClassOverview | null>(null);
+  const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<StudentReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [rosterSearchTerm, setRosterSearchTerm] = useState('');
@@ -81,11 +106,11 @@ export default function InstructorDashboard({
     setSelectedSubtopic(null);
     setLoading(true);
     loadClassOverview();
-  }, [classId]);
+  }, [classId, selectedSection]);
 
   const loadClassOverview = async () => {
     try {
-      const data = await reportsService.getClassOverview(classId);
+      const data = await reportsService.getClassOverview(classId, selectedSection);
       setClassOverview(data);
     } catch (error) {
       console.error('Failed to load class overview:', error);
@@ -97,7 +122,7 @@ export default function InstructorDashboard({
   const viewStudentReport = async (studentId: number) => {
     try {
       setLookupError(null);
-      const report = await reportsService.getStudentReport(studentId, classId);
+      const report = await reportsService.getStudentReport(studentId, classId, selectedSection);
       setSelectedStudent(report);
     } catch (error) {
       console.error('Failed to load student report:', error);
@@ -109,7 +134,7 @@ export default function InstructorDashboard({
     if (!classOverview) {
       return;
     }
-    createDownload(classOverview, 'class-overview.json');
+    createDownload(classOverview, buildExportFilename(className, selectedSection));
   };
 
   const openRosterModal = () => setShowRoster(true);
@@ -150,6 +175,12 @@ export default function InstructorDashboard({
       return name.includes(normalizedRosterSearch) || email.includes(normalizedRosterSearch);
     });
   }, [rosteredStudents, normalizedRosterSearch]);
+  const sectionOptions = classOverview?.sections ?? [];
+  const showSectionSelector = sectionOptions.length > 1;
+
+  useEffect(() => {
+    setSelectedSection(null);
+  }, [classId]);
 
   const handleRosterSelection = (studentId: number | null) => {
     if (!studentId) {
@@ -166,8 +197,8 @@ export default function InstructorDashboard({
     setSelectedSubtopic(null);
     try {
       const [report, analytics] = await Promise.all([
-        reportsService.getTopicReport(topic.topic, classId),
-        reportsService.getQuestionAnalytics(topic.topic, undefined, classId),
+        reportsService.getTopicReport(topic.topic, classId, selectedSection),
+        reportsService.getQuestionAnalytics(topic.topic, undefined, classId, selectedSection),
       ]);
       setTopicReport(report);
       setTopicQuestionAnalytics(analytics);
@@ -248,6 +279,23 @@ export default function InstructorDashboard({
           {activeTab === 'analytics' && (
             <div className="dashboard-toolbar">
               <button className="btn-secondary" type="button" onClick={handleExport}>Export Data</button>
+              {showSectionSelector && (
+                <select
+                  className="dashboard-toolbar-select"
+                  value={selectedSection ?? ALL_SECTIONS_VALUE}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setSelectedSection(value === ALL_SECTIONS_VALUE ? null : value);
+                  }}
+                >
+                  <option value={ALL_SECTIONS_VALUE}>All Sections</option>
+                  {sectionOptions.map((section) => (
+                    <option key={section === '' ? '__empty_section__' : section} value={section}>
+                      {section === '' ? '(No Section)' : section}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
           )}
           <Button onClick={() => setSelectedStudent(null)} className="back-button" variant="ghost">
@@ -613,6 +661,23 @@ export default function InstructorDashboard({
         {activeTab === 'analytics' && (
           <div className="dashboard-toolbar">
             <button className="btn-secondary" type="button" onClick={handleExport}>Export Data</button>
+            {showSectionSelector && (
+              <select
+                className="dashboard-toolbar-select"
+                value={selectedSection ?? ALL_SECTIONS_VALUE}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setSelectedSection(value === ALL_SECTIONS_VALUE ? null : value);
+                }}
+              >
+                <option value={ALL_SECTIONS_VALUE}>All Sections</option>
+                {sectionOptions.map((section) => (
+                  <option key={section === '' ? '__empty_section__' : section} value={section}>
+                    {section === '' ? '(No Section)' : section}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
         )}
 

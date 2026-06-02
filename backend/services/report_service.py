@@ -12,7 +12,17 @@ class ReportService:
     """Service for generating analytics and reports."""
 
     @staticmethod
-    def get_student_report(student_id: int, class_id: Optional[int] = None) -> Optional[Dict]:
+    def normalize_section(section: Optional[str]) -> Optional[str]:
+        if section is None:
+            return None
+        return section.strip()
+
+    @staticmethod
+    def get_student_report(
+        student_id: int,
+        class_id: Optional[int] = None,
+        section: Optional[str] = None,
+    ) -> Optional[Dict]:
         user = db.session.get(User, student_id)
         if not user:
             return None
@@ -23,6 +33,8 @@ class ReportService:
         ]
         if class_id is not None:
             roster_filter.append(RosterStudent.class_id == class_id)
+        if section is not None:
+            roster_filter.append(RosterStudent.section == section)
 
         roster_entry = (
             db.session.execute(
@@ -253,7 +265,11 @@ class ReportService:
         }
 
     @staticmethod
-    def get_topic_report(topic_id: str, class_id: Optional[int] = None) -> Optional[Dict]:
+    def get_topic_report(
+        topic_id: str,
+        class_id: Optional[int] = None,
+        section: Optional[str] = None,
+    ) -> Optional[Dict]:
         topic = db.session.get(Topic, topic_id)
         if not topic:
             return None
@@ -261,6 +277,8 @@ class ReportService:
         roster_filter = [User.role == "student", RosterStudent.deleted_at.is_(None)]
         if class_id is not None:
             roster_filter.append(RosterStudent.class_id == class_id)
+        if section is not None:
+            roster_filter.append(RosterStudent.section == section)
 
         rostered_students_subquery = (
             db.select(User.id)
@@ -449,12 +467,15 @@ class ReportService:
         }
 
     @staticmethod
-    def get_class_overview(class_id: Optional[int] = None) -> Dict:
+    def get_class_overview(class_id: Optional[int] = None, section: Optional[str] = None) -> Dict:
         roster_filter = [User.role == "student", RosterStudent.deleted_at.is_(None)]
         entry_filter = [RosterStudent.deleted_at.is_(None)]
         if class_id is not None:
             roster_filter.append(RosterStudent.class_id == class_id)
             entry_filter.append(RosterStudent.class_id == class_id)
+        if section is not None:
+            roster_filter.append(RosterStudent.section == section)
+            entry_filter.append(RosterStudent.section == section)
 
         rostered_students_subquery = (
             db.select(User.id)
@@ -473,6 +494,7 @@ class ReportService:
                     RosterStudent.id.label("roster_id"),
                     RosterStudent.first_name,
                     RosterStudent.last_name,
+                    RosterStudent.section,
                     RosterStudent.email,
                     User.id.label("user_id"),
                     User.name.label("user_name"),
@@ -728,6 +750,20 @@ class ReportService:
             for activity in recent_activity
         ]
 
+        section_query = db.select(RosterStudent.section).filter(
+            RosterStudent.deleted_at.is_(None)
+        )
+        if class_id is not None:
+            section_query = section_query.filter(RosterStudent.class_id == class_id)
+
+        section_options = sorted(
+            {
+                (row[0] or "").strip()
+                for row in db.session.execute(section_query.distinct()).all()
+            },
+            key=lambda s: (s != "", s.lower()),
+        )
+
         return {
             "total_students": total_students,
             "active_students_last_week": active_last_week or 0,
@@ -738,10 +774,16 @@ class ReportService:
             "top_performers": top_performer_list,
             "struggling_students": struggling_list,
             "recent_activity": recent_activity_list,
+            "sections": section_options,
         }
 
     @staticmethod
-    def get_question_analytics(topic_id: str, subtopic_type: Optional[str] = None, class_id: Optional[int] = None) -> Dict:
+    def get_question_analytics(
+        topic_id: str,
+        subtopic_type: Optional[str] = None,
+        class_id: Optional[int] = None,
+        section: Optional[str] = None,
+    ) -> Dict:
         query = (
             db.session.query(
                 StudentResponse.question_code,
@@ -772,6 +814,26 @@ class ReportService:
 
         if class_id is not None:
             query = query.filter(StudentResponse.class_id == class_id)
+
+        if section is not None:
+            rostered_students_subquery = (
+                db.select(User.id)
+                .select_from(User)
+                .join(
+                    RosterStudent,
+                    func.lower(RosterStudent.email) == func.lower(User.email),
+                )
+                .filter(
+                    User.role == "student",
+                    RosterStudent.deleted_at.is_(None),
+                    RosterStudent.section == section,
+                )
+            )
+            if class_id is not None:
+                rostered_students_subquery = rostered_students_subquery.filter(
+                    RosterStudent.class_id == class_id
+                )
+            query = query.filter(StudentResponse.user_id.in_(rostered_students_subquery))
 
         results = (
             query.group_by(StudentResponse.question_code, StudentResponse.subtopic_type)

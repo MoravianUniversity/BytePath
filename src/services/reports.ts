@@ -46,7 +46,9 @@ export interface ClassOverview {
     student_id: number | null;
     student_name: string;
     student_email: string;
+    section?: string;
   }>;
+  sections?: string[];
   top_performers: Array<{
     student_id: number;
     student_name: string;
@@ -109,28 +111,47 @@ export interface QuestionAnalyticsResponse {
 }
 
 export const reportsService = {
-  async getStudentReport(studentId: number, classId?: number | null): Promise<StudentReport> {
-    const params = classId ? `?class_id=${classId}` : '';
-    const response = await api.get(`reports/student/${studentId}${params}`);
+  async getStudentReport(
+    studentId: number,
+    classId?: number | null,
+    section?: string | null,
+  ): Promise<StudentReport> {
+    const params = new URLSearchParams();
+    if (classId) params.set('class_id', String(classId));
+    if (section != null) params.set('section', section);
+    const qs = params.toString();
+    const response = await api.get(`reports/student/${studentId}${qs ? `?${qs}` : ''}`);
     return response.data;
   },
 
-  async getClassOverview(classId?: number | null): Promise<ClassOverview> {
-    const params = classId ? `?class_id=${classId}` : '';
-    const response = await api.get(`reports/class/overview${params}`);
+  async getClassOverview(classId?: number | null, section?: string | null): Promise<ClassOverview> {
+    const params = new URLSearchParams();
+    if (classId) params.set('class_id', String(classId));
+    if (section != null) params.set('section', section);
+    const qs = params.toString();
+    const response = await api.get(`reports/class/overview${qs ? `?${qs}` : ''}`);
     return response.data;
   },
 
-  async getTopicReport(topicId: string, classId?: number | null): Promise<TopicReport> {
-    const params = classId ? `?class_id=${classId}` : '';
-    const response = await api.get(`reports/topic/${topicId}${params}`);
+  async getTopicReport(topicId: string, classId?: number | null, section?: string | null): Promise<TopicReport> {
+    const params = new URLSearchParams();
+    if (classId) params.set('class_id', String(classId));
+    if (section != null) params.set('section', section);
+    const qs = params.toString();
+    const response = await api.get(`reports/topic/${topicId}${qs ? `?${qs}` : ''}`);
     return response.data;
   },
 
-  async getQuestionAnalytics(topicId: string, subtopicType?: string, classId?: number | null): Promise<QuestionAnalyticsResponse> {
+  async getQuestionAnalytics(
+    topicId: string,
+    subtopicType?: string,
+    classId?: number | null,
+    section?: string | null,
+  ): Promise<QuestionAnalyticsResponse> {
     const params: Record<string, string | number> = {};
     if (subtopicType) params.subtopic_type = subtopicType;
     if (classId) params.class_id = classId;
+    if (section != null) params.section = section;
     const response = await api.get(`reports/question/${topicId}/analytics`, { params: Object.keys(params).length ? params : undefined });
     return response.data;
   },
