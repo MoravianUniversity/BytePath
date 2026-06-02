@@ -16,12 +16,22 @@ from sqlalchemy import func, or_
 
 from backend.models import RosterStudent, UploadHistory, db
 
+SECTION_MAX_LENGTH = 64
+
+
+def normalize_section(value: str | None) -> str:
+    """Trim and cap section to a short string; empty string when blank."""
+    if not value:
+        return ""
+    return value.strip()[:SECTION_MAX_LENGTH]
+
 
 @dataclass
 class RosterStudentRow:
     first_name: str
     last_name: str
     email: str
+    section: str = ""
 
 
 def list_students(
@@ -30,6 +40,11 @@ def list_students(
     search: str | None = None,
     include_deleted: bool = False,
     class_id: int | None = None,
+    email_filter: str | None = None,
+    first_name_filter: str | None = None,
+    last_name_filter: str | None = None,
+    notes_filter: str | None = None,
+    section: str | None = None,
     sort_by: str = "created_at",
     sort_order: str = "desc",
 ) -> dict:
@@ -44,6 +59,20 @@ def list_students(
     # Filter by class
     if class_id:
         query = query.filter(RosterStudent.class_id == class_id)
+
+    # Filter by section (single exact section, including empty string support)
+    if section is not None:
+        query = query.filter(RosterStudent.section == section)
+
+    # Column-specific text filters
+    if email_filter:
+        query = query.filter(func.lower(RosterStudent.email).like(f"%{email_filter.lower()}%"))
+    if first_name_filter:
+        query = query.filter(func.lower(RosterStudent.first_name).like(f"%{first_name_filter.lower()}%"))
+    if last_name_filter:
+        query = query.filter(func.lower(RosterStudent.last_name).like(f"%{last_name_filter.lower()}%"))
+    if notes_filter:
+        query = query.filter(func.lower(func.coalesce(RosterStudent.notes, "")).like(f"%{notes_filter.lower()}%"))
 
     # Search filter
     if search:
@@ -61,6 +90,8 @@ def list_students(
         "email": RosterStudent.email,
         "first_name": RosterStudent.first_name,
         "last_name": RosterStudent.last_name,
+        "section": RosterStudent.section,
+        "notes": RosterStudent.notes,
         "created_at": RosterStudent.created_at,
         "class_id": RosterStudent.class_id,
     }.get(sort_by, RosterStudent.created_at)
@@ -79,6 +110,21 @@ def list_students(
         "total": pagination.total,
         "total_pages": pagination.pages,
     }
+
+
+def list_sections(class_id: int | None = None) -> list[str]:
+    """Distinct non-empty section names for a class roster."""
+    query = (
+        db.session.query(RosterStudent.section)
+        .filter(RosterStudent.deleted_at.is_(None))
+        .filter(RosterStudent.section != "")
+    )
+    if class_id is not None:
+        query = query.filter(RosterStudent.class_id == class_id)
+
+    sections = {normalize_section(row[0]) for row in query.distinct().all() if row[0]}
+    sections.discard("")
+    return sorted(sections)
 
 
 def bulk_upsert(
@@ -134,7 +180,11 @@ def bulk_upsert(
 
 
 def add_students_from_csv(
-    rows: Iterable[Tuple[int, RosterStudentRow]], filename: str, user_id: int | None = None, class_id: int | None = None
+    rows: Iterable[Tuple[int, RosterStudentRow]],
+    filename: str,
+    user_id: int | None = None,
+    class_id: int | None = None,
+    default_section: str = "",
 ) -> tuple[dict, list[dict], UploadHistory]:
     """
     Add students from CSV to the roster bank.
@@ -144,11 +194,14 @@ def add_students_from_csv(
     added = restored = skipped = 0
     errors: list[dict] = []
     changes: list[dict] = []
+    fallback_section = normalize_section(default_section)
 
     for line_number, row in rows:
         first_name = row.first_name.strip()
         last_name = row.last_name.strip()
         email = row.email.strip().lower()
+        row_section = normalize_section(row.section)
+        section = row_section if row_section else fallback_section
 
         if not first_name or not last_name or not email:
             errors.append(
@@ -186,6 +239,7 @@ def add_students_from_csv(
             deleted.deleted_at = None
             deleted.first_name = first_name
             deleted.last_name = last_name
+            deleted.section = section
             deleted.last_updated_via = "csv_add"
             restored += 1
             changes.append({
@@ -201,6 +255,7 @@ def add_students_from_csv(
                 email=email,
                 first_name=first_name,
                 last_name=last_name,
+                section=section,
                 class_id=class_id,
                 last_updated_via="csv_add",
             )
@@ -340,8 +395,8 @@ def template_csv() -> str:
     """Return the CSV template string for downloads."""
 
     return (
-        "first_name,last_name,email\n"
-        "Ada,Lovelace,ada@example.com\n"
-        "Alan,Turing,alan@example.com\n"
+        "first_name,last_name,email,section\n"
+        "Ada,Lovelace,ada@example.com,Section A\n"
+        "Alan,Turing,alan@example.com,\n"
     )
 

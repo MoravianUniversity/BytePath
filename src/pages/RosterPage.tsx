@@ -1,18 +1,19 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { studentsService, type Student } from "../services/students";
 import { classesService, type CoInstructor } from "../services/classes";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUpload } from '@fortawesome/free-solid-svg-icons';
+import { faUpload, faFilter, faFilterCircleXmark, faSortUp, faSortDown, faSort } from '@fortawesome/free-solid-svg-icons';
+import SectionCombobox from "../components/SectionCombobox";
 import "./RosterPage.css";
 
 type EditingState = {
   id: number;
-  field: 'first_name' | 'last_name' | 'email' | 'notes';
+  field: 'first_name' | 'last_name' | 'email' | 'section' | 'notes';
   value: string;
 };
 
 export default function RosterPage({ classId }: { classId: number | null }) {
-  type SortField = "email" | "first_name" | "last_name" | "notes" | "created_at";
+  type SortField = "email" | "first_name" | "last_name" | "section" | "notes" | "created_at";
   const PAGE_SIZE = 10;
 
   const [students, setStudents] = useState<Student[]>([]);
@@ -32,13 +33,50 @@ export default function RosterPage({ classId }: { classId: number | null }) {
   const requestIdRef = useRef(0);
   const filtersRef = useRef<{
     classId: number | null;
+    columnFilters: {
+      email: string;
+      first_name: string;
+      last_name: string;
+      notes: string;
+    };
+    sectionFilter: string | null;
     sortBy: SortField;
     sortOrder: "asc" | "desc";
-  }>({ classId, sortBy, sortOrder });
+  }>({
+    classId,
+    columnFilters: { email: "", first_name: "", last_name: "", notes: "" },
+    sectionFilter: null,
+    sortBy,
+    sortOrder,
+  });
 
   const [editing, setEditing] = useState<EditingState | null>(null);
   const [showManualForm, setShowManualForm] = useState(false);
-  const [manualForm, setManualForm] = useState({ first_name: "", last_name: "", email: "", notes: "" });
+  const [manualForm, setManualForm] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    section: "",
+    notes: "",
+  });
+  const [sectionSuggestions, setSectionSuggestions] = useState<string[]>([]);
+  const [defaultImportSection, setDefaultImportSection] = useState("");
+  const [sectionFilter, setSectionFilter] = useState<string | null>(null);
+  const [sectionFilterDraft, setSectionFilterDraft] = useState("");
+  const [showSectionFilterPicker, setShowSectionFilterPicker] = useState(false);
+  const [columnFilters, setColumnFilters] = useState({
+    email: "",
+    first_name: "",
+    last_name: "",
+    notes: "",
+  });
+  const [columnFilterDrafts, setColumnFilterDrafts] = useState({
+    email: "",
+    first_name: "",
+    last_name: "",
+    notes: "",
+  });
+  const [activeTextFilterPicker, setActiveTextFilterPicker] = useState<"email" | "first_name" | "last_name" | "notes" | null>(null);
   const [manualError, setManualError] = useState<string | null>(null);
   const [manualSaving, setManualSaving] = useState(false);
   const [coInstructors, setCoInstructors] = useState<CoInstructor[]>([]);
@@ -48,8 +86,8 @@ export default function RosterPage({ classId }: { classId: number | null }) {
 
   // Keep the current filter context for "load more" without re-creating effects.
   useEffect(() => {
-    filtersRef.current = { classId, sortBy, sortOrder };
-  }, [classId, sortBy, sortOrder]);
+    filtersRef.current = { classId, columnFilters, sectionFilter, sortBy, sortOrder };
+  }, [classId, columnFilters, sectionFilter, sortBy, sortOrder]);
 
   const reloadFirstPage = useCallback(async () => {
     requestIdRef.current += 1;
@@ -57,9 +95,6 @@ export default function RosterPage({ classId }: { classId: number | null }) {
 
     setLoadingInitial(true);
     setLoadingMore(false);
-    setStudents([]);
-    setHasMore(false);
-    setTotal(0);
     setPage(1);
     setEditing(null);
 
@@ -70,6 +105,8 @@ export default function RosterPage({ classId }: { classId: number | null }) {
         "",
         false,
         classId ?? undefined,
+        columnFilters,
+        sectionFilter,
         sortBy,
         sortOrder,
       );
@@ -82,11 +119,37 @@ export default function RosterPage({ classId }: { classId: number | null }) {
     } finally {
       if (reqId === requestIdRef.current) setLoadingInitial(false);
     }
-  }, [classId, "", sortBy, sortOrder]);
+  }, [classId, "", columnFilters, sectionFilter, sortBy, sortOrder]);
 
   useEffect(() => {
     reloadFirstPage();
   }, [reloadFirstPage]);
+
+  const refreshSectionSuggestions = useCallback(async () => {
+    if (!classId) {
+      setSectionSuggestions([]);
+      return;
+    }
+    try {
+      const sections = await studentsService.listSections(classId);
+      setSectionSuggestions(sections);
+    } catch {
+      setSectionSuggestions([]);
+    }
+  }, [classId]);
+
+  useEffect(() => {
+    refreshSectionSuggestions();
+  }, [refreshSectionSuggestions]);
+
+  useEffect(() => {
+    setSectionFilter(null);
+    setSectionFilterDraft("");
+    setShowSectionFilterPicker(false);
+    setColumnFilters({ email: "", first_name: "", last_name: "", notes: "" });
+    setColumnFilterDrafts({ email: "", first_name: "", last_name: "", notes: "" });
+    setActiveTextFilterPicker(null);
+  }, [classId]);
 
   useEffect(() => {
     setCoInstructorError(null);
@@ -107,10 +170,11 @@ export default function RosterPage({ classId }: { classId: number | null }) {
     setUploadSummary(null);
     setErrors([]);
     try {
-      const res = await studentsService.addFromCsv(file, classId);
+      const res = await studentsService.addFromCsv(file, classId, defaultImportSection);
       setUploadSummary(res.summary);
       setErrors(res.errors);
       await reloadFirstPage();
+      await refreshSectionSuggestions();
     } catch (e) {
       alert(String(e));
     } finally {
@@ -128,7 +192,13 @@ export default function RosterPage({ classId }: { classId: number | null }) {
   useEffect(() => {
     if (page === 1) return;
     const reqId = requestIdRef.current;
-    const { classId: currentClassId, sortBy: currentSortBy, sortOrder: currentSortOrder } = filtersRef.current;
+    const {
+      classId: currentClassId,
+      columnFilters: currentColumnFilters,
+      sectionFilter: currentSectionFilter,
+      sortBy: currentSortBy,
+      sortOrder: currentSortOrder,
+    } = filtersRef.current;
 
     setLoadingMore(true);
     (async () => {
@@ -139,6 +209,8 @@ export default function RosterPage({ classId }: { classId: number | null }) {
           "",
           false,
           currentClassId ?? undefined,
+          currentColumnFilters,
+          currentSectionFilter,
           currentSortBy,
           currentSortOrder,
         );
@@ -181,16 +253,77 @@ export default function RosterPage({ classId }: { classId: number | null }) {
     setSortOrder("asc");
   };
 
+  const sortIconFor = (field: SortField) => {
+    if (sortBy !== field) return faSort;
+    return sortOrder === "asc" ? faSortDown : faSortUp;
+  };
+
+  const hasTextFilter = (field: "email" | "first_name" | "last_name" | "notes") =>
+    Boolean(columnFilters[field].trim());
+
+  const clearSectionFilter = () => {
+    setSectionFilter(null);
+    setSectionFilterDraft("");
+    setShowSectionFilterPicker(false);
+  };
+
+  const openTextFilter = (field: "email" | "first_name" | "last_name" | "notes") => {
+    setShowSectionFilterPicker(false);
+    setActiveTextFilterPicker(field);
+    setColumnFilterDrafts((prev) => ({ ...prev, [field]: columnFilters[field] }));
+  };
+
+  const closeTextFilter = (field: "email" | "first_name" | "last_name" | "notes") => {
+    setColumnFilterDrafts((prev) => ({ ...prev, [field]: columnFilters[field] }));
+    setActiveTextFilterPicker((cur) => (cur === field ? null : cur));
+  };
+
+  // Client-side filtering fallback so filter UX remains correct even
+  // if backend filter params are delayed/missed by the running API process.
+  const visibleStudents = useMemo(() => {
+    const emailNeedle = columnFilters.email.trim().toLowerCase();
+    const firstNameNeedle = columnFilters.first_name.trim().toLowerCase();
+    const lastNameNeedle = columnFilters.last_name.trim().toLowerCase();
+    const notesNeedle = columnFilters.notes.trim().toLowerCase();
+    const sectionNeedle = sectionFilter?.trim().toLowerCase() ?? null;
+
+    return students.filter((s) => {
+      if (emailNeedle && !s.email.toLowerCase().includes(emailNeedle)) return false;
+      if (firstNameNeedle && !s.first_name.toLowerCase().includes(firstNameNeedle)) return false;
+      if (lastNameNeedle && !s.last_name.toLowerCase().includes(lastNameNeedle)) return false;
+      if (notesNeedle && !(s.notes ?? "").toLowerCase().includes(notesNeedle)) return false;
+      if (sectionNeedle && !(s.section ?? "").toLowerCase().includes(sectionNeedle)) return false;
+      return true;
+    });
+  }, [students, columnFilters, sectionFilter]);
+  const isRefreshing = loadingInitial && students.length > 0;
+
   const handleInlineEdit = async (student: Student, field: EditingState['field'], newValue: string) => {
-    if (newValue === (student[field] || '')) {
+    const normalized =
+      field === "section" ? newValue.trim() : field === "notes" ? newValue : newValue;
+    const current =
+      field === "section"
+        ? student.section || ""
+        : field === "notes"
+          ? student.notes || ""
+          : (student[field] as string) || "";
+
+    if (normalized === current) {
       setEditing(null);
       return;
     }
 
     try {
-      const updated = await studentsService.update(student.id, { [field]: newValue });
-      setStudents(prev => prev.map(s => s.id === student.id ? updated : s));
+      const payload =
+        field === "section"
+          ? { section: normalized }
+          : field === "notes"
+            ? { notes: normalized.trim() || null }
+            : { [field]: normalized };
+      const updated = await studentsService.update(student.id, payload);
+      setStudents(prev => prev.map(s => (s.id === student.id ? updated : s)));
       setEditing(null);
+      if (field === "section") await refreshSectionSuggestions();
     } catch (e) {
       alert(`Failed to update: ${e}`);
     }
@@ -216,11 +349,13 @@ export default function RosterPage({ classId }: { classId: number | null }) {
         first_name: manualForm.first_name,
         last_name: manualForm.last_name,
         notes: manualForm.notes || undefined,
+        section: manualForm.section.trim() || undefined,
         class_id: classId,
       });
-      setManualForm({ first_name: "", last_name: "", email: "", notes: "" });
+      setManualForm({ first_name: "", last_name: "", email: "", section: "", notes: "" });
       setShowManualForm(false);
       await reloadFirstPage();
+      await refreshSectionSuggestions();
     } catch (err) {
       setManualError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -269,11 +404,11 @@ export default function RosterPage({ classId }: { classId: number | null }) {
               onChange={(e) => setCoInstructorEmail(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleAddCoInstructor()}
               placeholder="professor@school.edu"
-              className="search-input"
+              className="co-instructor-input"
             />
             <button
               type="button"
-              className="search-button"
+              className="co-instructor-button"
               onClick={handleAddCoInstructor}
               disabled={coInstructorSaving || !coInstructorEmail.trim()}
             >
@@ -308,23 +443,37 @@ export default function RosterPage({ classId }: { classId: number | null }) {
           <h2>Student Roster</h2>
           <div className="total-count">
             Total students: {total.toLocaleString()}
+            {isRefreshing && <span className="students-refreshing-indicator">Loading data…</span>}
           </div>
         </div>
-        <div>
-          <label className="upload-button">
-            <span><FontAwesomeIcon icon={faUpload} /> Upload CSV File</span>
-            <input
-              type="file"
-              accept=".csv,text/csv"
-              onChange={e => {
-                const file = e.target.files?.[0];
-                if (file) handleFile(file);
-                e.target.value = '';
-              }}
-              disabled={uploading}
-            />
-          </label>
-          Must have the columns first_name, last_name, email.
+        <div className="student-upload-controls">
+          <div>
+            <label className="upload-button">
+              <span><FontAwesomeIcon icon={faUpload} /> Upload CSV File</span>
+              <input
+                type="file"
+                accept=".csv,text/csv"
+                onChange={e => {
+                  const file = e.target.files?.[0];
+                  if (file) handleFile(file);
+                  e.target.value = '';
+                }}
+                disabled={uploading}
+              />
+            </label>
+            {classId != null && (
+              <span className="students-upload-section">
+                <span className="students-upload-section__label">Default section:</span>
+                <SectionCombobox
+                  value={defaultImportSection}
+                  onChange={setDefaultImportSection}
+                  suggestions={sectionSuggestions}
+                  placeholder="(none)"
+                />
+              </span>
+            )}
+          </div>
+          <p>Columns: first_name, last_name, email, section (optional).</p>
         </div>
         
         {uploading && (
@@ -363,48 +512,263 @@ export default function RosterPage({ classId }: { classId: number | null }) {
         <thead>
           <tr>
             <th>
-              <button type="button" className="students-table-sort-button" onClick={() => handleSort("email")}>
-                Email{" "}
-                {sortBy === "email" && (
-                  <span className="students-table-sort-indicator">{sortOrder === "asc" ? "▲" : "▼"}</span>
+              <div className="students-table-header-controls">
+                <button type="button" className="students-table-sort-button" onClick={() => handleSort("email")}>
+                  Email
+                </button>
+                <button
+                  type="button"
+                  className={`students-table-icon-button ${sortBy === "email" ? "students-table-icon-button--active" : ""}`.trim()}
+                  onClick={() => handleSort("email")}
+                  title="Sort email"
+                >
+                  <FontAwesomeIcon icon={sortIconFor("email")} />
+                </button>
+                <button
+                  type="button"
+                  className={`students-table-filter-button ${hasTextFilter("email") ? "students-table-filter-button--active" : ""}`.trim()}
+                  title="Filter email"
+                  onClick={() => openTextFilter("email")}
+                >
+                  <FontAwesomeIcon icon={faFilter} />
+                </button>
+                {activeTextFilterPicker === "email" && (
+                  <div className="students-table-text-filter-popover">
+                    <input
+                      type="text"
+                      className="inline-edit-input"
+                      placeholder="Filter email"
+                      autoFocus
+                      value={columnFilterDrafts.email}
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => {
+                        const next = e.target.value;
+                        setColumnFilterDrafts((prev) => ({ ...prev, email: next }));
+                      }}
+                      onBlur={() => closeTextFilter("email")}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          setColumnFilters((prev) => ({ ...prev, email: columnFilterDrafts.email.trim() }));
+                          setActiveTextFilterPicker(null);
+                        }
+                        if (e.key === "Escape") closeTextFilter("email");
+                      }}
+                    />
+                  </div>
                 )}
-              </button>
+              </div>
             </th>
             <th>
-              <button
-                type="button"
-                className="students-table-sort-button"
-                onClick={() => handleSort("first_name")}
-              >
-                First Name{" "}
-                {sortBy === "first_name" && (
-                  <span className="students-table-sort-indicator">{sortOrder === "asc" ? "▲" : "▼"}</span>
+              <div className="students-table-header-controls">
+                <button
+                  type="button"
+                  className="students-table-sort-button"
+                  onClick={() => handleSort("first_name")}
+                >
+                  First
+                </button>
+                <button
+                  type="button"
+                  className={`students-table-icon-button ${sortBy === "first_name" ? "students-table-icon-button--active" : ""}`.trim()}
+                  onClick={() => handleSort("first_name")}
+                  title="Sort first name"
+                >
+                  <FontAwesomeIcon icon={sortIconFor("first_name")} />
+                </button>
+                <button
+                  type="button"
+                  className={`students-table-filter-button ${hasTextFilter("first_name") ? "students-table-filter-button--active" : ""}`.trim()}
+                  title="Filter first name"
+                  onClick={() => openTextFilter("first_name")}
+                >
+                  <FontAwesomeIcon icon={faFilter} />
+                </button>
+                {activeTextFilterPicker === "first_name" && (
+                  <div className="students-table-text-filter-popover">
+                    <input
+                      type="text"
+                      className="inline-edit-input"
+                      placeholder="Filter first name"
+                      autoFocus
+                      value={columnFilterDrafts.first_name}
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => {
+                        const next = e.target.value;
+                        setColumnFilterDrafts((prev) => ({ ...prev, first_name: next }));
+                      }}
+                      onBlur={() => closeTextFilter("first_name")}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          setColumnFilters((prev) => ({ ...prev, first_name: columnFilterDrafts.first_name.trim() }));
+                          setActiveTextFilterPicker(null);
+                        }
+                        if (e.key === "Escape") closeTextFilter("first_name");
+                      }}
+                    />
+                  </div>
                 )}
-              </button>
+              </div>
             </th>
             <th>
-              <button type="button" className="students-table-sort-button" onClick={() => handleSort("last_name")}>
-                Last Name{" "}
-                {sortBy === "last_name" && (
-                  <span className="students-table-sort-indicator">{sortOrder === "asc" ? "▲" : "▼"}</span>
+              <div className="students-table-header-controls">
+                <button type="button" className="students-table-sort-button" onClick={() => handleSort("last_name")}>
+                  Last
+                </button>
+                <button
+                  type="button"
+                  className={`students-table-icon-button ${sortBy === "last_name" ? "students-table-icon-button--active" : ""}`.trim()}
+                  onClick={() => handleSort("last_name")}
+                  title="Sort last name"
+                >
+                  <FontAwesomeIcon icon={sortIconFor("last_name")} />
+                </button>
+                <button
+                  type="button"
+                  className={`students-table-filter-button ${hasTextFilter("last_name") ? "students-table-filter-button--active" : ""}`.trim()}
+                  title="Filter last name"
+                  onClick={() => openTextFilter("last_name")}
+                >
+                  <FontAwesomeIcon icon={faFilter} />
+                </button>
+                {activeTextFilterPicker === "last_name" && (
+                  <div className="students-table-text-filter-popover">
+                    <input
+                      type="text"
+                      className="inline-edit-input"
+                      placeholder="Filter last name"
+                      autoFocus
+                      value={columnFilterDrafts.last_name}
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => {
+                        const next = e.target.value;
+                        setColumnFilterDrafts((prev) => ({ ...prev, last_name: next }));
+                      }}
+                      onBlur={() => closeTextFilter("last_name")}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          setColumnFilters((prev) => ({ ...prev, last_name: columnFilterDrafts.last_name.trim() }));
+                          setActiveTextFilterPicker(null);
+                        }
+                        if (e.key === "Escape") closeTextFilter("last_name");
+                      }}
+                    />
+                  </div>
                 )}
-              </button>
+              </div>
             </th>
             <th>
-              <button type="button" className="students-table-sort-button" onClick={() => handleSort("notes")}>
-                Notes{" "}
-                {sortBy === "notes" && (
-                  <span className="students-table-sort-indicator">{sortOrder === "asc" ? "▲" : "▼"}</span>
+              <div className="students-table-header-controls students-table-section-header">
+                <button type="button" className="students-table-sort-button" onClick={() => handleSort("section")}>
+                  Section
+                </button>
+                <button
+                  type="button"
+                  className={`students-table-icon-button ${sortBy === "section" ? "students-table-icon-button--active" : ""}`.trim()}
+                  onClick={() => handleSort("section")}
+                  title="Sort section"
+                >
+                  <FontAwesomeIcon icon={sortIconFor("section")} />
+                </button>
+                <button
+                  type="button"
+                  className="students-table-filter-button"
+                  title={sectionFilter ? "Clear section filter" : "Filter by section"}
+                  onClick={() => {
+                    if (sectionFilter) {
+                      clearSectionFilter();
+                    } else {
+                      setActiveTextFilterPicker(null);
+                      setShowSectionFilterPicker((v) => !v);
+                    }
+                  }}
+                >
+                  <FontAwesomeIcon icon={sectionFilter ? faFilterCircleXmark : faFilter} />
+                </button>
+                {showSectionFilterPicker && !sectionFilter && (
+                  <div className="students-table-section-filter-popover">
+                    <SectionCombobox
+                      value={sectionFilterDraft}
+                      onChange={setSectionFilterDraft}
+                      suggestions={sectionSuggestions}
+                      placeholder="Select section"
+                      autoFocus
+                      onCommit={(value) => {
+                        const picked = value.trim();
+                        if (picked && sectionSuggestions.includes(picked)) {
+                          setSectionFilter(picked);
+                        }
+                        setShowSectionFilterPicker(false);
+                      }}
+                      onCancel={() => {
+                        setSectionFilterDraft("");
+                        setShowSectionFilterPicker(false);
+                      }}
+                    />
+                  </div>
                 )}
-              </button>
+              </div>
             </th>
             <th>
-              <button type="button" className="students-table-sort-button" onClick={() => handleSort("created_at")}>
-                Added{" "}
-                {sortBy === "created_at" && (
-                  <span className="students-table-sort-indicator">{sortOrder === "asc" ? "▲" : "▼"}</span>
+              <div className="students-table-header-controls">
+                <button type="button" className="students-table-sort-button" onClick={() => handleSort("notes")}>
+                  Notes
+                </button>
+                <button
+                  type="button"
+                  className={`students-table-icon-button ${sortBy === "notes" ? "students-table-icon-button--active" : ""}`.trim()}
+                  onClick={() => handleSort("notes")}
+                  title="Sort notes"
+                >
+                  <FontAwesomeIcon icon={sortIconFor("notes")} />
+                </button>
+                <button
+                  type="button"
+                  className={`students-table-filter-button ${hasTextFilter("notes") ? "students-table-filter-button--active" : ""}`.trim()}
+                  title="Filter notes"
+                  onClick={() => openTextFilter("notes")}
+                >
+                  <FontAwesomeIcon icon={faFilter} />
+                </button>
+                {activeTextFilterPicker === "notes" && (
+                  <div className="students-table-text-filter-popover">
+                    <input
+                      type="text"
+                      className="inline-edit-input"
+                      placeholder="Filter notes"
+                      autoFocus
+                      value={columnFilterDrafts.notes}
+                      onFocus={(e) => e.currentTarget.select()}
+                      onChange={(e) => {
+                        const next = e.target.value;
+                        setColumnFilterDrafts((prev) => ({ ...prev, notes: next }));
+                      }}
+                      onBlur={() => closeTextFilter("notes")}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          setColumnFilters((prev) => ({ ...prev, notes: columnFilterDrafts.notes.trim() }));
+                          setActiveTextFilterPicker(null);
+                        }
+                        if (e.key === "Escape") closeTextFilter("notes");
+                      }}
+                    />
+                  </div>
                 )}
-              </button>
+              </div>
+            </th>
+            <th>
+              <div className="students-table-header-controls">
+                <button type="button" className="students-table-sort-button" onClick={() => handleSort("created_at")}>
+                  Added
+                </button>
+                <button
+                  type="button"
+                  className={`students-table-icon-button ${sortBy === "created_at" ? "students-table-icon-button--active" : ""}`.trim()}
+                  onClick={() => handleSort("created_at")}
+                  title="Sort date added"
+                >
+                  <FontAwesomeIcon icon={sortIconFor("created_at")} />
+                </button>
+              </div>
             </th>
             <th></th>
           </tr>
@@ -428,7 +792,7 @@ export default function RosterPage({ classId }: { classId: number | null }) {
                     type="text"
                     value={manualForm.first_name}
                     onChange={e => setManualForm(f => ({ ...f, first_name: e.target.value }))}
-                    placeholder="First name"
+                    placeholder="First"
                     className="inline-edit-input"
                   />
                 </td>
@@ -437,8 +801,16 @@ export default function RosterPage({ classId }: { classId: number | null }) {
                     type="text"
                     value={manualForm.last_name}
                     onChange={e => setManualForm(f => ({ ...f, last_name: e.target.value }))}
-                    placeholder="Last name"
+                    placeholder="Last"
                     className="inline-edit-input"
+                  />
+                </td>
+                <td>
+                  <SectionCombobox
+                    value={manualForm.section}
+                    onChange={v => setManualForm(f => ({ ...f, section: v }))}
+                    suggestions={sectionSuggestions}
+                    placeholder="Section (optional)"
                   />
                 </td>
                 <td>
@@ -453,7 +825,7 @@ export default function RosterPage({ classId }: { classId: number | null }) {
                 <td>
                   <button
                     onClick={handleManualSubmit}
-                    className="search-button"
+                    className="students-primary-button"
                     disabled={manualSaving || !manualForm.email || !manualForm.first_name || !manualForm.last_name}
                   >
                     {manualSaving ? "Saving…" : "Save"}
@@ -462,7 +834,7 @@ export default function RosterPage({ classId }: { classId: number | null }) {
                   <button
                     onClick={() => {
                       setShowManualForm(false);
-                      setManualForm({ first_name: "", last_name: "", email: "", notes: "" });
+                      setManualForm({ first_name: "", last_name: "", email: "", section: "", notes: "" });
                       setManualError(null);
                     }}
                     className="delete-button"
@@ -474,7 +846,7 @@ export default function RosterPage({ classId }: { classId: number | null }) {
               </tr>
               {manualError && (
                 <tr>
-                  <td colSpan={6} className="manual-error">
+                  <td colSpan={7} className="manual-error">
                     {manualError}
                   </td>
                 </tr>
@@ -489,26 +861,26 @@ export default function RosterPage({ classId }: { classId: number | null }) {
               }}
               title="Add a student"
             >
-              <td colSpan={6} style={{ padding: "0", letterSpacing: 1, textAlign: "center", fontWeight: "bold", lineHeight: "2.0em" }}>
+              <td colSpan={7} style={{ padding: "0", letterSpacing: 1, textAlign: "center", fontWeight: "bold", lineHeight: "2.0em" }}>
                 <span style={{ fontSize: "1.75em", color: "var(--color-primary)", verticalAlign: "middle" }}>+</span><span style={{ fontSize: "1.0em", color: "var(--text-dashboard)", verticalAlign: "middle" }}> {" "}Add Student</span>
               </td>
             </tr>
           )}
 
-          {loadingInitial ? (
+          {loadingInitial && students.length === 0 ? (
             <tr>
-              <td colSpan={6} className="loading-cell">
+              <td colSpan={7} className="loading-cell">
                 Loading…
               </td>
             </tr>
-          ) : students.length === 0 ? (
+          ) : visibleStudents.length === 0 ? (
             <tr>
-              <td colSpan={6} className="empty-cell">
+              <td colSpan={7} className="empty-cell">
                 No students
               </td>
             </tr>
           ) : (
-            students.map(s => (
+            visibleStudents.map(s => (
               <tr key={s.id}>
                 <td>
                   {editing?.id === s.id && editing.field === "email" ? (
@@ -580,6 +952,29 @@ export default function RosterPage({ classId }: { classId: number | null }) {
                   )}
                 </td>
                 <td>
+                  {editing?.id === s.id && editing.field === "section" ? (
+                    <SectionCombobox
+                      value={editing.value}
+                      onChange={v => setEditing({ ...editing, value: v })}
+                      suggestions={sectionSuggestions}
+                      placeholder="Section"
+                      autoFocus
+                      onCommit={v => handleInlineEdit(s, "section", v)}
+                      onCancel={() => setEditing(null)}
+                    />
+                  ) : (
+                    <span
+                      onClick={() =>
+                        setEditing({ id: s.id, field: "section", value: s.section || "" })
+                      }
+                      className="editable-cell"
+                      title={s.section || "Click to set section"}
+                    >
+                      {s.section || "—"}
+                    </span>
+                  )}
+                </td>
+                <td>
                   {editing?.id === s.id && editing.field === "notes" ? (
                     <input
                       type="text"
@@ -616,9 +1011,9 @@ export default function RosterPage({ classId }: { classId: number | null }) {
             ))
           )}
 
-          {loadingMore && students.length > 0 && (
+          {loadingMore && visibleStudents.length > 0 && (
             <tr>
-              <td colSpan={6} className="loading-cell">
+              <td colSpan={7} className="loading-cell">
                 Loading more…
               </td>
             </tr>

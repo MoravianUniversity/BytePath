@@ -1,0 +1,67 @@
+.section-combobox {
+  position: relative;
+  display: inline-block;
+  min-width: 6rem;
+  max-width: 100%;
+}
+
+.section-combobox__input {
+  width: 100%;
+  min-width: 6rem;
+  max-width: 12rem;
+}
+
+.section-combobox__dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 50;
+  min-width: 100%;
+  max-width: 16rem;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  background: color-mix(in srgb, var(--bg-card), var(--bg-card-hover));
+  border: 1px solid var(--color-primary);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px var(--shadow-color);
+  max-height: 10rem;
+  overflow-y: auto;
+}
+
+.section-combobox__option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.35rem 0.6rem;
+  border: none;
+  background: none;
+  color: var(--text-dashboard);
+  font-size: inherit;
+  cursor: pointer;
+}
+
+.section-combobox__option:hover {
+  background: var(--bg-sidebar-item-active);
+}
+
+.students-upload-section {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-right: 0.75rem;
+  vertical-align: middle;
+}
+
+.students-upload-section__label {
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.students-upload-section .section-combobox__input {
+  max-width: 10rem;
+}
+
+.students-upload-section .section-combobox__input::placeholder {
+  opacity: 0.7;
+}

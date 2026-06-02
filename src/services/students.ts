@@ -9,6 +9,7 @@ export type Student = {
   updated_at: string;
   deleted_at: string | null;
   notes: string | null;
+  section: string;
   class_id: number | null;
   last_updated_via: string | null;
   last_upload_id: number | null;
@@ -70,6 +71,13 @@ export const studentsService = {
     search = '',
     includeDeleted = false,
     classId?: number,
+    columnFilters?: {
+      email?: string;
+      first_name?: string;
+      last_name?: string;
+      notes?: string;
+    },
+    section?: string | null,
     sortBy = 'email',
     sortOrder: 'asc' | 'desc' = 'asc',
   ): Promise<Paginated<Student>> {
@@ -82,6 +90,11 @@ export const studentsService = {
     if (search.trim()) params.set('search', search.trim());
     if (includeDeleted) params.set('include_deleted', 'true');
     if (classId) params.set('class_id', String(classId));
+    if (columnFilters?.email?.trim()) params.set('email_filter', columnFilters.email.trim());
+    if (columnFilters?.first_name?.trim()) params.set('first_name_filter', columnFilters.first_name.trim());
+    if (columnFilters?.last_name?.trim()) params.set('last_name_filter', columnFilters.last_name.trim());
+    if (columnFilters?.notes?.trim()) params.set('notes_filter', columnFilters.notes.trim());
+    if (section != null) params.set('section', section.trim());
 
     const res = await fetch(`${API_BASE}/students?${params.toString()}`);
     if (!res.ok) throw new Error(`Failed to fetch students (${res.status})`);
@@ -99,6 +112,7 @@ export const studentsService = {
     first_name: string;
     last_name: string;
     notes?: string;
+    section?: string;
     class_id?: number | null;
   }): Promise<Student> {
     const res = await fetch(`${API_BASE}/students`, {
@@ -121,6 +135,7 @@ export const studentsService = {
       first_name: string;
       last_name: string;
       notes: string | null;
+      section: string;
       class_id: number | null;
     }>,
   ): Promise<Student> {
@@ -166,10 +181,26 @@ export const studentsService = {
     return res.json();
   },
 
-  async addFromCsv(file: File, classId?: number | null): Promise<UploadResponse> {
+  async listSections(classId?: number | null): Promise<string[]> {
+    const params = new URLSearchParams();
+    if (classId != null) params.set('class_id', String(classId));
+    const qs = params.toString();
+    const res = await fetch(`${API_BASE}/students/sections${qs ? `?${qs}` : ''}`);
+    if (!res.ok) throw new Error(`Failed to fetch sections (${res.status})`);
+    const data = await res.json();
+    return data.sections ?? [];
+  },
+
+  async addFromCsv(
+    file: File,
+    classId?: number | null,
+    defaultSection = '',
+  ): Promise<UploadResponse> {
     const formData = new FormData();
     formData.set('file', file);
     if (classId) formData.set('class_id', String(classId));
+    const trimmedSection = defaultSection.trim();
+    if (trimmedSection) formData.set('default_section', trimmedSection);
     const res = await fetch(`${API_BASE}/students/add`, {
       method: 'POST',
       body: formData,

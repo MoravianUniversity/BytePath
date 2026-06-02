@@ -266,6 +266,7 @@ class RosterStudent(db.Model):
     # CRUD features
     deleted_at = db.Column(db.DateTime, nullable=True, default=None)  # Soft delete
     notes = db.Column(db.Text, nullable=True, default=None)  # Optional notes
+    section = db.Column(db.String(64), nullable=False, default="")
 
     class_id = db.Column(db.Integer, db.ForeignKey("classes.id"), nullable=True)
 
@@ -288,6 +289,7 @@ class RosterStudent(db.Model):
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
             "deleted_at": self.deleted_at.isoformat() if self.deleted_at else None,
             "notes": self.notes,
+            "section": self.section or "",
             "class_id": self.class_id,
             "last_updated_via": self.last_updated_via,
             "last_upload_id": self.last_upload_id,

@@ -41,6 +41,11 @@ with app.app_context():
             conn.execute(db.text("ALTER TABLE roster_students ADD COLUMN class_id INTEGER REFERENCES classes(id)"))
             conn.commit()
 
+        if 'section' not in roster_cols:
+            print("Adding section...")
+            conn.execute(db.text("ALTER TABLE roster_students ADD COLUMN section VARCHAR(64) NOT NULL DEFAULT ''"))
+            conn.commit()
+
     # ── student_responses ────────────────────────────────────────────────────
     response_cols = [col['name'] for col in inspector.get_columns('student_responses')]
     print(f"student_responses columns: {response_cols}")
