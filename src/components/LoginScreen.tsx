@@ -64,7 +64,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
             <>
               <input
                 type="email"
-                placeholder="Enter your Moravian email"
+                placeholder="Enter your school email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
