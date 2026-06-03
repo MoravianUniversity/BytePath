@@ -86,9 +86,10 @@ function answerToString(answer: string | Exception | null): string {
 function serialize(
   question: CodeOutputQuestion,
   user: UserAnswerFor<'code-output'> | null,
+  ctx?: TopicContext,
 ): SerializedResponse {
   return {
-    questionPayload: question.code,
+    questionPayload: ((ctx?.sharedCode ?? '') + '\n' + question.code).trim(),
     studentAnswer: answerToString(user),
     correctAnswer: answerToString(question.correct),
   };

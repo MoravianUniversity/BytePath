@@ -1,6 +1,6 @@
 import api from './api';
 import type { Question } from '../topics';
-import type { UserAnswer } from '../questions/types';
+import type { TopicContext, UserAnswer } from '../questions/types';
 import { serialize } from '../questions/registry';
 
 export interface SubmitResponseRequest {
@@ -50,8 +50,9 @@ export const responsesService = {
     isCorrect: boolean,
     timeSpent: number,
     classId?: number | null,
+    ctx?: TopicContext,
   ): SubmitResponseRequest {
-    const { questionPayload, studentAnswer, correctAnswer } = serialize(question, userAnswer);
+    const { questionPayload, studentAnswer, correctAnswer } = serialize(question, userAnswer, ctx);
     return {
       user_id: userId,
       topic: topicId,

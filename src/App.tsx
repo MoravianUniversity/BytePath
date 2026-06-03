@@ -649,6 +649,7 @@ function App() {
           isCorrect,
           Math.floor((Date.now() - questionStartTime) / 1000),
           currentClass?.id ?? null,
+          context ?? undefined,
         );
 
         await responsesService.submitResponse(responseData);

@@ -47,9 +47,10 @@ function formatHtmlAnswer(answer: Answer): React.ReactNode {
 function serialize(
   question: EvalLastLineQuestion,
   user: UserAnswerFor<'eval-last-line'> | null,
+  ctx?: TopicContext,
 ): SerializedResponse {
   return {
-    questionPayload: question.code,
+    questionPayload: ((ctx?.sharedCode ?? '') + '\n' + question.code).trim(),
     studentAnswer: user === null ? null : formatAnswer(user),
     correctAnswer: formatAnswer(question.correct),
   };

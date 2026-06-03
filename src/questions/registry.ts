@@ -3,6 +3,7 @@ import type {
   Question,
   QuestionFor,
   QuestionKind,
+  TopicContext,
   UserAnswer,
   UserAnswerFor,
 } from './types';
@@ -39,7 +40,7 @@ export interface QuestionTypeDef<K extends QuestionKind> {
   // user answer must be an actual answer, not undefined or SKIPPED
   checkAnswer: (question: QuestionFor<K>, user: UserAnswerFor<K>) => boolean | Promise<boolean>;
   // user answer must be an answer or null if the question was skipped/unanswered (one place where SKIPPED is not used, but null is)
-  serialize: (question: QuestionFor<K>, user: UserAnswerFor<K> | null) => SerializedResponse;
+  serialize: (question: QuestionFor<K>, user: UserAnswerFor<K> | null, ctx?: TopicContext) => SerializedResponse;
   // user answer is returned as undefined if the question was skipped/unanswered/not yet answered
   unserialize: (response: SerializedResponse) => { question: QuestionFor<K>, userAnswer: UserAnswerFor<K> | undefined };
   View: React.FC<QuestionViewProps<K>>;
@@ -63,8 +64,9 @@ export function checkAnswer(
 export function serialize(
   question: Question,
   user: UserAnswer | null,
+  ctx?: TopicContext,
 ): SerializedResponse {
-  return QUESTION_TYPES[question.kind].serialize(question as never, user as never);
+  return QUESTION_TYPES[question.kind].serialize(question as never, user as never, ctx);
 }
 
 export function unserialize(
