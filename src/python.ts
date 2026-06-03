@@ -126,7 +126,12 @@ export function runLastLine(code: string, reset_globals: boolean = true): PyType
   if (!python) { throw new Error('Python not initialized'); }
   if (code[0] === '\n' || code[0] === ' ') { code = dedent(code); }
   const lines = code.split('\n');
-  const last_line = `repr(${lines[lines.length - 1]})`;
+  let raw_last_line = lines[lines.length - 1];
+  // remove trailing comments (look for # followed by anything but take care to look for strings)
+  // TODO: this is not perfect, it does not handle escaped quotes in strings
+  const comment_match = raw_last_line.match(/^((?:"[^"]*"|'[^']*'|[^#"'\\r\\n]+)*)(#[^\r\n]*)?$/);
+  if (comment_match && comment_match[2]) { raw_last_line = comment_match[1]?.trim() ?? ''; }
+  const last_line = `repr(${raw_last_line})`;
   if (reset_globals) { resetGlobals(); }
   try {
     let repr_val: string;
