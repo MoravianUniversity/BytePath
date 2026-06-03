@@ -115,6 +115,8 @@ class ClassTopicSetting(db.Model):
     section = db.Column(db.String(64), nullable=True, default=None)
     is_enabled = db.Column(db.Boolean, default=True, nullable=False)
     available_at = db.Column(db.DateTime, nullable=True)
+    is_assigned = db.Column(db.Boolean, default=False, nullable=False)
+    due_at = db.Column(db.DateTime, nullable=True)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     __table_args__ = (
@@ -168,6 +170,7 @@ class StudentProgress(db.Model):
     class_id = db.Column(db.Integer, db.ForeignKey("classes.id"), nullable=True)
     topic = db.Column(db.String(100), db.ForeignKey("topics.id"), nullable=False)
     subtopics_completed = db.Column(db.Integer, default=0)
+    max_subtopics_completed = db.Column(db.Integer, default=0)
     total_subtopics = db.Column(db.Integer)
     questions_answered = db.Column(db.Integer, default=0)
     last_accessed = db.Column(db.DateTime, default=datetime.utcnow)
@@ -178,19 +181,35 @@ class StudentProgress(db.Model):
     def __repr__(self) -> str:
         return f"<Progress user={self.user_id} topic={self.topic}>"
 
+    @staticmethod
+    def best_completion_percentage(
+        max_subtopics_completed: int, total_subtopics: int
+    ) -> float:
+        max_completed = max_subtopics_completed or 0
+        total = total_subtopics or 0
+        denominator = max(max_completed, total)
+        if denominator == 0:
+            return 0.0
+        return max_completed / denominator * 100
+
     def to_dict(self) -> dict:
+        max_completed = self.max_subtopics_completed or 0
         return {
             "id": self.id,
             "user_id": self.user_id,
             "class_id": self.class_id,
             "topic": self.topic,
             "subtopics_completed": self.subtopics_completed,
+            "max_subtopics_completed": max_completed,
             "total_subtopics": self.total_subtopics,
             "questions_answered": self.questions_answered,
             "completion_percentage": (
                 self.subtopics_completed / self.total_subtopics * 100
                 if self.total_subtopics
                 else 0
+            ),
+            "best_completion_percentage": self.best_completion_percentage(
+                max_completed, self.total_subtopics or 0
             ),
             "last_accessed": self.last_accessed.isoformat(),
         }

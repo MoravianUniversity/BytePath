@@ -30,6 +30,8 @@ def upsert(
     section: str | None = None,
     is_enabled: bool,
     available_at,
+    is_assigned: bool = False,
+    due_at=None,
     updated_at: datetime | None = None,
 ) -> ClassTopicSetting:
     row = get_by_class_and_topic(class_id, topic_id, section)
@@ -39,6 +41,8 @@ def upsert(
     row.section = section
     row.is_enabled = is_enabled
     row.available_at = available_at
+    row.is_assigned = is_assigned
+    row.due_at = due_at
     row.updated_at = updated_at or datetime.utcnow()
     db.session.flush()
     return row

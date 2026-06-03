@@ -266,6 +266,8 @@ def put_class_topic_settings(id: int):
             return jsonify({"error": f"settings[{i}].topic_id is required"}), 400
         if "is_enabled" in row and not isinstance(row["is_enabled"], bool):
             return jsonify({"error": f"settings[{i}].is_enabled must be a boolean"}), 400
+        if "is_assigned" in row and not isinstance(row["is_assigned"], bool):
+            return jsonify({"error": f"settings[{i}].is_assigned must be a boolean"}), 400
 
     try:
         saved = ClassTopicSettingsService.bulk_upsert(
@@ -291,6 +293,8 @@ def patch_class_topic_settings(id: int, topic_id: str):
     section = payload.get("section")
     if "is_enabled" in payload and not isinstance(payload["is_enabled"], bool):
         return jsonify({"error": "is_enabled must be a boolean"}), 400
+    if "is_assigned" in payload and not isinstance(payload["is_assigned"], bool):
+        return jsonify({"error": "is_assigned must be a boolean"}), 400
 
     try:
         saved = ClassTopicSettingsService.update_one(id, topic_id, payload, section=section)

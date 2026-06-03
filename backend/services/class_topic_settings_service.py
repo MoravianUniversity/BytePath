@@ -8,7 +8,7 @@ from backend.repositories import class_topic_settings_repository, topic_reposito
 
 class ClassTopicSettingsService:
     @staticmethod
-    def _parse_available_at(value):
+    def _parse_datetime(value, field_name: str):
         if value in (None, ''):
             return None
         if isinstance(value, datetime):
@@ -21,7 +21,15 @@ class ClassTopicSettingsService:
             if parsed.tzinfo is not None:
                 return parsed.astimezone(timezone.utc).replace(tzinfo=None)
             return parsed
-        raise ValueError('available_at must be an ISO datetime string or null')
+        raise ValueError(f'{field_name} must be an ISO datetime string or null')
+
+    @staticmethod
+    def _parse_available_at(value):
+        return ClassTopicSettingsService._parse_datetime(value, 'available_at')
+
+    @staticmethod
+    def _parse_due_at(value):
+        return ClassTopicSettingsService._parse_datetime(value, 'due_at')
 
     @staticmethod
     def effective_enabled(row, now: datetime) -> bool:
@@ -69,6 +77,8 @@ class ClassTopicSettingsService:
                 'section': row.section,
                 'is_enabled': bool(row.is_enabled),
                 'available_at': row.available_at.isoformat() if row.available_at else None,
+                'is_assigned': bool(row.is_assigned),
+                'due_at': row.due_at.isoformat() if row.due_at else None,
                 'effective_enabled': ClassTopicSettingsService.effective_enabled(row, now),
             }
             if row.section is None:
@@ -95,6 +105,8 @@ class ClassTopicSettingsService:
                 section=normalized_section,
                 is_enabled=bool(item.get('is_enabled', True)),
                 available_at=ClassTopicSettingsService._parse_available_at(item.get('available_at')),
+                is_assigned=bool(item.get('is_assigned', False)),
+                due_at=ClassTopicSettingsService._parse_due_at(item.get('due_at')),
                 updated_at=now,
             )
             keep_topic_ids.add(topic_id)
@@ -120,6 +132,8 @@ class ClassTopicSettingsService:
                 section=normalized_section,
                 is_enabled=bool(payload.get('is_enabled', True)),
                 available_at=ClassTopicSettingsService._parse_available_at(payload.get('available_at')),
+                is_assigned=bool(payload.get('is_assigned', False)),
+                due_at=ClassTopicSettingsService._parse_due_at(payload.get('due_at')),
             )
         else:
             class_topic_settings_repository.upsert(
@@ -128,6 +142,8 @@ class ClassTopicSettingsService:
                 section=normalized_section,
                 is_enabled=bool(payload.get('is_enabled', row.is_enabled)),
                 available_at=ClassTopicSettingsService._parse_available_at(payload.get('available_at')) if 'available_at' in payload else row.available_at,
+                is_assigned=bool(payload.get('is_assigned', row.is_assigned)),
+                due_at=ClassTopicSettingsService._parse_due_at(payload.get('due_at')) if 'due_at' in payload else row.due_at,
             )
         db.session.commit()
         ClassTopicSettingsService.apply_due_schedules(class_id)
@@ -138,5 +154,7 @@ class ClassTopicSettingsService:
             'section': setting.section,
             'is_enabled': bool(setting.is_enabled),
             'available_at': setting.available_at.isoformat() if setting.available_at else None,
+            'is_assigned': bool(setting.is_assigned),
+            'due_at': setting.due_at.isoformat() if setting.due_at else None,
             'effective_enabled': ClassTopicSettingsService.effective_enabled(setting, now),
         }

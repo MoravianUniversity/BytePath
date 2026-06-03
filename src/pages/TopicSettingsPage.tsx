@@ -13,6 +13,8 @@ type TopicDraft = {
   name: string;
   is_enabled: boolean;
   available_at: string | null;
+  is_assigned: boolean;
+  due_at: string | null;
 };
 
 const ALL_SECTIONS_VALUE = "__all_sections__";
@@ -47,17 +49,52 @@ function isFuture(iso: string | null): boolean {
   return parseServerUtc(iso).getTime() > Date.now();
 }
 
-function availableAtEqual(a: string | null, b: string | null): boolean {
+function dateTimeEqual(a: string | null, b: string | null): boolean {
   if (!a && !b) return true;
   if (!a || !b) return false;
   return parseServerUtc(a).getTime() === parseServerUtc(b).getTime();
 }
 
-function draftsMatchGlobal(sectionDraft: TopicDraft, globalDraft: TopicDraft): boolean {
+function draftsMatchGlobalEnable(sectionDraft: TopicDraft, globalDraft: TopicDraft): boolean {
   return (
     sectionDraft.is_enabled === globalDraft.is_enabled
-    && availableAtEqual(sectionDraft.available_at, globalDraft.available_at)
+    && dateTimeEqual(sectionDraft.available_at, globalDraft.available_at)
   );
+}
+
+function draftsMatchGlobalAssignment(sectionDraft: TopicDraft, globalDraft: TopicDraft): boolean {
+  return (
+    sectionDraft.is_assigned === globalDraft.is_assigned
+    && dateTimeEqual(sectionDraft.due_at, globalDraft.due_at)
+  );
+}
+
+function draftsMatchGlobal(sectionDraft: TopicDraft, globalDraft: TopicDraft): boolean {
+  return (
+    draftsMatchGlobalEnable(sectionDraft, globalDraft)
+    && draftsMatchGlobalAssignment(sectionDraft, globalDraft)
+  );
+}
+
+function buildTopicOverrideSections(
+  sectionOverrideDrafts: Record<string, Record<string, TopicDraft>>,
+  globalDrafts: Record<string, TopicDraft>,
+  matchesGlobal: (sectionDraft: TopicDraft, globalDraft: TopicDraft) => boolean,
+): Map<string, string[]> {
+  const byTopic = new Map<string, Set<string>>();
+  for (const [section, rows] of Object.entries(sectionOverrideDrafts)) {
+    for (const row of Object.values(rows)) {
+      const global = globalDrafts[row.topic_id];
+      if (!global || matchesGlobal(row, global)) continue;
+      if (!byTopic.has(row.topic_id)) byTopic.set(row.topic_id, new Set());
+      byTopic.get(row.topic_id)!.add(section);
+    }
+  }
+  const result = new Map<string, string[]>();
+  for (const [topicId, sections] of byTopic) {
+    result.set(topicId, [...sections].sort(compareSections));
+  }
+  return result;
 }
 
 function formatSectionLabel(section: string): string {
@@ -70,6 +107,12 @@ function compareSections(a: string, b: string): number {
 
 function formatOverriddenInLabel(sections: string[]): string {
   return `Overridden in: ${sections.map(formatSectionLabel).join(", ")}`;
+}
+
+function datetimeClassName(inactive: boolean): string {
+  return inactive
+    ? "topic-settings-datetime topic-settings-datetime--inactive"
+    : "topic-settings-datetime";
 }
 
 function getTimezoneLabel(): string {
@@ -122,6 +165,8 @@ export default function TopicSettingsPage({ classId }: { classId: number | null 
         name: topic.name,
         is_enabled: setting?.is_enabled ?? setting?.effective_enabled ?? true,
         available_at: setting?.available_at ?? null,
+        is_assigned: setting?.is_assigned ?? false,
+        due_at: setting?.due_at ?? null,
       };
     }
 
@@ -135,6 +180,8 @@ export default function TopicSettingsPage({ classId }: { classId: number | null 
           name: topic?.name ?? row.topic_id,
           is_enabled: row.is_enabled ?? row.effective_enabled ?? true,
           available_at: row.available_at ?? null,
+          is_assigned: row.is_assigned ?? false,
+          due_at: row.due_at ?? null,
         };
         const globalDraft = nextGlobal[row.topic_id];
         if (globalDraft && draftsMatchGlobal(draft, globalDraft)) continue;
@@ -216,29 +263,38 @@ export default function TopicSettingsPage({ classId }: { classId: number | null 
 
   const isSectionMode = selectedSection !== null;
 
-  const topicOverrideSections = useMemo(() => {
-    const byTopic = new Map<string, Set<string>>();
-    for (const [section, rows] of Object.entries(sectionOverrideDrafts)) {
-      for (const row of Object.values(rows)) {
-        const global = globalDrafts[row.topic_id];
-        if (!global || draftsMatchGlobal(row, global)) continue;
-        if (!byTopic.has(row.topic_id)) byTopic.set(row.topic_id, new Set());
-        byTopic.get(row.topic_id)!.add(section);
-      }
-    }
-    const result = new Map<string, string[]>();
-    for (const [topicId, sections] of byTopic) {
-      result.set(topicId, [...sections].sort(compareSections));
-    }
-    return result;
-  }, [sectionOverrideDrafts, globalDrafts]);
+  const topicEnableOverrideSections = useMemo(
+    () => buildTopicOverrideSections(
+      sectionOverrideDrafts,
+      globalDrafts,
+      draftsMatchGlobalEnable,
+    ),
+    [sectionOverrideDrafts, globalDrafts],
+  );
 
-  const hasOverride = (topicId: string) => {
+  const topicAssignmentOverrideSections = useMemo(
+    () => buildTopicOverrideSections(
+      sectionOverrideDrafts,
+      globalDrafts,
+      draftsMatchGlobalAssignment,
+    ),
+    [sectionOverrideDrafts, globalDrafts],
+  );
+
+  const hasEnableOverride = (topicId: string) => {
     if (selectedSection === null) return false;
     const override = sectionOverrideDrafts[selectedSection]?.[topicId];
     const global = globalDrafts[topicId];
     if (!override || !global) return false;
-    return !draftsMatchGlobal(override, global);
+    return !draftsMatchGlobalEnable(override, global);
+  };
+
+  const hasAssignmentOverride = (topicId: string) => {
+    if (selectedSection === null) return false;
+    const override = sectionOverrideDrafts[selectedSection]?.[topicId];
+    const global = globalDrafts[topicId];
+    if (!override || !global) return false;
+    return !draftsMatchGlobalAssignment(override, global);
   };
 
   const effectiveDraft = (topicId: string): TopicDraft => {
@@ -267,6 +323,20 @@ export default function TopicSettingsPage({ classId }: { classId: number | null 
     }
   };
 
+  const updateGroupAssigned = (group: TopicGroup, assigned: boolean) => {
+    for (const topic of group.topics) {
+      updateTopic(topic.id, { is_assigned: assigned, due_at: null });
+    }
+  };
+
+  const updateGroupDueSchedule = (group: TopicGroup, dateValue: string, timeValue: string) => {
+    const iso = toIsoFromLocalParts(dateValue, timeValue);
+    if (!iso) return;
+    for (const topic of group.topics) {
+      updateTopic(topic.id, { is_assigned: true, due_at: iso });
+    }
+  };
+
   const onSave = async () => {
     if (!classId || !dirty) return;
     setSaving(true);
@@ -281,6 +351,8 @@ export default function TopicSettingsPage({ classId }: { classId: number | null 
           name: draft.name,
           is_enabled: draft.is_enabled,
           available_at: draft.available_at,
+          is_assigned: draft.is_assigned,
+          due_at: draft.due_at,
         })),
         {
           section: selectedSection,
@@ -349,15 +421,24 @@ export default function TopicSettingsPage({ classId }: { classId: number | null 
             const groupAllEnabled = groupEnabledStates.every(Boolean);
             const groupSomeEnabled = groupEnabledStates.some(Boolean);
             const groupCheckboxIndeterminate = groupSomeEnabled && !groupAllEnabled;
-            const groupOverrideSections = [
+            const groupEnableOverrideSections = [
               ...new Set(
-                item.topics.flatMap((topic) => topicOverrideSections.get(topic.id) ?? []),
+                item.topics.flatMap((topic) => topicEnableOverrideSections.get(topic.id) ?? []),
               ),
             ].sort(compareSections);
-            const groupHasSectionOverrides = groupOverrideSections.length > 0;
-            const groupHasAnyOverride = item.topics.some((topic) => hasOverride(topic.id));
-            const groupHasAnyInherited =
-              isSectionMode && item.topics.some((topic) => !hasOverride(topic.id));
+            const groupAssignmentOverrideSections = [
+              ...new Set(
+                item.topics.flatMap((topic) => topicAssignmentOverrideSections.get(topic.id) ?? []),
+              ),
+            ].sort(compareSections);
+            const groupHasEnableSectionOverrides = groupEnableOverrideSections.length > 0;
+            const groupHasAssignmentSectionOverrides = groupAssignmentOverrideSections.length > 0;
+            const groupHasAnyEnableOverride = item.topics.some((topic) => hasEnableOverride(topic.id));
+            const groupHasAnyAssignmentOverride = item.topics.some((topic) => hasAssignmentOverride(topic.id));
+            const groupHasAnyEnableInherited =
+              isSectionMode && item.topics.some((topic) => !hasEnableOverride(topic.id));
+            const groupHasAnyAssignmentInherited =
+              isSectionMode && item.topics.some((topic) => !hasAssignmentOverride(topic.id));
             const groupDrafts = item.topics
               .map((topic) => effectiveDraft(topic.id))
               .filter(Boolean) as TopicDraft[];
@@ -375,11 +456,29 @@ export default function TopicSettingsPage({ classId }: { classId: number | null 
               (draft) => (toLocalTimeValue(draft.available_at) || "00:00") === firstGroupTime,
             );
             const groupTimeValue = sameGroupDate && sameGroupTime ? firstGroupTime : "00:00";
+            const groupAssignedStates = item.topics.map((topic) => effectiveDraft(topic.id)?.is_assigned ?? false);
+            const groupAllAssigned = groupAssignedStates.every(Boolean);
+            const groupSomeAssigned = groupAssignedStates.some(Boolean);
+            const groupAssignedIndeterminate = groupSomeAssigned && !groupAllAssigned;
+            const firstGroupDueDate = groupDrafts.length
+              ? toLocalDateValue(groupDrafts[0].due_at)
+              : "";
+            const sameGroupDueDate = groupDrafts.every(
+              (draft) => toLocalDateValue(draft.due_at) === firstGroupDueDate,
+            );
+            const groupDueDateValue = sameGroupDueDate ? firstGroupDueDate : "";
+            const firstGroupDueTime = groupDrafts.length
+              ? (toLocalTimeValue(groupDrafts[0].due_at) || "00:00")
+              : "00:00";
+            const sameGroupDueTime = groupDrafts.every(
+              (draft) => (toLocalTimeValue(draft.due_at) || "00:00") === firstGroupDueTime,
+            );
+            const groupDueTimeValue = sameGroupDueDate && sameGroupDueTime ? firstGroupDueTime : "00:00";
 
             return (
               <section key={item.id} className="topic-settings-group">
                 <div className="topic-settings-group-header">
-                  <div className="topic-settings-group-title-wrap">
+                  <div className="topic-settings-group-title-col">
                     <button
                       type="button"
                       className="topic-settings-group-title"
@@ -395,55 +494,113 @@ export default function TopicSettingsPage({ classId }: { classId: number | null 
                       <span className={`expand-icon ${isOpen ? "expanded" : ""}`}>▶</span>
                       {item.name}
                     </button>
-                    {!isSectionMode && groupHasSectionOverrides && (
-                      <span
-                        className="topic-settings-override-badge"
-                        title={formatOverriddenInLabel(groupOverrideSections)}
-                      >
-                        {formatOverriddenInLabel(groupOverrideSections)}
-                      </span>
-                    )}
-                    {groupHasAnyInherited && (
-                      <span className="topic-settings-inherited-badge" title="Topics in this group inherit settings from All Sections">Inherited</span>
-                    )}
-                    {groupHasAnyOverride && (
-                      <span className="topic-settings-override-active-badge" title="Topics in this group override the global default">Overrides</span>
-                    )}
                   </div>
 
-                  <div className="topic-settings-group-controls">
-                    <label className="topic-settings-toggle">
+                  <div className="topic-settings-group-side">
+                    <div className="topic-settings-meta-row">
+                      <div className="topic-settings-badge-row">
+                        {!isSectionMode && groupHasEnableSectionOverrides && (
+                          <span
+                            className="topic-settings-override-badge"
+                            title={formatOverriddenInLabel(groupEnableOverrideSections)}
+                          >
+                            {formatOverriddenInLabel(groupEnableOverrideSections)}
+                          </span>
+                        )}
+                        {groupHasAnyEnableInherited && (
+                          <span className="topic-settings-inherited-badge" title="Availability inherits from All Sections">Inherited</span>
+                        )}
+                        {groupHasAnyEnableOverride && (
+                          <span className="topic-settings-override-active-badge" title="Availability overrides the global default">Overrides</span>
+                        )}
+                      </div>
+                      <div className="topic-settings-control-row">
+                      <label className="topic-settings-toggle">
+                        <input
+                          type="checkbox"
+                          ref={(el) => {
+                            if (el) el.indeterminate = groupCheckboxIndeterminate;
+                          }}
+                          checked={groupAllEnabled}
+                          onChange={(e) => updateGroupEnabled(item, e.target.checked)}
+                        />
+                        All enabled
+                      </label>
                       <input
-                        type="checkbox"
-                        ref={(el) => {
-                          if (el) el.indeterminate = groupCheckboxIndeterminate;
-                        }}
-                        checked={groupAllEnabled}
-                        onChange={(e) => updateGroupEnabled(item, e.target.checked)}
+                        type="date"
+                        className={datetimeClassName(groupAllEnabled)}
+                        value={groupDateValue}
+                        onChange={(e) =>
+                          updateGroupSchedule(item, e.target.value, groupTimeValue || "00:00")
+                        }
+                        title="Schedule date for all topics in this group"
                       />
-                      All on
-                    </label>
-                    <input
-                      type="date"
-                      className="topic-settings-datetime"
-                      value={groupDateValue}
-                      onChange={(e) =>
-                        updateGroupSchedule(item, e.target.value, groupTimeValue || "00:00")
-                      }
-                      title="Schedule date for all topics in this group"
-                    />
-                    <input
-                      type="time"
-                      step={60}
-                      className="topic-settings-datetime"
-                      value={groupTimeValue}
-                      onChange={(e) => {
-                        if (!groupDateValue) return;
-                        updateGroupSchedule(item, groupDateValue, e.target.value);
-                      }}
-                      disabled={!groupDateValue}
-                      title="Schedule time for all topics in this group"
-                    />
+                      <input
+                        type="time"
+                        step={60}
+                        className={datetimeClassName(groupAllEnabled)}
+                        value={groupTimeValue}
+                        onChange={(e) => {
+                          if (!groupDateValue) return;
+                          updateGroupSchedule(item, groupDateValue, e.target.value);
+                        }}
+                        disabled={!groupDateValue}
+                        title="Schedule time for all topics in this group"
+                      />
+                      </div>
+                    </div>
+                    <div className="topic-settings-meta-row">
+                      <div className="topic-settings-badge-row">
+                        {!isSectionMode && groupHasAssignmentSectionOverrides && (
+                          <span
+                            className="topic-settings-override-badge"
+                            title={formatOverriddenInLabel(groupAssignmentOverrideSections)}
+                          >
+                            {formatOverriddenInLabel(groupAssignmentOverrideSections)}
+                          </span>
+                        )}
+                        {groupHasAnyAssignmentInherited && (
+                          <span className="topic-settings-inherited-badge" title="Assignment inherits from All Sections">Inherited</span>
+                        )}
+                        {groupHasAnyAssignmentOverride && (
+                          <span className="topic-settings-override-active-badge" title="Assignment overrides the global default">Overrides</span>
+                        )}
+                      </div>
+                      <div className="topic-settings-control-row">
+                      <label className="topic-settings-toggle">
+                        <input
+                          type="checkbox"
+                          ref={(el) => {
+                            if (el) el.indeterminate = groupAssignedIndeterminate;
+                          }}
+                          checked={groupAllAssigned}
+                          onChange={(e) => updateGroupAssigned(item, e.target.checked)}
+                        />
+                        All assigned
+                      </label>
+                      <input
+                        type="date"
+                        className={datetimeClassName(!groupAllAssigned)}
+                        value={groupDueDateValue}
+                        onChange={(e) =>
+                          updateGroupDueSchedule(item, e.target.value, groupDueTimeValue || "00:00")
+                        }
+                        title="Due date for all topics in this group"
+                      />
+                      <input
+                        type="time"
+                        step={60}
+                        className={datetimeClassName(!groupAllAssigned)}
+                        value={groupDueTimeValue}
+                        onChange={(e) => {
+                          if (!groupDueDateValue) return;
+                          updateGroupDueSchedule(item, groupDueDateValue, e.target.value);
+                        }}
+                        disabled={!groupDueDateValue}
+                        title="Due time for all topics in this group"
+                      />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -452,76 +609,150 @@ export default function TopicSettingsPage({ classId }: { classId: number | null 
                     {item.topics.map((topic) => {
                       const draft = effectiveDraft(topic.id);
                       if (!draft) return null;
-                      const overrideSections = topicOverrideSections.get(topic.id);
+                      const enableOverrideSections = topicEnableOverrideSections.get(topic.id);
+                      const assignmentOverrideSections = topicAssignmentOverrideSections.get(topic.id);
                       const status = isFuture(draft.available_at)
                         ? "scheduled"
                         : draft.is_enabled
                           ? "on"
                           : "off";
+                      const assignmentStatus = draft.is_assigned ? "assigned" : "unassigned";
+                      const topicEnabled = isTopicEffectivelyOn(topic.id);
 
                       return (
                         <div key={topic.id} className="topic-settings-topic-row">
-                          <div className="topic-settings-topic-name">
-                            {topic.name}
-                            {!isSectionMode && overrideSections && overrideSections.length > 0 && (
-                              <span
-                                className="topic-settings-override-badge"
-                                title={formatOverriddenInLabel(overrideSections)}
-                              >
-                                {formatOverriddenInLabel(overrideSections)}
-                              </span>
-                            )}
-                            {isSectionMode && !hasOverride(topic.id) && (
-                              <span className="topic-settings-inherited-badge" title="Inherited from All Sections">Inherited</span>
-                            )}
-                            {isSectionMode && hasOverride(topic.id) && (
-                              <span className="topic-settings-override-active-badge" title="Overrides the global default">Overrides</span>
-                            )}
+                          <div className="topic-settings-topic-label-col">
+                            <div className="topic-settings-topic-name">{topic.name}</div>
                           </div>
-                          <div className="topic-settings-topic-controls">
-                            <span className={`topic-status ${status}`}>{status}</span>
-                            <label className="topic-settings-toggle">
-                              <input
-                                type="checkbox"
-                                checked={isTopicEffectivelyOn(topic.id)}
-                                onChange={(e) =>
-                                  updateTopic(topic.id, {
-                                    is_enabled: e.target.checked,
-                                    available_at: null,
-                                  })
-                                }
-                              />
-                              Enabled
-                            </label>
-                            <input
-                              type="date"
-                              className="topic-settings-datetime"
-                              value={toLocalDateValue(draft.available_at)}
-                              onChange={(e) =>
-                                updateTopic(topic.id, {
-                                  is_enabled: false,
-                                  available_at: toIsoFromLocalParts(
-                                    e.target.value,
-                                    toLocalTimeValue(draft.available_at) || "00:00",
-                                  ),
-                                })
-                              }
-                            />
-                            <input
-                              type="time"
-                              step={60}
-                              className="topic-settings-datetime"
-                              value={toLocalTimeValue(draft.available_at) || "00:00"}
-                              disabled={!toLocalDateValue(draft.available_at)}
-                              onChange={(e) => {
-                                const dateValue = toLocalDateValue(draft.available_at);
-                                if (!dateValue) return;
-                                updateTopic(topic.id, {
-                                  is_enabled: false,
-                                  available_at: toIsoFromLocalParts(dateValue, e.target.value),
-                                });
-                              }}
-                            />
+                          <div className="topic-settings-topic-side">
+                            <div className="topic-settings-meta-row">
+                              <div className="topic-settings-badge-row">
+                                <span className={`topic-status ${status}`}>{status}</span>
+                                {!isSectionMode && enableOverrideSections && enableOverrideSections.length > 0 && (
+                                  <span
+                                    className="topic-settings-override-badge"
+                                    title={formatOverriddenInLabel(enableOverrideSections)}
+                                  >
+                                    {formatOverriddenInLabel(enableOverrideSections)}
+                                  </span>
+                                )}
+                                {isSectionMode && !hasEnableOverride(topic.id) && (
+                                  <span className="topic-settings-inherited-badge" title="Availability inherited from All Sections">Inherited</span>
+                                )}
+                                {isSectionMode && hasEnableOverride(topic.id) && (
+                                  <span className="topic-settings-override-active-badge" title="Availability overrides the global default">Overrides</span>
+                                )}
+                              </div>
+                              <div className="topic-settings-control-row">
+                                <label className="topic-settings-toggle">
+                                  <input
+                                    type="checkbox"
+                                    checked={isTopicEffectivelyOn(topic.id)}
+                                    onChange={(e) =>
+                                      updateTopic(topic.id, {
+                                        is_enabled: e.target.checked,
+                                        available_at: null,
+                                      })
+                                    }
+                                  />
+                                  Enabled
+                                </label>
+                                <input
+                                  type="date"
+                                  className={datetimeClassName(topicEnabled)}
+                                  value={toLocalDateValue(draft.available_at)}
+                                  onChange={(e) =>
+                                    updateTopic(topic.id, {
+                                      is_enabled: false,
+                                      available_at: toIsoFromLocalParts(
+                                        e.target.value,
+                                        toLocalTimeValue(draft.available_at) || "00:00",
+                                      ),
+                                    })
+                                  }
+                                />
+                                <input
+                                  type="time"
+                                  step={60}
+                                  className={datetimeClassName(topicEnabled)}
+                                  value={toLocalTimeValue(draft.available_at) || "00:00"}
+                                  disabled={!toLocalDateValue(draft.available_at)}
+                                  onChange={(e) => {
+                                    const dateValue = toLocalDateValue(draft.available_at);
+                                    if (!dateValue) return;
+                                    updateTopic(topic.id, {
+                                      is_enabled: false,
+                                      available_at: toIsoFromLocalParts(dateValue, e.target.value),
+                                    });
+                                  }}
+                                />
+                              </div>
+                            </div>
+                            <div className="topic-settings-meta-row">
+                              <div className="topic-settings-badge-row">
+                                <span className={`topic-status topic-status--assignment ${assignmentStatus}`}>
+                                  {assignmentStatus}
+                                </span>
+                                {!isSectionMode && assignmentOverrideSections && assignmentOverrideSections.length > 0 && (
+                                  <span
+                                    className="topic-settings-override-badge"
+                                    title={formatOverriddenInLabel(assignmentOverrideSections)}
+                                  >
+                                    {formatOverriddenInLabel(assignmentOverrideSections)}
+                                  </span>
+                                )}
+                                {isSectionMode && !hasAssignmentOverride(topic.id) && (
+                                  <span className="topic-settings-inherited-badge" title="Assignment inherited from All Sections">Inherited</span>
+                                )}
+                                {isSectionMode && hasAssignmentOverride(topic.id) && (
+                                  <span className="topic-settings-override-active-badge" title="Assignment overrides the global default">Overrides</span>
+                                )}
+                              </div>
+                              <div className="topic-settings-control-row">
+                                <label className="topic-settings-toggle">
+                                  <input
+                                    type="checkbox"
+                                    checked={draft.is_assigned}
+                                    onChange={(e) =>
+                                      updateTopic(topic.id, {
+                                        is_assigned: e.target.checked,
+                                        due_at: null,
+                                      })
+                                    }
+                                  />
+                                  Assigned
+                                </label>
+                                <input
+                                  type="date"
+                                  className={datetimeClassName(!draft.is_assigned)}
+                                  value={toLocalDateValue(draft.due_at)}
+                                  onChange={(e) =>
+                                    updateTopic(topic.id, {
+                                      is_assigned: true,
+                                      due_at: toIsoFromLocalParts(
+                                        e.target.value,
+                                        toLocalTimeValue(draft.due_at) || "00:00",
+                                      ),
+                                    })
+                                  }
+                                />
+                                <input
+                                  type="time"
+                                  step={60}
+                                  className={datetimeClassName(!draft.is_assigned)}
+                                  value={toLocalTimeValue(draft.due_at) || "00:00"}
+                                  disabled={!toLocalDateValue(draft.due_at)}
+                                  onChange={(e) => {
+                                    const dateValue = toLocalDateValue(draft.due_at);
+                                    if (!dateValue) return;
+                                    updateTopic(topic.id, {
+                                      is_assigned: true,
+                                      due_at: toIsoFromLocalParts(dateValue, e.target.value),
+                                    });
+                                  }}
+                                />
+                              </div>
+                            </div>
                           </div>
                         </div>
                       );

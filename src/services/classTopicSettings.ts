@@ -5,6 +5,8 @@ export interface ClassTopicSetting {
   section?: string | null;
   is_enabled?: boolean;
   available_at?: string | null;
+  is_assigned?: boolean;
+  due_at?: string | null;
   effective_enabled: boolean;
 }
 
@@ -18,6 +20,8 @@ export interface ClassTopicSettingInput {
   name?: string;
   is_enabled: boolean;
   available_at: string | null;
+  is_assigned: boolean;
+  due_at: string | null;
 }
 
 export const classTopicSettingsService = {

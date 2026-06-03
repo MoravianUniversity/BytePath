@@ -9,12 +9,21 @@ from backend.services.class_topic_settings_service import ClassTopicSettingsServ
 def test_list_settings_returns_global_and_section_overrides(monkeypatch):
     now = datetime.utcnow()
     rows = [
-        SimpleNamespace(topic_id="t1", section=None, is_enabled=True, available_at=None),
+        SimpleNamespace(
+            topic_id="t1",
+            section=None,
+            is_enabled=True,
+            available_at=None,
+            is_assigned=False,
+            due_at=None,
+        ),
         SimpleNamespace(
             topic_id="t2",
             section="A",
             is_enabled=False,
             available_at=now + timedelta(days=1),
+            is_assigned=True,
+            due_at=now + timedelta(days=7),
         ),
     ]
 
@@ -66,7 +75,13 @@ def test_bulk_upsert_replace_scope_deletes_missing(monkeypatch):
 
     ClassTopicSettingsService.bulk_upsert(
         7,
-        [{"topic_id": "topic-1", "is_enabled": True, "available_at": None}],
+        [{
+            "topic_id": "topic-1",
+            "is_enabled": True,
+            "available_at": None,
+            "is_assigned": False,
+            "due_at": None,
+        }],
         section="A",
         replace_scope=True,
     )

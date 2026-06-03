@@ -152,6 +152,8 @@ with app.app_context():
                     section VARCHAR(64),
                     is_enabled BOOLEAN NOT NULL DEFAULT 1,
                     available_at DATETIME,
+                    is_assigned BOOLEAN NOT NULL DEFAULT 0,
+                    due_at DATETIME,
                     updated_at DATETIME,
                     UNIQUE (class_id, topic_id, section)
                 )
@@ -171,6 +173,8 @@ with app.app_context():
                         section VARCHAR(64),
                         is_enabled BOOLEAN NOT NULL DEFAULT 1,
                         available_at DATETIME,
+                        is_assigned BOOLEAN NOT NULL DEFAULT 0,
+                        due_at DATETIME,
                         updated_at DATETIME,
                         UNIQUE (class_id, topic_id, section)
                     )
@@ -185,6 +189,21 @@ with app.app_context():
                 conn.execute(db.text("ALTER TABLE class_topic_settings_new RENAME TO class_topic_settings"))
                 conn.commit()
                 print("class_topic_settings recreated with section support.")
+
+        cts_cols = [col['name'] for col in db.inspect(db.engine).get_columns('class_topic_settings')]
+        with db.engine.connect() as conn:
+            if 'is_assigned' not in cts_cols:
+                print("Adding is_assigned to class_topic_settings...")
+                conn.execute(db.text(
+                    "ALTER TABLE class_topic_settings ADD COLUMN is_assigned BOOLEAN NOT NULL DEFAULT 0"
+                ))
+                conn.commit()
+            if 'due_at' not in cts_cols:
+                print("Adding due_at to class_topic_settings...")
+                conn.execute(db.text(
+                    "ALTER TABLE class_topic_settings ADD COLUMN due_at DATETIME"
+                ))
+                conn.commit()
 
     # ── create any new tables (classes, upload_history, etc.) ────────────────
     db.create_all()

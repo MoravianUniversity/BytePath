@@ -1,6 +1,6 @@
 .topic-settings-page {
   color: var(--text-dashboard);
-  max-width: 1100px;
+  max-width: 1280px;
   margin: 0 auto;
 }
 
@@ -93,7 +93,7 @@
 
 .topic-settings-group-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
@@ -101,12 +101,11 @@
   background: var(--bg-dashboard-card-hover);
 }
 
-.topic-settings-group-title-wrap {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+.topic-settings-group-title-col,
+.topic-settings-topic-label-col {
+  flex: 1 1 12rem;
   min-width: 0;
+  align-self: flex-start;
 }
 
 .topic-settings-group-title {
@@ -116,20 +115,49 @@
   font-size: 1rem;
   font-weight: 700;
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.45rem;
   cursor: pointer;
+  line-height: 34px;
+  padding: 0;
 }
 
 .topic-settings-group-title:hover {
   opacity: 0.85;
 }
 
-.topic-settings-group-controls {
+.topic-settings-group-side,
+.topic-settings-topic-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+.topic-settings-meta-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.topic-settings-badge-row {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
+  min-height: 34px;
+  align-self: flex-start;
+}
+
+.topic-settings-control-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-self: flex-start;
 }
 
 .topic-settings-topic-list {
@@ -138,7 +166,7 @@
 
 .topic-settings-topic-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.65rem 0.85rem 0.65rem 2rem;
@@ -147,11 +175,8 @@
 }
 
 .topic-settings-topic-name {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
   font-weight: 500;
+  line-height: 34px;
 }
 
 .topic-settings-override-badge,
@@ -182,12 +207,15 @@
   color: #16a34a;
 }
 
-.topic-settings-topic-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  flex-shrink: 0;
+.topic-status.assigned {
+  background: rgba(59, 130, 246, 0.15);
+  color: #2563eb;
+}
+
+.topic-status.unassigned {
+  background: rgba(148, 163, 184, 0.14);
+  color: var(--text-dashboard);
+  opacity: 0.9;
 }
 
 .topic-settings-toggle {
@@ -213,6 +241,17 @@
   background: var(--bg-page);
   color: var(--text-dashboard);
   font-size: 0.85rem;
+}
+
+.topic-settings-datetime--inactive {
+  opacity: 0.45;
+  border-color: color-mix(in srgb, var(--border-dashboard-card) 65%, transparent);
+  transition: opacity 0.15s ease, border-color 0.15s ease;
+}
+
+.topic-settings-datetime--inactive:focus {
+  opacity: 1;
+  border-color: var(--border-dashboard-card);
 }
 
 .topic-settings-datetime:focus {
@@ -245,17 +284,18 @@
 }
 
 @media (max-width: 900px) {
-  .topic-settings-group-header,
-  .topic-settings-topic-row {
-    align-items: flex-start;
-  }
-
   .topic-settings-topic-row {
     padding-left: 1rem;
   }
 
-  .topic-settings-topic-controls {
+  .topic-settings-group-side,
+  .topic-settings-topic-side {
     width: 100%;
+    align-items: stretch;
+  }
+
+  .topic-settings-meta-row {
+    justify-content: flex-start;
   }
 }
 
