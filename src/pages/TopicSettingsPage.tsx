@@ -18,6 +18,8 @@ type TopicDraft = {
 };
 
 const ALL_SECTIONS_VALUE = "__all_sections__";
+const DEFAULT_AVAILABLE_TIME = "00:00";
+const DEFAULT_DUE_TIME = "23:59";
 
 function parseServerUtc(iso: string): Date {
   const normalized = /(?:Z|[+-]\d{2}:\d{2})$/.test(iso) ? iso : `${iso}Z`;
@@ -40,7 +42,7 @@ function toLocalTimeValue(iso: string | null): string {
 
 function toIsoFromLocalParts(dateValue: string, timeValue: string): string | null {
   if (!dateValue) return null;
-  const time = /^\d{2}:\d{2}$/.test(timeValue) ? timeValue : "00:00";
+  const time = /^\d{2}:\d{2}$/.test(timeValue) ? timeValue : DEFAULT_AVAILABLE_TIME;
   return new Date(`${dateValue}T${time}`).toISOString();
 }
 
@@ -468,12 +470,12 @@ export default function TopicSettingsPage({ classId }: { classId: number | null 
             );
             const groupDueDateValue = sameGroupDueDate ? firstGroupDueDate : "";
             const firstGroupDueTime = groupDrafts.length
-              ? (toLocalTimeValue(groupDrafts[0].due_at) || "00:00")
-              : "00:00";
+              ? (toLocalTimeValue(groupDrafts[0].due_at) || DEFAULT_DUE_TIME)
+              : DEFAULT_DUE_TIME;
             const sameGroupDueTime = groupDrafts.every(
-              (draft) => (toLocalTimeValue(draft.due_at) || "00:00") === firstGroupDueTime,
+              (draft) => (toLocalTimeValue(draft.due_at) || DEFAULT_DUE_TIME) === firstGroupDueTime,
             );
-            const groupDueTimeValue = sameGroupDueDate && sameGroupDueTime ? firstGroupDueTime : "00:00";
+            const groupDueTimeValue = sameGroupDueDate && sameGroupDueTime ? firstGroupDueTime : DEFAULT_DUE_TIME;
 
             return (
               <section key={item.id} className="topic-settings-group">
@@ -583,7 +585,7 @@ export default function TopicSettingsPage({ classId }: { classId: number | null 
                         className={datetimeClassName(!groupAllAssigned)}
                         value={groupDueDateValue}
                         onChange={(e) =>
-                          updateGroupDueSchedule(item, e.target.value, groupDueTimeValue || "00:00")
+                          updateGroupDueSchedule(item, e.target.value, groupDueTimeValue || DEFAULT_DUE_TIME)
                         }
                         title="Due date for all topics in this group"
                       />
@@ -731,7 +733,7 @@ export default function TopicSettingsPage({ classId }: { classId: number | null 
                                       is_assigned: true,
                                       due_at: toIsoFromLocalParts(
                                         e.target.value,
-                                        toLocalTimeValue(draft.due_at) || "00:00",
+                                        toLocalTimeValue(draft.due_at) || DEFAULT_DUE_TIME,
                                       ),
                                     })
                                   }
@@ -740,7 +742,7 @@ export default function TopicSettingsPage({ classId }: { classId: number | null 
                                   type="time"
                                   step={60}
                                   className={datetimeClassName(!draft.is_assigned)}
-                                  value={toLocalTimeValue(draft.due_at) || "00:00"}
+                                  value={toLocalTimeValue(draft.due_at) || DEFAULT_DUE_TIME}
                                   disabled={!toLocalDateValue(draft.due_at)}
                                   onChange={(e) => {
                                     const dateValue = toLocalDateValue(draft.due_at);
