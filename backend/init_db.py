@@ -8,7 +8,9 @@ from typing import Iterable
 from sqlalchemy import func
 
 from backend.app import create_app
-from backend.models import StudentProgress, StudentResponse, Topic, User, db
+from backend.models import Class, StudentProgress, StudentResponse, Topic, User, db
+
+DEMO_CLASS_NAME = "Demo Class"
 from backend.topic_definitions import DEFAULT_TOPICS, TOPIC_DEFINITIONS, TOPIC_META_BY_ID
 
 
@@ -89,6 +91,14 @@ def seed_realistic_dataset() -> None:
     if not instructor:
         instructor = User(email="bush@moravian.edu", name="Dr. Bush", role="instructor")
         db.session.add(instructor)
+        db.session.flush()
+
+    demo_class = db.session.execute(
+        db.select(Class).filter_by(class_name=DEMO_CLASS_NAME, instructor_id=instructor.id)
+    ).scalar_one_or_none()
+    if not demo_class:
+        demo_class = Class(class_name=DEMO_CLASS_NAME, instructor_id=instructor.id)
+        db.session.add(demo_class)
         db.session.flush()
 
     student_profiles = [
@@ -255,12 +265,17 @@ def seed_realistic_dataset() -> None:
             )
         )
         progress = db.session.execute(
-            db.select(StudentProgress).filter_by(user_id=user_id, topic=topic_id)
+            db.select(StudentProgress).filter_by(
+                user_id=user_id,
+                topic=topic_id,
+                class_id=demo_class.id,
+            )
         ).scalar_one_or_none()
 
         if not progress:
             progress = StudentProgress(
                 user_id=user_id,
+                class_id=demo_class.id,
                 topic=topic_id,
                 subtopics_completed=subtopics_completed,
                 max_subtopics_completed=subtopics_completed,

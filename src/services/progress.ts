@@ -11,24 +11,27 @@ export interface TopicProgress {
   best_completion_percentage: number;
   questions_answered: number;
   last_accessed: string | null;
-  class_id?: number | null;
+  class_id: number;
 }
 
 export interface UpdateProgressRequest {
   subtopics_completed: number;
   total_subtopics: number;
-  class_id?: number | null;
+  class_id: number;
 }
 
 export const progressService = {
-  async getUserProgress(userId: number, classId?: number | null): Promise<TopicProgress[]> {
-    const params = classId != null ? `?class_id=${classId}` : '';
-    const response = await api.get(`progress/${userId}${params}`);
+  async getUserProgress(userId: number, classId: number): Promise<TopicProgress[]> {
+    const response = await api.get(`progress/${userId}?class_id=${classId}`);
     return response.data.progress;
   },
 
-  async getTopicProgress(userId: number, topic: string): Promise<TopicProgress> {
-    const response = await api.get(`progress/${userId}/${topic}`);
+  async getTopicProgress(
+    userId: number,
+    topic: string,
+    classId: number,
+  ): Promise<TopicProgress> {
+    const response = await api.get(`progress/${userId}/${topic}?class_id=${classId}`);
     return response.data;
   },
 
@@ -40,7 +43,7 @@ export const progressService = {
     await api.put(`progress/${userId}/${topic}`, data);
   },
 
-  async incrementProgress(userId: number, topic: string): Promise<void> {
-    await api.post(`progress/${userId}/${topic}/increment`);
+  async incrementProgress(userId: number, topic: string, classId: number): Promise<void> {
+    await api.post(`progress/${userId}/${topic}/increment?class_id=${classId}`);
   },
 };

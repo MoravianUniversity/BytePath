@@ -21,9 +21,24 @@ def get_topic_repository():
     return current_app.config.get("TOPIC_REPOSITORY", topic_repository)
 
 
+def _parse_required_class_id(*, from_json: bool = False) -> tuple[int | None, tuple | None]:
+    if from_json:
+        payload = request.get_json(silent=True) or {}
+        raw = payload.get("class_id")
+    else:
+        raw = request.args.get("class_id")
+
+    if raw is None or raw == "":
+        return None, (jsonify({"error": "class_id is required"}), 400)
+    try:
+        return int(raw), None
+    except (TypeError, ValueError):
+        return None, (jsonify({"error": "class_id must be an integer"}), 400)
+
+
 @progress_bp.get("/<int:user_id>")
 def get_user_progress(user_id: int):
-    """Return progress for all topics for the requested user."""
+    """Return progress for all topics for the requested user in a class."""
 
     users = get_user_repository()
     topics_repo = get_topic_repository()
@@ -32,7 +47,9 @@ def get_user_progress(user_id: int):
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    class_id = request.args.get("class_id", type=int)
+    class_id, error = _parse_required_class_id()
+    if error:
+        return error
 
     service = get_progress_service()
     progress_records = service.get_user_progress(user_id, class_id=class_id)
@@ -55,13 +72,17 @@ def get_user_progress(user_id: int):
 
 @progress_bp.get("/<int:user_id>/<string:topic_id>")
 def get_topic_progress(user_id: int, topic_id: str):
-    """Return progress for a specific topic for the requested user."""
+    """Return progress for a specific topic for the requested user in a class."""
 
     users = get_user_repository()
     topics_repo = get_topic_repository()
 
     if not users.get_by_id(user_id):
         return jsonify({"error": "User not found"}), 404
+
+    class_id, error = _parse_required_class_id()
+    if error:
+        return error
 
     topic = topics_repo.get_by_id(topic_id)
     if not topic:
@@ -72,7 +93,7 @@ def get_topic_progress(user_id: int, topic_id: str):
         )
 
     service = get_progress_service()
-    progress = service.get_topic_progress(user_id, topic_id)
+    progress = service.get_topic_progress(user_id, topic_id, class_id=class_id)
     if not progress:
         return jsonify({"error": "Progress not found for this user and topic"}), 404
 
@@ -81,7 +102,7 @@ def get_topic_progress(user_id: int, topic_id: str):
 
 @progress_bp.put("/<int:user_id>/<string:topic_id>")
 def update_topic_progress(user_id: int, topic_id: str):
-    """Create or update a progress record for a given user and topic."""
+    """Create or update a progress record for a given user, topic, and class."""
 
     payload = request.get_json(silent=True) or {}
 
@@ -101,8 +122,9 @@ def update_topic_progress(user_id: int, topic_id: str):
     if total_subtopics <= 0:
         return jsonify({"error": "total_subtopics must be greater than 0"}), 400
 
-    raw_class_id = payload.get("class_id")
-    class_id = int(raw_class_id) if raw_class_id is not None else None
+    class_id, error = _parse_required_class_id(from_json=True)
+    if error:
+        return error
 
     users = get_user_repository()
     topics_repo = get_topic_repository()
@@ -136,7 +158,7 @@ def update_topic_progress(user_id: int, topic_id: str):
 
 @progress_bp.post("/<int:user_id>/<string:topic_id>/increment")
 def increment_questions_answered(user_id: int, topic_id: str):
-    """Increment the number of questions answered for a topic."""
+    """Increment the number of questions answered for a topic in a class."""
 
     users = get_user_repository()
     topics_repo = get_topic_repository()
@@ -151,7 +173,9 @@ def increment_questions_answered(user_id: int, topic_id: str):
             is_visible=True,
         )
 
-    class_id = request.args.get("class_id", type=int)
+    class_id, error = _parse_required_class_id()
+    if error:
+        return error
 
     service = get_progress_service()
     progress = service.increment_questions_answered(

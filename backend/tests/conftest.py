@@ -118,6 +118,12 @@ def student1_id(app):
 
 
 @pytest.fixture
+def progress_class_id():
+    """Class id used by progress API tests (fake service and query params)."""
+    return 1
+
+
+@pytest.fixture
 def student2_id(app):
     return app.config["USER_REPOSITORY"].get_by_email("student2@test.com").id
 
@@ -313,32 +319,47 @@ def _install_fake_progress_service(app):
     student1 = auth_service.get_user_by_email("student1@test.com")
 
     class FakeProgress:
-        def __init__(self, user_id: int, topic: str, subtopics_completed: int, total_subtopics: int, questions_answered: int = 0):
+        def __init__(
+            self,
+            user_id: int,
+            topic: str,
+            class_id: int,
+            subtopics_completed: int,
+            total_subtopics: int,
+            questions_answered: int = 0,
+        ):
             self.user_id = user_id
             self.topic = topic
+            self.class_id = class_id
             self.subtopics_completed = subtopics_completed
             self.max_subtopics_completed = subtopics_completed
             self.total_subtopics = total_subtopics
             self.questions_answered = questions_answered
             self.last_accessed = None
-            self.class_id = None
 
     class FakeProgressService:
         def __init__(self, s1_id: int):
             self.s1_id = s1_id
             self.topic_id = "test-topic-1"
+            self.default_class_id = 1
             self.records = {
-                (s1_id, self.topic_id): FakeProgress(s1_id, self.topic_id, 3, 7, 10)
+                (s1_id, self.topic_id, self.default_class_id): FakeProgress(
+                    s1_id, self.topic_id, self.default_class_id, 3, 7, 10
+                )
             }
 
-        def get_user_progress(self, user_id: int):
-            return [record for (uid, _), record in self.records.items() if uid == user_id]
+        def get_user_progress(self, user_id: int, class_id: int):
+            return [
+                record
+                for (uid, _, cid), record in self.records.items()
+                if uid == user_id and cid == class_id
+            ]
 
-        def get_topic_progress(self, user_id: int, topic_id: str):
-            return self.records.get((user_id, topic_id))
+        def get_topic_progress(self, user_id: int, topic_id: str, class_id: int):
+            return self.records.get((user_id, topic_id, class_id))
 
-        def update_or_create_progress(self, user_id: int, topic_id: str, data):
-            key = (user_id, topic_id)
+        def update_or_create_progress(self, user_id: int, topic_id: str, data, class_id: int):
+            key = (user_id, topic_id, class_id)
             if key in self.records:
                 record = self.records[key]
                 record.subtopics_completed = data["subtopics_completed"]
@@ -351,6 +372,7 @@ def _install_fake_progress_service(app):
                 record = FakeProgress(
                     user_id,
                     topic_id,
+                    class_id,
                     data["subtopics_completed"],
                     data["total_subtopics"],
                     0,
@@ -359,10 +381,12 @@ def _install_fake_progress_service(app):
                 created = True
             return record, created
 
-        def increment_questions_answered(self, user_id: int, topic_id: str, timestamp=None):
-            key = (user_id, topic_id)
+        def increment_questions_answered(
+            self, user_id: int, topic_id: str, class_id: int, timestamp=None
+        ):
+            key = (user_id, topic_id, class_id)
             if key not in self.records:
-                self.records[key] = FakeProgress(user_id, topic_id, 0, 0, 0)
+                self.records[key] = FakeProgress(user_id, topic_id, class_id, 0, 0, 0)
             record = self.records[key]
             record.questions_answered = (record.questions_answered or 0) + 1
             return record
@@ -437,7 +461,7 @@ def _install_fake_response_service(app):
             self.responses.setdefault(data["user_id"], []).append(resp)
             return resp
 
-        def get_student_responses(self, user_id: int):
+        def get_student_responses(self, user_id: int, class_id=None):
             return self.responses.get(user_id, [])
 
         def get_student_responses_for_topic(self, user_id: int, topic_id: str):

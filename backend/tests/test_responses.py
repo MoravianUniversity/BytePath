@@ -11,6 +11,7 @@ def test_submit_response(client, student1_id):
         "is_correct": True,
         "status": "correct",
         "time_spent": 45,
+        "class_id": 1,
     }
 
     response = client.post("/api/responses", json=payload)
@@ -68,6 +69,7 @@ def test_submit_response_invalid_status(client, student1_id):
         "is_correct": True,
         "status": "maybe",
         "time_spent": 45,
+        "class_id": 1,
     }
 
     response = client.post("/api/responses", json=payload)
@@ -87,6 +89,7 @@ def test_submit_response_unknown_user(client):
         "is_correct": True,
         "status": "correct",
         "time_spent": 45,
+        "class_id": 1,
     }
 
     response = client.post("/api/responses", json=payload)

@@ -58,11 +58,19 @@ def create_response():
             is_visible=True,
         )
 
+    raw_class_id = payload.get("class_id")
+    if raw_class_id is None:
+        return jsonify({"error": "class_id is required"}), 400
+    try:
+        class_id = int(raw_class_id)
+    except (TypeError, ValueError):
+        return jsonify({"error": "class_id must be an integer"}), 400
+
     response = response_service.create_response(payload)
     progress_service.increment_questions_answered(
         user_id=user.id,
         topic_id=topic.id,
-        class_id=payload.get("class_id"),
+        class_id=class_id,
     )
 
     return (

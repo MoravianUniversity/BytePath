@@ -11,25 +11,27 @@ class ProgressService:
     """Business logic for tracking student progress."""
 
     @staticmethod
-    def get_user_progress(
-        user_id: int, class_id: Optional[int] = None
-    ) -> Iterable[StudentProgress]:
+    def get_user_progress(user_id: int, class_id: int) -> Iterable[StudentProgress]:
         return progress_repository.get_by_user(user_id, class_id=class_id)
 
     @staticmethod
     def get_topic_progress(
-        user_id: int, topic_id: str, class_id: Optional[int] = None
+        user_id: int, topic_id: str, class_id: int
     ) -> Optional[StudentProgress]:
-        return progress_repository.get_by_user_and_topic(user_id, topic_id, class_id=class_id)
+        return progress_repository.get_by_user_and_topic(
+            user_id, topic_id, class_id=class_id
+        )
 
     @staticmethod
     def update_or_create_progress(
-        user_id: int, topic_id: str, data: Dict[str, int], class_id: Optional[int] = None
+        user_id: int, topic_id: str, data: Dict[str, int], class_id: int
     ) -> tuple[StudentProgress, bool]:
         subtopics_completed = data["subtopics_completed"]
         total_subtopics = data["total_subtopics"]
 
-        progress = progress_repository.get_by_user_and_topic(user_id, topic_id, class_id=class_id)
+        progress = progress_repository.get_by_user_and_topic(
+            user_id, topic_id, class_id=class_id
+        )
         created = False
         if progress:
             progress.subtopics_completed = subtopics_completed
@@ -60,14 +62,16 @@ class ProgressService:
     def increment_questions_answered(
         user_id: int,
         topic_id: str,
-        class_id: Optional[int] = None,
+        class_id: int,
         *,
         timestamp: Optional[datetime] = None,
     ) -> StudentProgress:
         if timestamp is None:
             timestamp = datetime.utcnow()
 
-        progress = progress_repository.get_by_user_and_topic(user_id, topic_id, class_id=class_id)
+        progress = progress_repository.get_by_user_and_topic(
+            user_id, topic_id, class_id=class_id
+        )
 
         if progress:
             progress.questions_answered = (progress.questions_answered or 0) + 1

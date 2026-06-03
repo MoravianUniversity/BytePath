@@ -393,13 +393,13 @@ function App() {
 
   // Hydrate server-side progress after login so completion follows users across browsers.
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser || currentClass == null) return;
 
     (async () => {
       try {
         const [progress, responses] = await Promise.all([
-          progressService.getUserProgress(currentUser.id, currentClass?.id ?? null),
-          responsesService.getStudentResponses(currentUser.id, currentClass?.id ?? null),
+          progressService.getUserProgress(currentUser.id, currentClass.id),
+          responsesService.getStudentResponses(currentUser.id, currentClass.id),
         ]);
 
         const completedFromProgress = progress
@@ -654,10 +654,12 @@ function App() {
 
         await responsesService.submitResponse(responseData);
 
+        if (currentClass == null) return;
+
         await progressService.updateProgress(currentUser.id, currentTopic.id, {
           subtopics_completed: currentTopic.numCompletedSubtopics,
           total_subtopics: currentTopic.subtopics.length,
-          class_id: currentClass?.id ?? null,
+          class_id: currentClass.id,
         });
       } catch (error) {
         console.error('Failed to sync to backend:', error);
@@ -967,10 +969,10 @@ function App() {
                   ))}
                 </div>
               </div>
-            ) : !isInstructor ? (
+            ) : !isInstructor && currentClass ? (
               <StudentDashboard
                 user={currentUser}
-                currentClassId={currentClass?.id ?? null}
+                currentClassId={currentClass.id}
                 currentClass={currentClass}
               />
             ) : (

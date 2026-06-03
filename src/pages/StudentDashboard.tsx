@@ -26,7 +26,7 @@ import {
 
 interface StudentDashboardProps {
   user: User;
-  currentClassId: number | null;
+  currentClassId: number;
   currentClass?: Class | null;
 }
 
@@ -365,9 +365,9 @@ export default function StudentDashboard({
     setLoading(true);
     setError(null);
 
-    const settingsPromise = currentClassId != null
-      ? classTopicSettingsService.getSettings(currentClassId).catch(() => null)
-      : Promise.resolve(null);
+    const settingsPromise = classTopicSettingsService
+      .getSettings(currentClassId)
+      .catch(() => null);
 
     Promise.all([
       progressService.getUserProgress(user.id, currentClassId),

@@ -167,7 +167,7 @@ class StudentProgress(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    class_id = db.Column(db.Integer, db.ForeignKey("classes.id"), nullable=True)
+    class_id = db.Column(db.Integer, db.ForeignKey("classes.id"), nullable=False)
     topic = db.Column(db.String(100), db.ForeignKey("topics.id"), nullable=False)
     subtopics_completed = db.Column(db.Integer, default=0)
     max_subtopics_completed = db.Column(db.Integer, default=0)

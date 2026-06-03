@@ -137,7 +137,7 @@ sudo systemctl restart bytepath-backend bytepath-frontend
 
 **"Database errors"**
 - The script automatically initializes the database
-- If it fails, manually run: `python3 -m backend.add_columns`
+- If it fails, manually run: `python3 -m backend.db_migration`
 
 ## Useful Commands
 

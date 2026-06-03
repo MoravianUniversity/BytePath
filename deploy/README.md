@@ -101,7 +101,7 @@ source .venv/bin/activate
 git pull
 pip install -r backend/requirements.txt
 npm install
-python3 -m backend.add_columns
+python3 -m backend.db_migration
 sudo systemctl restart bytepath-backend
 sudo systemctl restart bytepath-frontend
 ```

@@ -224,21 +224,21 @@ if [ ! -s "$BACKEND_DIR/bytepath.db" ]; then
     source "$BACKEND_DIR/.venv/bin/activate"
     python3 -m backend.init_db || echo "Warning: Database initialization may have failed"
     
-    # Run add_columns script to ensure schema is up to date
-    if [ -f "$PROJECT_ROOT/backend/add_columns.py" ]; then
+    # Run db_migration script to ensure schema is up to date
+    if [ -f "$PROJECT_ROOT/backend/db_migration.py" ]; then
         echo "Updating database schema..."
-        python3 -m backend.add_columns || echo "Warning: Schema update may have failed"
+        python3 -m backend.db_migration || echo "Warning: Schema update may have failed"
     fi
     chown $SERVICE_USER:$SERVICE_USER "$BACKEND_DIR/bytepath.db"
 else
     echo "Database already exists, skipping initialization..."
-    # Still run add_columns to ensure schema is up to date
-    if [ -f "$PROJECT_ROOT/backend/add_columns.py" ]; then
+    # Still run db_migration to ensure schema is up to date
+    if [ -f "$PROJECT_ROOT/backend/db_migration.py" ]; then
         echo "Checking database schema..."
         cd "$PROJECT_ROOT"
         export PYTHONPATH="$PROJECT_ROOT"
         source "$BACKEND_DIR/.venv/bin/activate"
-        python3 -m backend.add_columns || echo "Warning: Schema update may have failed"
+        python3 -m backend.db_migration || echo "Warning: Schema update may have failed"
     fi
 fi
 
