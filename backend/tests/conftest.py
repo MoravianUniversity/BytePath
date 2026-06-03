@@ -134,17 +134,12 @@ def _install_fake_auth_service(app):
     user_repo = app.config["USER_REPOSITORY"]
 
     class FakeAuthService:
-        INSTRUCTOR_EMAILS = {"instructor@test.com", "bush@moravian.edu", "prof@test.com"}
-
-        def login_or_create_user(self, email: str):
+        def login_or_create_user(self, email: str, display_name=None):
             user = user_repo.get_by_email(email)
-            desired_role = "instructor" if email.lower() in self.INSTRUCTOR_EMAILS else "student"
             if user:
-                if desired_role == "instructor" and user.role != "instructor":
-                    user.role = "instructor"
                 return user
-            name = email.split("@")[0].replace(".", " ").title()
-            return user_repo.create_user(email=email, name=name, role=desired_role)
+            name = display_name or email.split("@")[0].replace(".", " ").title()
+            return user_repo.create_user(email=email, name=name, role="student")
 
         def get_user_by_id(self, user_id: int):
             return user_repo.get_by_id(user_id)

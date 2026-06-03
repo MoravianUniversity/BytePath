@@ -11,9 +11,6 @@ from backend.repositories import user_repository
 class AuthService:
     """Service encapsulating authentication-related operations."""
 
-    # List of emails that should be assigned instructor role
-    INSTRUCTOR_EMAILS = {"bushj@moravian.edu"}
-
     @staticmethod
     def login_or_create_user(email: str, display_name: Optional[str] = None) -> User:
         email_lower = email.lower()
@@ -36,21 +33,12 @@ class AuthService:
         )
 
         user = user_repository.get_by_email(email)
-        desired_role = (
-            "instructor" if email_lower in AuthService.INSTRUCTOR_EMAILS else "student"
-        )
 
         if not user:
             name = preferred_name or display_name or email.split("@")[0].replace(".", " ").title()
-            user = user_repository.create_user(email=email, name=name, role=desired_role)
+            user = user_repository.create_user(email=email, name=name, role="student")
             db.session.commit()
         else:
-            if email_lower in AuthService.INSTRUCTOR_EMAILS and user.role != "instructor":
-                user.role = "instructor"
-            elif roster_entry and user.role != "instructor":
-                # Ensure rostered logins are treated as students for reporting
-                user.role = "student"
-
             if roster_entry and preferred_name and user.name != preferred_name:
                 user.name = preferred_name
             elif not roster_entry and display_name and user.name != display_name:

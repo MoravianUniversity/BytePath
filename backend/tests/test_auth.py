@@ -28,10 +28,10 @@ def test_login_missing_email(client):
     assert response.status_code == 400
 
 
-def test_login_instructor_email(client):
-    """Instructor emails should be assigned instructor role."""
+def test_login_existing_instructor(client):
+    """Existing instructor accounts keep their role on login."""
 
-    response = client.post("/api/auth/login", json={"email": "prof@test.com"})
+    response = client.post("/api/auth/login", json={"email": "instructor@test.com"})
     assert response.status_code == 200
     data = response.get_json()
     assert data["user"]["role"] == "instructor"

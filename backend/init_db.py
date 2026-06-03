@@ -1,17 +1,26 @@
 from __future__ import annotations
 
 import argparse
+import os
 import random
+import sys
 from datetime import datetime, timedelta, timezone
-from typing import Iterable
 
 from sqlalchemy import func
 
 from backend.app import create_app
 from backend.models import Class, StudentProgress, StudentResponse, Topic, User, db
+from backend.topic_definitions import DEFAULT_TOPICS, TOPIC_DEFINITIONS, TOPIC_META_BY_ID
 
 DEMO_CLASS_NAME = "Demo Class"
-from backend.topic_definitions import DEFAULT_TOPICS, TOPIC_DEFINITIONS, TOPIC_META_BY_ID
+
+# Dev/test accounts inserted only with --seed (not first-time production init).
+DEFAULT_USERS = [
+    ("instructor@test.com", "Test Instructor", "instructor"),
+    ("student1@test.com", "Student One", "student"),
+    ("student2@test.com", "Student Two", "student"),
+    ("integration@test.com", "Integration Student", "student"),
+]
 
 
 def _utc_now() -> datetime:
@@ -20,7 +29,71 @@ def _utc_now() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
-def initialise_database(seed: bool = False, realistic: bool = False) -> None:
+def _normalize_email(email: str) -> str:
+    return email.strip().lower()
+
+
+def _display_name_from_email(email: str) -> str:
+    local = email.split("@", 1)[0]
+    return local.replace(".", " ").replace("_", " ").title()
+
+
+def _prompt_instructor_email() -> str:
+    print("No instructor account exists yet.")
+    while True:
+        email = input("Primary instructor email: ").strip()
+        normalized = _normalize_email(email)
+        if normalized and "@" in normalized and "." in normalized.split("@", 1)[-1]:
+            return normalized
+        print("Please enter a valid email address.")
+
+
+def _resolve_instructor_email(cli_email: str | None) -> str | None:
+    if cli_email:
+        return _normalize_email(cli_email)
+    env_email = os.environ.get("BYTEPATH_INSTRUCTOR_EMAIL", "").strip()
+    if env_email:
+        return _normalize_email(env_email)
+    if sys.stdin.isatty():
+        return _prompt_instructor_email()
+    return None
+
+
+def _has_instructor() -> bool:
+    return (
+        db.session.execute(
+            db.select(func.count(User.id)).where(User.role == "instructor")
+        ).scalar_one()
+        > 0
+    )
+
+
+def _ensure_primary_instructor(email: str) -> User:
+    normalized = _normalize_email(email)
+    existing = db.session.execute(
+        db.select(User).filter(func.lower(User.email) == normalized)
+    ).scalar_one_or_none()
+    if existing:
+        if existing.role != "instructor":
+            existing.role = "instructor"
+        return existing
+
+    instructor = User(
+        email=normalized,
+        name=_display_name_from_email(normalized),
+        role="instructor",
+    )
+    db.session.add(instructor)
+    db.session.flush()
+    print(f"Created primary instructor: {instructor.email}")
+    return instructor
+
+
+def initialise_database(
+    seed: bool = False,
+    realistic: bool = False,
+    instructor_email: str | None = None,
+) -> None:
     """Create the database schema and optionally insert seed data."""
 
     app = create_app()
@@ -28,12 +101,21 @@ def initialise_database(seed: bool = False, realistic: bool = False) -> None:
     with app.app_context():
         db.create_all()
 
+        if not _has_instructor():
+            resolved = _resolve_instructor_email(instructor_email)
+            if not resolved:
+                raise SystemExit(
+                    "No instructor found. Re-run interactively, pass "
+                    "--instructor-email, or set BYTEPATH_INSTRUCTOR_EMAIL."
+                )
+            _ensure_primary_instructor(resolved)
+
         if seed:
             _seed_topics()
             _seed_users()
 
         if realistic:
-            seed_realistic_dataset()
+            seed_realistic_dataset(instructor_email=instructor_email)
 
         db.session.commit()
         print("Database initialised successfully.")
@@ -69,7 +151,7 @@ def _seed_users() -> None:
             db.session.add(User(email=email, name=name, role=role))
 
 
-def seed_realistic_dataset() -> None:
+def seed_realistic_dataset(*, instructor_email: str | None = None) -> None:
     """Populate the database with a realistic set of users, responses, and progress."""
 
     existing_responses = db.session.execute(
@@ -86,12 +168,13 @@ def seed_realistic_dataset() -> None:
     _seed_users()
 
     instructor = db.session.execute(
-        db.select(User).filter_by(email="bush@moravian.edu")
-    ).scalar_one_or_none()
+        db.select(User).where(User.role == "instructor").order_by(User.id)
+    ).scalars().first()
     if not instructor:
-        instructor = User(email="bush@moravian.edu", name="Dr. Bush", role="instructor")
-        db.session.add(instructor)
-        db.session.flush()
+        resolved = _resolve_instructor_email(instructor_email)
+        if not resolved:
+            raise RuntimeError("seed_realistic_dataset requires an instructor account")
+        instructor = _ensure_primary_instructor(resolved)
 
     demo_class = db.session.execute(
         db.select(Class).filter_by(class_name=DEMO_CLASS_NAME, instructor_id=instructor.id)
@@ -218,6 +301,7 @@ def seed_realistic_dataset() -> None:
 
             response = StudentResponse(
                 user_id=user.id,
+                class_id=demo_class.id,
                 topic=topic_id,
                 subtopic_type=subtopic,
                 question_code=question_code,
@@ -315,9 +399,18 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Populate the database with realistic sample data (users, responses, progress).",
     )
+    parser.add_argument(
+        "--instructor-email",
+        metavar="EMAIL",
+        help="Primary instructor email (used when stdin is not interactive).",
+    )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
-    initialise_database(seed=args.seed, realistic=args.realistic)
+    initialise_database(
+        seed=args.seed,
+        realistic=args.realistic,
+        instructor_email=args.instructor_email,
+    )
