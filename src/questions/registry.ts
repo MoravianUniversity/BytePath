@@ -23,6 +23,7 @@ export interface QuestionViewProps<K extends QuestionKind> {
   question: QuestionFor<K>;
   userAnswer: UserAnswerFor<K> | typeof SKIPPED | undefined;
   isQuiz: boolean;
+  isShowingStats?: boolean;
   isCorrect: boolean;
   onSkip: (() => void) | undefined;
   helpMessage?: string;

@@ -1,7 +1,7 @@
 import React from 'react';
 import type { FuncWriteQuestion, UserAnswerFor } from './types.ts';
 import type { QuestionTypeDef, QuestionViewProps, SerializedResponse } from './registry.ts';
-import { QuestionAnswerOptions, QuestionPrompt, QuestionQuizInputAnswerDisplay, QuestionQuizInputMultiLine, QuestionSkipButton } from './QuestionComponents.tsx';
+import { QuestionAnswerOptions, QuestionPrompt, QuestionQuizInputAnswerDisplay, QuestionQuizInputMultiLine, QuestionSkipButton, useQuizDisplayMode } from './QuestionComponents.tsx';
 import { isAnswerSame } from '../topics.ts';
 import { toPyAtom, runLastLine, PyType, runGrabOutput, createException } from '../python.ts';
 import { SKIPPED } from '../App.tsx';
@@ -69,12 +69,14 @@ const FuncWriteView: React.FC<QuestionViewProps<'func-write'>> = ({
   question,
   userAnswer,
   isQuiz,
+  isShowingStats = false,
   isCorrect,
   onSkip,
   helpMessage,
   onAnswer,
 }) => {
-  const useQuiz = isQuiz || question.options.length <= 1;
+  const useQuiz = useQuizDisplayMode(isQuiz, isShowingStats, question.options.length);
+  const readOnly = isShowingStats;
 
   const getAnswerClass = (answer: string) => {
     if (userAnswer === undefined) { return ''; }
@@ -105,8 +107,8 @@ const FuncWriteView: React.FC<QuestionViewProps<'func-write'>> = ({
 
   return (
     <>
-      <QuestionSkipButton onClick={onSkip} />
-      <QuestionPrompt prompt={question.prompt} helpMessage={helpMessage} />
+      <QuestionSkipButton onClick={readOnly ? undefined : onSkip} />
+      <QuestionPrompt prompt={question.prompt} helpMessage={readOnly ? undefined : helpMessage} />
       {useQuiz ? (
         <div className="quiz-input-container">
           {userAnswer !== undefined ? (
@@ -115,6 +117,7 @@ const FuncWriteView: React.FC<QuestionViewProps<'func-write'>> = ({
               correctAnswer={question.correct}
               isCorrect={isCorrect}
               formatAnswer={formatHtmlAnswer}
+              isShowingStats={readOnly}
             >
               {failureMessage}
             </QuestionQuizInputAnswerDisplay>

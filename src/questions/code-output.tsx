@@ -1,7 +1,7 @@
 import React from 'react';
 import type { CodeOutputQuestion, TopicContext, UserAnswerFor } from './types.ts';
 import type { QuestionTypeDef, QuestionViewProps, SerializedResponse } from './registry.ts';
-import { QuestionAnswerOptions, QuestionCodeBlock, QuestionInput, QuestionPrompt, QuestionQuizInputAnswerDisplay, QuestionQuizInputMultiLine } from './QuestionComponents.tsx';
+import { QuestionAnswerOptions, QuestionCodeBlock, QuestionInput, QuestionPrompt, QuestionQuizInputAnswerDisplay, QuestionQuizInputMultiLine, useQuizDisplayMode } from './QuestionComponents.tsx';
 import { createCodeQuestionCore, prepareOptions, type BuildCodeQuestionOpts } from './utils.ts';
 import { Exception, normalizeOutputContainers, runGrabOutput, INPUT_START, INPUT_END, injectInputEcho, removeInputEcho } from '../python.ts';
 
@@ -84,12 +84,14 @@ const CodeOutputView: React.FC<QuestionViewProps<'code-output'>> = ({
   question,
   userAnswer,
   isQuiz,
+  isShowingStats = false,
   isCorrect,
   onSkip,
   helpMessage,
   onAnswer,
 }) => {
-  const useQuiz = isQuiz || question.options.length <= 1;
+  const useQuiz = useQuizDisplayMode(isQuiz, isShowingStats, question.options.length);
+  const readOnly = isShowingStats;
 
   const getAnswerClass = (answer: string) => {
     if (userAnswer === undefined) { return ''; }
@@ -101,8 +103,12 @@ const CodeOutputView: React.FC<QuestionViewProps<'code-output'>> = ({
   return (
     <>
       <QuestionCodeBlock code={question.code} />
-      <QuestionInput input={question.input} />
-      <QuestionPrompt prompt={<>What is the <em>output to the user</em>? {useQuiz && <small>You can either include or omit all of the input echos.</small>}</>} helpMessage={helpMessage} onSkip={onSkip} />
+      {!readOnly && <QuestionInput input={question.input} />}
+      <QuestionPrompt
+        prompt={<>What is the <em>output to the user</em>? {useQuiz && !readOnly && <small>You can either include or omit all of the input echos.</small>}</>}
+        helpMessage={readOnly ? undefined : helpMessage}
+        onSkip={readOnly ? undefined : onSkip}
+      />
       {useQuiz ? (
         <div className="quiz-input-container">
           {userAnswer !== undefined ? (
@@ -111,6 +117,7 @@ const CodeOutputView: React.FC<QuestionViewProps<'code-output'>> = ({
               correctAnswer={question.correct}
               isCorrect={isCorrect}
               formatAnswer={formatHtmlAnswer}
+              isShowingStats={readOnly}
             />
           ) : (
             <QuestionQuizInputMultiLine

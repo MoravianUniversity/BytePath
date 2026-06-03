@@ -11,6 +11,12 @@ function defaultParseQuizAnswer(raw: string): string | undefined {
   return trimmed === '' ? undefined : trimmed;
 };
 
+export const useQuizDisplayMode = (
+  isQuiz: boolean,
+  isShowingStats: boolean | undefined,
+  optionCount: number,
+): boolean => isQuiz || !!isShowingStats || optionCount <= 1;
+
 export const getCorrectClass = (answer: any | typeof SKIPPED | undefined, isCorrect: boolean) => {
   const cn = answer instanceof Error ? 'exception ' : '';
   if (answer === undefined) { return cn; }
@@ -188,8 +194,9 @@ export const QuestionQuizInputAnswerDisplay: React.FC<{
   isCorrect: boolean,
   formatAnswer: (answer: any) => React.ReactNode,
   children?: React.ReactNode,
+  isShowingStats?: boolean,
 }> = (
-  {userAnswer, correctAnswer, isCorrect, formatAnswer, children = undefined}
+  {userAnswer, correctAnswer, isCorrect, formatAnswer, children = undefined, isShowingStats = false}
 ) => {
   if (userAnswer === SKIPPED) {
     return (
@@ -197,9 +204,11 @@ export const QuestionQuizInputAnswerDisplay: React.FC<{
         <div key="correct-answer" className={'quiz-input ' + getCorrectClass(correctAnswer, true)}>
           {formatAnswer(correctAnswer)}
         </div>
-        <button key="feedback-button" className='feedback submit-button skipped' disabled>
-          <FontAwesomeIcon icon={faForwardFast} />
-        </button>
+        {!isShowingStats && (
+          <button key="feedback-button" className='feedback submit-button skipped' disabled>
+            <FontAwesomeIcon icon={faForwardFast} />
+          </button>
+        )}
       </>
     );
   }
@@ -209,9 +218,11 @@ export const QuestionQuizInputAnswerDisplay: React.FC<{
       <div key="user-answer" className={'quiz-input ' + correctClass}>
         {formatAnswer(userAnswer!)}
       </div>
-      <button key="feedback-button" className={'feedback submit-button ' + correctClass} disabled>
-        {isCorrect ? '✓' : '✗'}
-      </button>
+      {!isShowingStats && (
+        <button key="feedback-button" className={'feedback submit-button ' + correctClass} disabled>
+          {isCorrect ? '✓' : '✗'}
+        </button>
+      )}
       {children}
       {!isCorrect && (
         <div key="correct-answer" className={'quiz-input ' + getCorrectClass(correctAnswer, true)}>

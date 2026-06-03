@@ -1,4 +1,4 @@
-import { QuestionAnswerOptions, QuestionPrompt, QuestionQuizInputAnswerDisplay, QuestionQuizInputSingleLine, QuestionSkipButton } from "./QuestionComponents";
+import { QuestionAnswerOptions, QuestionPrompt, QuestionQuizInputAnswerDisplay, QuestionQuizInputSingleLine, QuestionSkipButton, useQuizDisplayMode } from "./QuestionComponents";
 import { fuzzyMatch } from "./fuzzyMatch";
 import { QuestionTypeDef, QuestionViewProps, SerializedResponse } from "./registry";
 import { ConceptualQuestion, UserAnswerFor } from "./types";
@@ -56,12 +56,14 @@ const ConceptualView: React.FC<QuestionViewProps<'conceptual'>> = ({
   question,
   userAnswer,
   isQuiz,
+  isShowingStats = false,
   isCorrect,
   onSkip,
   helpMessage,
   onAnswer,
 }) => {
-  const useQuiz = isQuiz || question.options.length <= 1;
+  const useQuiz = useQuizDisplayMode(isQuiz, isShowingStats, question.options.length);
+  const readOnly = isShowingStats;
 
   const getAnswerClass = (answer: string) => {
     if (userAnswer === undefined) { return ''; }
@@ -72,8 +74,12 @@ const ConceptualView: React.FC<QuestionViewProps<'conceptual'>> = ({
 
   return (
     <>
-      <QuestionSkipButton onClick={onSkip} />
-      <QuestionPrompt prompt={question.prompt} helpMessage={helpMessage} />
+      <QuestionSkipButton onClick={readOnly ? undefined : onSkip} />
+      <QuestionPrompt
+        prompt={question.prompt}
+        helpMessage={readOnly ? undefined : helpMessage}
+        onSkip={readOnly ? undefined : onSkip}
+      />
       {useQuiz ? (
         <div className="quiz-input-container">
           {userAnswer !== undefined ? (
@@ -82,6 +88,7 @@ const ConceptualView: React.FC<QuestionViewProps<'conceptual'>> = ({
               correctAnswer={correctAnswerString(question.correct)}
               isCorrect={isCorrect}
               formatAnswer={formatHtmlAnswer}
+              isShowingStats={readOnly}
             />
           ) : (
             <QuestionQuizInputSingleLine
