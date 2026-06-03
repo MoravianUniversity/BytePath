@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import { Markdown } from "../components/Markdown";
 import '../components/QuestionScreen.css';
@@ -11,18 +11,36 @@ function defaultParseQuizAnswer(raw: string): string | undefined {
   return trimmed === '' ? undefined : trimmed;
 };
 
-export const useQuizDisplayMode = (
+export function useQuizDisplayMode(
   isQuiz: boolean,
-  isShowingStats: boolean | undefined,
+  readOnly: boolean,
   optionCount: number,
-): boolean => isQuiz || !!isShowingStats || optionCount <= 1;
+): boolean {
+  return isQuiz || readOnly || optionCount <= 1;
+}
 
-export const getCorrectClass = (answer: any | typeof SKIPPED | undefined, isCorrect: boolean) => {
+export function getCorrectClass(answer: any | typeof SKIPPED | undefined, isCorrect: boolean) {
   const cn = answer instanceof Error ? 'exception ' : '';
   if (answer === undefined) { return cn; }
   if (answer === SKIPPED) { return cn + 'skipped'; }
   return cn + (isCorrect ? 'correct' : 'incorrect');
-};
+}
+
+export function getAnswerClass<T>(
+  answer: T,
+  userAnswer: T | typeof SKIPPED | undefined,
+  correctAnswer: T,
+  isCorrect: boolean,
+  sameAnswer: (a: T, b: T) => boolean = (a: T, b: T) => { return a === b; },
+) {
+  const cn = answer instanceof Error ? 'exception ' : '';
+  if (userAnswer === undefined) { return cn; }
+  if (userAnswer === SKIPPED) { return cn + 'skipped'; }
+  if (sameAnswer(answer, correctAnswer) || (sameAnswer(answer, userAnswer) && isCorrect)) { return cn + 'correct'; }
+  if (sameAnswer(answer, userAnswer) && !isCorrect) { return cn + 'incorrect'; }
+  return cn;
+}
+
 
 export const QuestionCodeBlock: React.FC<{code: string, language?: string}> = (
   {code, language = 'python'}

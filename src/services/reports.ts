@@ -21,6 +21,7 @@ export interface StudentReport {
     accuracy: number;
     avg_time: number;
     completion_percentage: number;
+    best_completion_percentage: number;
   }>;
   struggling_subtopics?: Array<{
     topic: string;

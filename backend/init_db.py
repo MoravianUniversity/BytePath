@@ -263,6 +263,7 @@ def seed_realistic_dataset() -> None:
                 user_id=user_id,
                 topic=topic_id,
                 subtopics_completed=subtopics_completed,
+                max_subtopics_completed=subtopics_completed,
                 total_subtopics=total_subtopics,
                 questions_answered=attempts,
                 last_accessed=summary["last_accessed"],
@@ -270,6 +271,9 @@ def seed_realistic_dataset() -> None:
             db.session.add(progress)
         else:
             progress.subtopics_completed = subtopics_completed
+            progress.max_subtopics_completed = max(
+                progress.max_subtopics_completed or 0, subtopics_completed
+            )
             progress.total_subtopics = total_subtopics
             progress.questions_answered = attempts
             progress.last_accessed = summary["last_accessed"]

@@ -30,6 +30,28 @@ def test_update_progress(client, student1_id):
 
     data = response.get_json()
     assert data["progress"]["subtopics_completed"] == 5
+    assert data["progress"]["max_subtopics_completed"] == 5
+    assert data["progress"]["best_completion_percentage"] == round(5 / 7 * 100, 2)
+
+
+def test_max_subtopics_completed_monotonic(client, student1_id):
+    """max_subtopics_completed keeps the peak even when current progress drops."""
+
+    client.put(
+        f"/api/progress/{student1_id}/test-topic-1",
+        json={"subtopics_completed": 6, "total_subtopics": 10},
+    )
+    response = client.put(
+        f"/api/progress/{student1_id}/test-topic-1",
+        json={"subtopics_completed": 2, "total_subtopics": 10},
+    )
+    assert response.status_code == 200
+
+    progress = response.get_json()["progress"]
+    assert progress["subtopics_completed"] == 2
+    assert progress["max_subtopics_completed"] == 6
+    assert progress["completion_percentage"] == 20.0
+    assert progress["best_completion_percentage"] == 60.0
 
 
 def test_create_new_progress(client, student1_id):

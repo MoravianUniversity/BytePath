@@ -1507,9 +1507,14 @@ components:
           type: string
         subtopics_completed:
           type: integer
+        max_subtopics_completed:
+          type: integer
         total_subtopics:
           type: integer
         completion_percentage:
+          type: number
+          format: float
+        best_completion_percentage:
           type: number
           format: float
         questions_answered:
@@ -1522,8 +1527,10 @@ components:
         - user_id
         - topic
         - subtopics_completed
+        - max_subtopics_completed
         - total_subtopics
         - completion_percentage
+        - best_completion_percentage
         - questions_answered
 
     StudentResponse:

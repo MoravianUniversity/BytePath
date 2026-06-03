@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlay } from '@fortawesome/free-solid-svg-icons';
+import { faPlay, faXmark } from '@fortawesome/free-solid-svg-icons';
 
 import type { User } from '../services/auth';
 import { progressService, type TopicProgress } from '../services/progress';
 import { responsesService, type StudentResponse } from '../services/responses';
+import StatsQuestionRow from '../components/StatsQuestionRow';
 import './Dashboards.css';
 import './StudentDashboard.css';
+import { formatDateTime } from '../util';
+import { TopicMetadata, topicsService } from '../services/topics';
 
 interface StudentDashboardProps {
   user: User;
@@ -19,8 +22,9 @@ interface SummaryStats {
   incorrect: number;
   skipped: number;
   accuracy?: number;
-  avgTime?: number;
   medianTime?: number;
+  medianTimeCorrect?: number;
+  medianTimeIncorrect?: number;
 }
 
 const buildSummary = (responses: StudentResponse[]): SummaryStats => {
@@ -30,12 +34,15 @@ const buildSummary = (responses: StudentResponse[]): SummaryStats => {
   const totalQuestions = correct + incorrect;
   const accuracy = totalQuestions > 0 ? (correct / totalQuestions) * 100 : undefined;
 
-  const timedResponses = responses.filter(
-    (r) => r.status !== 'skipped' && r.time_spent != null,
-  );
+  const timedResponses = responses.filter(r => r.status !== 'skipped' && r.time_spent != null);
   const n = timedResponses.length;
-  const avgTime = n > 0 ? timedResponses.reduce((sum, r) => sum + (r.time_spent!), 0) / n : undefined;
   const medianTime = n > 0 ? timedResponses.sort((a, b) => (a.time_spent!) - (b.time_spent!))[Math.floor(n/2)].time_spent! : undefined;
+
+  const correctResponses = timedResponses.filter(r => r.status === 'correct');
+  const medianTimeCorrect = correctResponses.length > 0 ? correctResponses.sort((a, b) => (a.time_spent!) - (b.time_spent!))[Math.floor(correctResponses.length/2)].time_spent! : undefined;
+
+  const incorrectResponses = timedResponses.filter(r => r.status === 'incorrect');
+  const medianTimeIncorrect = incorrectResponses.length > 0 ? incorrectResponses.sort((a, b) => (a.time_spent!) - (b.time_spent!))[Math.floor(incorrectResponses.length/2)].time_spent! : undefined;
 
   return {
     totalQuestions,
@@ -43,8 +50,9 @@ const buildSummary = (responses: StudentResponse[]): SummaryStats => {
     incorrect,
     skipped,
     accuracy,
-    avgTime,
     medianTime,
+    medianTimeCorrect,
+    medianTimeIncorrect,
   };
 };
 
@@ -65,8 +73,7 @@ const sortTopics = (
   responsesByTopic: Record<string, StudentResponse[]>,
 ): TopicProgress[] => {
   const copy = [...topics];
-  const byName = (a: TopicProgress, b: TopicProgress) =>
-    (a.topic_name ?? a.topic).localeCompare(b.topic_name ?? b.topic);
+  const byName = (a: TopicProgress, b: TopicProgress) => a.topic_name.localeCompare(b.topic_name);
 
   switch (sort) {
     case 'recent':
@@ -84,13 +91,13 @@ const sortTopics = (
       });
     case 'completion-desc':
       return copy.sort((a, b) => {
-        const diff = b.completion_percentage - a.completion_percentage;
+        const diff = b.best_completion_percentage - a.best_completion_percentage;
         if (diff !== 0) return diff;
         return byName(a, b);
       });
     case 'completion-asc':
       return copy.sort((a, b) => {
-        const diff = a.completion_percentage - b.completion_percentage;
+        const diff = a.best_completion_percentage - b.best_completion_percentage;
         if (diff !== 0) return diff;
         return byName(a, b);
       });
@@ -103,22 +110,12 @@ const navigateToTopic = (topicId: string) => {
   window.location.hash = topicId;
 };
 
-const formatLastAccessed = (isoDate: string | null): string | null => {
-  if (!isoDate) return null;
-  const date = new Date(isoDate);
-  if (Number.isNaN(date.getTime())) return null;
-  return date.toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-};
-
 export default function StudentDashboard({ user, currentClassId }: StudentDashboardProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<TopicProgress[]>([]);
   const [responses, setResponses] = useState<StudentResponse[]>([]);
+  const [topics, setTopics] = useState<TopicMetadata[]>([]);
   const [expandedTopic, setExpandedTopic] = useState<string | null>(null);
 
   useEffect(() => {
@@ -129,12 +126,14 @@ export default function StudentDashboard({ user, currentClassId }: StudentDashbo
     Promise.all([
       progressService.getUserProgress(user.id, currentClassId),
       responsesService.getStudentResponses(user.id, currentClassId),
+      topicsService.getTopics(),
     ])
-      .then(([progressData, responseData]) => {
+      .then(([progressData, responseData, topicsData]) => {
         if (!mounted) {
           return;
         }
         setProgress(progressData);
+        setTopics(topicsData);
         setResponses(
           responseData.sort(
             (a, b) =>
@@ -162,26 +161,19 @@ export default function StudentDashboard({ user, currentClassId }: StudentDashbo
 
   const summary = useMemo(() => buildSummary(responses), [responses]);
 
-  const topicsCompleted = progress.filter(
-    (p) => p.total_subtopics && p.subtopics_completed >= p.total_subtopics,
-  ).length;
-  const activeTopics = progress.length;
-
   // progress is all topics that the user has started
   const inProgressTopics = useMemo(
     () =>
-      progress.filter(
-        (p) => p.total_subtopics && p.subtopics_completed < p.total_subtopics,
-      ),
+      progress.filter(p => p.total_subtopics && p.max_subtopics_completed < p.total_subtopics),
     [progress],
   );
   const completedTopics = useMemo(
     () =>
-      progress.filter(
-        (p) => p.total_subtopics && p.subtopics_completed >= p.total_subtopics,
-      ),
+      progress.filter(p => p.total_subtopics && p.max_subtopics_completed >= p.total_subtopics),
     [progress],
   );
+  const topicsCompleted = completedTopics.length;
+  const activeTopics = topics.filter(t => t.is_visible).length;
 
   const responsesByTopic = useMemo(() => {
     const grouped: Record<string, StudentResponse[]> = {};
@@ -240,7 +232,7 @@ export default function StudentDashboard({ user, currentClassId }: StudentDashbo
               <div className="stat-card__content">
                 <p className="stat-card__label">Questions</p>
                 <p className="stat-card__value">{summary.totalQuestions}</p>
-                <p className="stat-card__detail">Skipped: {summary.skipped}</p>
+                <p className="stat-card__detail">And Skipped: {summary.skipped}</p>
               </div>
             </div>
 
@@ -256,7 +248,7 @@ export default function StudentDashboard({ user, currentClassId }: StudentDashbo
               <div className="stat-card__content">
                 <p className="stat-card__label">Median Question Time</p>
                 <p className="stat-card__value">{summary.medianTime?.toFixed(0) ?? 'No data yet'}s</p>
-                <p className="stat-card__detail">Average: {summary.avgTime?.toFixed(0) ?? 'No data yet'}s</p>
+                <p className="stat-card__detail">Correct: {summary.medianTimeCorrect?.toFixed(0) ?? 'No data yet'}s • Incorrect: {summary.medianTimeIncorrect?.toFixed(0) ?? 'No data yet'}s</p>
               </div>
             </div>
 
@@ -402,9 +394,8 @@ function TopicCard({
   isSelected: boolean;
   onSelect: () => void;
 }) {
-  const perc = topic.completion_percentage;
+  const perc = topic.best_completion_percentage;
   const isComplete = perc >= 100;
-  const totalSubtopics = topic.total_subtopics != null ? topic.total_subtopics : '?';
 
   const topicSummary = buildSummary(responses);
   return (
@@ -432,7 +423,7 @@ function TopicCard({
         <button
           type="button"
           className="topic-card__badge"
-          aria-label={`Open ${topic.topic_name ?? 'topic'}`}
+          aria-label={`Open ${topic.topic_name}`}
           onClick={(e) => {
             e.stopPropagation();
             navigateToTopic(topic.topic);
@@ -446,7 +437,7 @@ function TopicCard({
       <div className="topic-card__stats">
         <div className="topic-stat">
           <span className="topic-stat__value">
-            {topic.subtopics_completed} {isComplete ? '✓' : `/ ${totalSubtopics}`}
+            {topic.max_subtopics_completed} {isComplete ? '✓' : `/ ${topic.total_subtopics}`}
           </span>
           <span className="topic-stat__label">subtopics</span>
         </div>
@@ -475,7 +466,7 @@ function TopicCard({
 
       {topic.last_accessed && (
         <div className="topic-card__footer">
-          Last practiced: {formatLastAccessed(topic.last_accessed)}
+          Last practiced: {formatDateTime(topic.last_accessed)}
         </div>
       )}
     </div>
@@ -554,80 +545,44 @@ function TopicExpandedPanel({
   responses: StudentResponse[];
   onClose: () => void;
 }) {
-  const perc = topic.completion_percentage;
-  const isComplete = perc >= 100;
+  const reviewRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    reviewRef.current?.scrollTo({ top: 0 });
+  }, [topic.topic]);
 
   return (
     <div className="topic-expanded-panel">
-      <div
-        className="topic-expanded-panel__header"
-        role="button"
-        tabIndex={0}
-        aria-label={`Close ${topic.topic_name} details`}
-        onClick={onClose}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            onClose();
-          }
-        }}
-      >
+      <div className="topic-expanded-panel__header">
         <h3>{topic.topic_name}</h3>
         <div className="topic-expanded-panel__header-actions">
           <button
             type="button"
             className="topic-card__badge"
-            aria-label={`Open ${topic.topic_name ?? 'topic'}`}
+            aria-label={`Open ${topic.topic_name}`}
             onClick={(e) => {
               e.stopPropagation();
               navigateToTopic(topic.topic);
             }}
           >
-            <FontAwesomeIcon icon={faPlay} className="topic-card__badge-icon" aria-hidden />
-            {isComplete ? 'Complete' : `${perc.toFixed(0)}%`}
+            Play
+            <FontAwesomeIcon icon={faPlay} aria-hidden />
           </button>
-          <span className="topic-expanded-panel__close">Close</span>
+          <button
+            type="button" className="topic-expanded-panel__close"
+              aria-label={`Close ${topic.topic_name} details`}
+              onClick={onClose}
+            >
+            Close
+            <FontAwesomeIcon icon={faXmark} aria-hidden />
+          </button>
         </div>
       </div>
-      <div className="topic-expanded-panel__review">
+      <div className="topic-expanded-panel__review" ref={reviewRef}>
         {responses.length === 0 ? (
           <p className="completed-topic-item__empty">No recorded answers for this topic.</p>
         ) : (
-          responses.map((r) => (
-            <div key={r.id} className={`response-row response-row--${r.status}`}>
-              <div
-                className={`activity-item__indicator activity-item__indicator--${r.status}`}
-              >
-                {r.status === 'correct' ? '✓' : r.status === 'incorrect' ? '✗' : '—'}
-              </div>
-              <div className="response-row__content">
-                <div className="response-row__subtopic">{r.subtopic_type}</div>
-                <pre className="response-row__code">{r.question_code}</pre>
-                <div className="response-row__answers">
-                  {r.status === 'correct' ? (
-                    <>
-                      Your answer:{' '}
-                      <span className="response-row__correct">{r.student_answer}</span>
-                    </>
-                  ) : (
-                    <>
-                      {r.student_answer != null ? (
-                        <>
-                          Your answer:{' '}
-                          <span className="response-row__student">{r.student_answer}</span>
-                        </>
-                      ) : (
-                        <span className="response-row__skipped">Skipped.</span>
-                      )}
-                      Correct:{' '}
-                      <span className="response-row__correct">{r.correct_answer}</span>
-                    </>
-                  )}
-                </div>
-              </div>
-              <div className="response-row__time">{r.time_spent}s</div>
-            </div>
-          ))
+          responses.map((r) => <StatsQuestionRow key={r.id} response={r} />)
         )}
       </div>
     </div>

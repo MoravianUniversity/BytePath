@@ -162,6 +162,15 @@ class ReportService:
                         ),
                         2,
                     ),
+                    "best_completion_percentage": round(
+                        StudentProgress.best_completion_percentage(
+                            progress.max_subtopics_completed if progress else 0,
+                            progress.total_subtopics if progress else 0,
+                        ),
+                        2,
+                    )
+                    if progress
+                    else 0,
                     "last_accessed": progress.last_accessed.isoformat() if progress else None,
                 }
             )

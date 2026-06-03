@@ -8,7 +8,7 @@ Adding a new question type
     - Add the answer type to the `UserAnswerFor<K>` union
 
 * Create the question definition in `questions/<question-type>.tsx`:
-    - Needs to define the `checkAnswer` and `serializeResponse` functions, and the `View` component
+    - Needs to define the `checkAnswer`, `serialize`, and `unserialize` functions, and the `View` component
 
 * In `questions/registry.ts`:
     - Add the question definition to the `QUESTION_TYPES` object in `registry.ts`

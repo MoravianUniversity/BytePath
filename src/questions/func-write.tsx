@@ -1,7 +1,7 @@
 import React from 'react';
 import type { FuncWriteQuestion, UserAnswerFor } from './types.ts';
 import type { QuestionTypeDef, QuestionViewProps, SerializedResponse } from './registry.ts';
-import { QuestionAnswerOptions, QuestionPrompt, QuestionQuizInputAnswerDisplay, QuestionQuizInputMultiLine, QuestionSkipButton, useQuizDisplayMode } from './QuestionComponents.tsx';
+import { getAnswerClass, QuestionAnswerOptions, QuestionPrompt, QuestionQuizInputAnswerDisplay, QuestionQuizInputMultiLine, QuestionSkipButton, useQuizDisplayMode } from './QuestionComponents.tsx';
 import { isAnswerSame } from '../topics.ts';
 import { toPyAtom, runLastLine, PyType, runGrabOutput, createException } from '../python.ts';
 import { SKIPPED } from '../App.tsx';
@@ -31,6 +31,15 @@ function* testResults(question: FuncWriteQuestion, answer: string): Generator<Py
   }
 }
 
+function findFirstFailure(question: FuncWriteQuestion, answer: string): { result: PyType | undefined, testCase: { args: PyType[], expected: PyType } } | null {
+  for (const [result, testCase] of zip(testResults(question, answer), question.testCases)) {
+    if (result === undefined || !isAnswerSame(result, testCase.expected)) {
+      return { result, testCase };
+    }
+  }
+  return null;
+}
+
 function checkAnswer(
   question: FuncWriteQuestion,
   answer: string,
@@ -41,13 +50,8 @@ function checkAnswer(
   return true;
 }
 
-function findFirstFailure(question: FuncWriteQuestion, answer: string): { result: PyType | undefined, testCase: { args: PyType[], expected: PyType } } | null {
-  for (const [result, testCase] of zip(testResults(question, answer), question.testCases)) {
-    if (result === undefined || !isAnswerSame(result, testCase.expected)) {
-      return { result, testCase };
-    }
-  }
-  return null;
+function formatHtmlAnswer(answer: string): React.ReactNode {
+  return <code className="language-python">{answer}</code>;
 }
 
 function serialize(
@@ -61,29 +65,33 @@ function serialize(
   };
 }
 
-function formatHtmlAnswer(answer: string): React.ReactNode {
-  return <code className="language-python">{answer}</code>;
+function unserialize(response: SerializedResponse): { question: FuncWriteQuestion, userAnswer: string | undefined } {
+  return {
+    question: {
+      kind: 'func-write',
+      prompt: response.questionPayload,
+      correct: response.correctAnswer,
+      options: [],
+      name: 'f',
+      testCases: [],
+    },
+    userAnswer: response.studentAnswer ? response.studentAnswer : undefined,
+  };
 }
 
 const FuncWriteView: React.FC<QuestionViewProps<'func-write'>> = ({
   question,
   userAnswer,
   isQuiz,
-  isShowingStats = false,
+  readOnly,
   isCorrect,
   onSkip,
   helpMessage,
   onAnswer,
 }) => {
-  const useQuiz = useQuizDisplayMode(isQuiz, isShowingStats, question.options.length);
-  const readOnly = isShowingStats;
-
-  const getAnswerClass = (answer: string) => {
-    if (userAnswer === undefined) { return ''; }
-    if (answer === question.correct) { return 'correct'; }
-    if (answer === userAnswer && !isCorrect) { return 'incorrect'; }
-    return '';
-  };
+  const useQuiz = useQuizDisplayMode(isQuiz, readOnly, question.options.length);
+  const myGetAnswerClass = (answer: string) =>
+    getAnswerClass(answer, userAnswer, question.correct, isCorrect);
 
   const hasIncorrectAnswer = userAnswer !== undefined && userAnswer !== SKIPPED && !isCorrect;
   const firstFailure = hasIncorrectAnswer ? findFirstFailure(question, userAnswer) : null;
@@ -108,7 +116,7 @@ const FuncWriteView: React.FC<QuestionViewProps<'func-write'>> = ({
   return (
     <>
       <QuestionSkipButton onClick={readOnly ? undefined : onSkip} />
-      <QuestionPrompt prompt={question.prompt} helpMessage={readOnly ? undefined : helpMessage} />
+      <QuestionPrompt prompt={question.prompt} helpMessage={helpMessage} />
       {useQuiz ? (
         <div className="quiz-input-container">
           {userAnswer !== undefined ? (
@@ -133,7 +141,7 @@ const FuncWriteView: React.FC<QuestionViewProps<'func-write'>> = ({
           <QuestionAnswerOptions
             options={question.options}
             onSelect={onAnswer}
-            getAnswerClass={getAnswerClass}
+            getAnswerClass={myGetAnswerClass}
             formatAnswer={formatHtmlAnswer}
             disabled={userAnswer !== undefined}
           />
@@ -147,6 +155,7 @@ const FuncWriteView: React.FC<QuestionViewProps<'func-write'>> = ({
 export const funcWriteDef: QuestionTypeDef<'func-write'> = {
   kind: 'func-write',
   checkAnswer: checkAnswer,
-  serializeResponse: serialize,
+  serialize,
+  unserialize,
   View: FuncWriteView,
 };

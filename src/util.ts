@@ -194,3 +194,28 @@ export function deduplicate<T>(array: T[], isSame: (a: T, b: T) => boolean = (a,
   }
   return output;
 }
+
+// Format a date and time as a string
+export function formatDateTime(isoDate: string | null): string | null {
+  if (!isoDate) return null;
+  const date = new Date(isoDate);
+  const today = new Date();
+  if (Number.isNaN(date.getTime())) { return null; }
+  if (
+    date.getFullYear() === today.getFullYear() ||
+    (date.getFullYear() === today.getFullYear()-1 && date.getMonth() > today.getMonth())
+  ) {
+    return date.toLocaleString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+    });
+  } else {
+    return date.toLocaleString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  }
+};

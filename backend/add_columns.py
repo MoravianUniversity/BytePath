@@ -66,6 +66,17 @@ with app.app_context():
             conn.execute(db.text("ALTER TABLE student_progress ADD COLUMN class_id INTEGER REFERENCES classes(id)"))
             conn.commit()
 
+        if 'max_subtopics_completed' not in progress_cols:
+            print("Adding max_subtopics_completed to student_progress...")
+            conn.execute(db.text(
+                "ALTER TABLE student_progress ADD COLUMN max_subtopics_completed INTEGER DEFAULT 0"
+            ))
+            conn.execute(db.text(
+                "UPDATE student_progress SET max_subtopics_completed = subtopics_completed "
+                "WHERE max_subtopics_completed IS NULL OR max_subtopics_completed = 0"
+            ))
+            conn.commit()
+
     # ── fix roster_students unique constraint ────────────────────────────────
     # Old schema had UNIQUE(email); new schema needs UNIQUE(email, class_id)
     # SQLite can't drop constraints, so recreate the table if needed.

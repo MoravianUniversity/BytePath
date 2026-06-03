@@ -72,6 +72,9 @@ def mark_python_basics_complete(*, class_name: str | None) -> dict:
             progress = progress_repository.get_by_user_and_topic(user_id, topic["id"])
             if progress:
                 progress.subtopics_completed = total_subtopics
+                progress.max_subtopics_completed = max(
+                    progress.max_subtopics_completed or 0, total_subtopics
+                )
                 progress.total_subtopics = total_subtopics
                 progress.last_accessed = now
                 progress_repository.save(progress)
@@ -82,6 +85,7 @@ def mark_python_basics_complete(*, class_name: str | None) -> dict:
                         user_id=user_id,
                         topic=topic["id"],
                         subtopics_completed=total_subtopics,
+                        max_subtopics_completed=total_subtopics,
                         total_subtopics=total_subtopics,
                         questions_answered=0,
                         last_accessed=now,

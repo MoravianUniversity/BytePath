@@ -103,6 +103,9 @@ export abstract class Subtopic<K extends QuestionKind = QuestionKind> {
   getActiveHelpMessage(): string | undefined {
     return getActiveHelpMessage(this.help, this.failedAttempts);
   }
+  getMostHelpfulMessage(): string | undefined {
+    return getActiveHelpMessage(this.help, Number.MAX_SAFE_INTEGER);
+  }
 
   abstract generateQuestion(ctx: TopicContext): QuestionFor<K>;
 }

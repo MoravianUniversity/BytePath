@@ -317,9 +317,11 @@ def _install_fake_progress_service(app):
             self.user_id = user_id
             self.topic = topic
             self.subtopics_completed = subtopics_completed
+            self.max_subtopics_completed = subtopics_completed
             self.total_subtopics = total_subtopics
             self.questions_answered = questions_answered
             self.last_accessed = None
+            self.class_id = None
 
     class FakeProgressService:
         def __init__(self, s1_id: int):
@@ -340,6 +342,9 @@ def _install_fake_progress_service(app):
             if key in self.records:
                 record = self.records[key]
                 record.subtopics_completed = data["subtopics_completed"]
+                record.max_subtopics_completed = max(
+                    record.max_subtopics_completed, data["subtopics_completed"]
+                )
                 record.total_subtopics = data["total_subtopics"]
                 created = False
             else:

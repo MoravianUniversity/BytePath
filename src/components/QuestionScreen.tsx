@@ -73,6 +73,7 @@ const QuestionScreen: React.FC<QuestionScreenProps> = ({
           question={question as never}
           userAnswer={userAnswer as never}
           isQuiz={isQuiz}
+          readOnly={false}
           isCorrect={isCorrect}
           onSkip={canSkip && !isCompleted ? () => handleAnswer(null, undefined) : undefined}
           onAnswer={handleAnswer}

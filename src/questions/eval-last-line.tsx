@@ -4,10 +4,17 @@ import { formatAnswer, isAnswerSame } from '../topics.ts';
 import { parsePyAtom, createException, runLastLine } from '../python.ts';
 import type { EvalLastLineQuestion, TopicContext, UserAnswerFor } from './types.ts';
 import type { QuestionTypeDef, QuestionViewProps, SerializedResponse } from './registry.ts';
-import { QuestionAnswerOptions, QuestionCodeBlock, QuestionInput, QuestionQuizInputAnswerDisplay, QuestionQuizInputSingleLine, QuestionPrompt, useQuizDisplayMode } from './QuestionComponents.tsx';
+import { QuestionAnswerOptions, QuestionCodeBlock, QuestionInput, QuestionQuizInputAnswerDisplay, QuestionQuizInputSingleLine, QuestionPrompt, useQuizDisplayMode, getAnswerClass } from './QuestionComponents.tsx';
 import { BuildCodeQuestionOpts, createCodeQuestionCore, prepareOptions } from './utils.ts';
 
-export function parseEvalLastLineStoredAnswer(raw: string): Answer | undefined {
+function checkAnswer(
+  question: EvalLastLineQuestion,
+  answer: UserAnswerFor<'eval-last-line'>,
+): boolean {
+  return isAnswerSame(answer, question.correct);
+}
+
+function parseAnswer(raw: string): Answer | undefined {
   let answer = raw.trim();
   if (answer === '') { return undefined; }
   const errors = [
@@ -28,11 +35,13 @@ export function parseEvalLastLineStoredAnswer(raw: string): Answer | undefined {
   }
 }
 
-function checkAnswer(
-  question: EvalLastLineQuestion,
-  answer: UserAnswerFor<'eval-last-line'>,
-): boolean {
-  return isAnswerSame(answer, question.correct);
+function formatHtmlAnswer(answer: Answer): React.ReactNode {
+  if (answer instanceof Error) {  // Exception -> Error/Exception (name and message)
+    if (!answer.message || answer.message === answer.name) { return answer.name; }
+    if (answer.name === 'Error') { return answer.message; }
+    return answer.name; //`${answer.name}: ${answer.message}`;
+  }
+  return <code className="language-python">{formatAnswer(answer)}</code>;
 }
 
 function serialize(
@@ -46,35 +55,31 @@ function serialize(
   };
 }
 
-function formatHtmlAnswer(answer: Answer): React.ReactNode {
-  if (answer instanceof Error) {  // Exception -> Error/Exception (name and message)
-    if (!answer.message || answer.message === answer.name) { return answer.name; }
-    if (answer.name === 'Error') { return answer.message; }
-    return answer.name; //`${answer.name}: ${answer.message}`;
-  }
-  return <code className="language-python">{formatAnswer(answer)}</code>;
+function unserialize(response: SerializedResponse): { question: EvalLastLineQuestion, userAnswer: Answer | undefined } {
+  return {
+    question: {
+      kind: 'eval-last-line',
+      code: response.questionPayload,
+      correct: parseAnswer(response.correctAnswer) ?? response.correctAnswer,
+      options: [],
+    },
+    userAnswer: response.studentAnswer ? parseAnswer(response.studentAnswer) : undefined,
+  };
 }
 
 const EvalLastLineView: React.FC<QuestionViewProps<'eval-last-line'>> = ({
   question,
   userAnswer,
   isQuiz,
-  isShowingStats = false,
+  readOnly,
   isCorrect,
   onSkip,
   helpMessage,
   onAnswer,
 }) => {
-  const useQuiz = useQuizDisplayMode(isQuiz, isShowingStats, question.options.length);
-  const readOnly = isShowingStats;
-
-  const getAnswerClass = (answer: Answer) => {
-    const cn = answer instanceof Error ? 'exception ' : '';
-    if (userAnswer === undefined) { return cn; }
-    if (isAnswerSame(answer, question.correct)) { return cn + 'correct'; }
-    if (isAnswerSame(answer, userAnswer) && !isCorrect) { return cn + 'incorrect'; }
-    return cn;
-  };
+  const useQuiz = useQuizDisplayMode(isQuiz, readOnly, question.options.length);
+  const myGetAnswerClass = (answer: Answer) =>
+    getAnswerClass(answer, userAnswer, question.correct, isCorrect, isAnswerSame);
 
   return (
     <>
@@ -82,7 +87,7 @@ const EvalLastLineView: React.FC<QuestionViewProps<'eval-last-line'>> = ({
       {!readOnly && <QuestionInput input={question.input} />}
       <QuestionPrompt
         prompt="What is the value of the final line of code?"
-        helpMessage={readOnly ? undefined : helpMessage}
+        helpMessage={helpMessage}
         onSkip={readOnly ? undefined : onSkip}
       />
       {useQuiz ? (
@@ -98,7 +103,7 @@ const EvalLastLineView: React.FC<QuestionViewProps<'eval-last-line'>> = ({
           ) : (
             <QuestionQuizInputSingleLine
               onSubmit={onAnswer}
-              parseAnswer={parseEvalLastLineStoredAnswer}
+              parseAnswer={parseAnswer}
               placeholder="Remember to use the correct syntax!"
             />
           )}
@@ -107,7 +112,7 @@ const EvalLastLineView: React.FC<QuestionViewProps<'eval-last-line'>> = ({
         <QuestionAnswerOptions
           options={question.options}
           onSelect={onAnswer}
-          getAnswerClass={getAnswerClass}
+          getAnswerClass={myGetAnswerClass}
           formatAnswer={formatHtmlAnswer}
           disabled={userAnswer !== undefined}
         />
@@ -119,7 +124,8 @@ const EvalLastLineView: React.FC<QuestionViewProps<'eval-last-line'>> = ({
 export const evalLastLineDef: QuestionTypeDef<'eval-last-line'> = {
   kind: 'eval-last-line',
   checkAnswer: checkAnswer,
-  serializeResponse: serialize,
+  serialize,
+  unserialize,
   View: EvalLastLineView,
 };
 

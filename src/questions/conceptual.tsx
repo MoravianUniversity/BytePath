@@ -1,4 +1,4 @@
-import { QuestionAnswerOptions, QuestionPrompt, QuestionQuizInputAnswerDisplay, QuestionQuizInputSingleLine, QuestionSkipButton, useQuizDisplayMode } from "./QuestionComponents";
+import { getAnswerClass, QuestionAnswerOptions, QuestionPrompt, QuestionQuizInputAnswerDisplay, QuestionQuizInputSingleLine, QuestionSkipButton, useQuizDisplayMode } from "./QuestionComponents";
 import { fuzzyMatch } from "./fuzzyMatch";
 import { QuestionTypeDef, QuestionViewProps, SerializedResponse } from "./registry";
 import { ConceptualQuestion, UserAnswerFor } from "./types";
@@ -48,6 +48,19 @@ function serialize(
   };
 }
 
+function unserialize(response: SerializedResponse): { question: ConceptualQuestion, userAnswer: string | undefined } {
+  return {
+    question: {
+      kind: 'conceptual',
+      prompt: response.questionPayload,
+      correct: response.correctAnswer,
+      options: [],
+      fuzzyMatch: true,
+    },
+    userAnswer: response.studentAnswer ? response.studentAnswer : undefined,
+  };
+}
+
 function formatHtmlAnswer(answer: string): React.ReactNode {
   return <span>{answer}</span>;
 }
@@ -56,28 +69,22 @@ const ConceptualView: React.FC<QuestionViewProps<'conceptual'>> = ({
   question,
   userAnswer,
   isQuiz,
-  isShowingStats = false,
+  readOnly,
   isCorrect,
   onSkip,
   helpMessage,
   onAnswer,
 }) => {
-  const useQuiz = useQuizDisplayMode(isQuiz, isShowingStats, question.options.length);
-  const readOnly = isShowingStats;
-
-  const getAnswerClass = (answer: string) => {
-    if (userAnswer === undefined) { return ''; }
-    if (checkAnswer(question, answer)) { return 'correct'; }
-    if (answer === userAnswer && !isCorrect) { return 'incorrect'; }
-    return '';
-  };
+  const useQuiz = useQuizDisplayMode(isQuiz, readOnly, question.options.length);
+  const myGetAnswerClass = (answer: string) =>
+    getAnswerClass(answer, userAnswer, question.correct, isCorrect);
 
   return (
     <>
       <QuestionSkipButton onClick={readOnly ? undefined : onSkip} />
       <QuestionPrompt
         prompt={question.prompt}
-        helpMessage={readOnly ? undefined : helpMessage}
+        helpMessage={helpMessage}
         onSkip={readOnly ? undefined : onSkip}
       />
       {useQuiz ? (
@@ -101,7 +108,7 @@ const ConceptualView: React.FC<QuestionViewProps<'conceptual'>> = ({
         <QuestionAnswerOptions
           options={question.options}
           onSelect={onAnswer}
-          getAnswerClass={getAnswerClass}
+          getAnswerClass={myGetAnswerClass}
           formatAnswer={formatHtmlAnswer}
           disabled={userAnswer !== undefined}
         />
@@ -113,7 +120,8 @@ const ConceptualView: React.FC<QuestionViewProps<'conceptual'>> = ({
 export const conceptualDef: QuestionTypeDef<'conceptual'> = {
     kind: 'conceptual',
     checkAnswer: checkAnswer,
-    serializeResponse: serialize,
+    serialize,
+    unserialize,
     View: ConceptualView,
   };
   

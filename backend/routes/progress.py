@@ -172,8 +172,12 @@ def _serialise_progress(progress: StudentProgress, topic: Topic | None = None) -
 
     total_subtopics = progress.total_subtopics or 0
     subtopics_completed = progress.subtopics_completed or 0
+    max_subtopics_completed = progress.max_subtopics_completed or 0
     completion_percentage = (
         (subtopics_completed / total_subtopics) * 100 if total_subtopics else 0.0
+    )
+    best_completion_percentage = StudentProgress.best_completion_percentage(
+        max_subtopics_completed, total_subtopics
     )
 
     return {
@@ -182,8 +186,10 @@ def _serialise_progress(progress: StudentProgress, topic: Topic | None = None) -
         "topic": progress.topic,
         "topic_name": topic.name if topic else progress.topic,
         "subtopics_completed": subtopics_completed,
+        "max_subtopics_completed": max_subtopics_completed,
         "total_subtopics": total_subtopics,
         "completion_percentage": round(completion_percentage, 2),
+        "best_completion_percentage": round(best_completion_percentage, 2),
         "questions_answered": progress.questions_answered or 0,
         "last_accessed": (
             progress.last_accessed.isoformat() if progress.last_accessed else None

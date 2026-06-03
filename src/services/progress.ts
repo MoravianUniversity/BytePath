@@ -5,8 +5,10 @@ export interface TopicProgress {
   topic: string;
   topic_name: string;
   subtopics_completed: number;
+  max_subtopics_completed: number;
   total_subtopics: number;
   completion_percentage: number;
+  best_completion_percentage: number;
   questions_answered: number;
   last_accessed: string | null;
   class_id?: number | null;

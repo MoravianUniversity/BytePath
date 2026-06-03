@@ -33,6 +33,9 @@ class ProgressService:
         created = False
         if progress:
             progress.subtopics_completed = subtopics_completed
+            progress.max_subtopics_completed = max(
+                progress.max_subtopics_completed or 0, subtopics_completed
+            )
             progress.total_subtopics = total_subtopics
             progress.last_accessed = datetime.utcnow()
             progress_repository.save(progress)
@@ -42,6 +45,7 @@ class ProgressService:
                 topic=topic_id,
                 class_id=class_id,
                 subtopics_completed=subtopics_completed,
+                max_subtopics_completed=subtopics_completed,
                 total_subtopics=total_subtopics,
                 questions_answered=0,
                 last_accessed=datetime.utcnow(),

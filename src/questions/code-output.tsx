@@ -1,11 +1,13 @@
 import React from 'react';
 import type { CodeOutputQuestion, TopicContext, UserAnswerFor } from './types.ts';
 import type { QuestionTypeDef, QuestionViewProps, SerializedResponse } from './registry.ts';
-import { QuestionAnswerOptions, QuestionCodeBlock, QuestionInput, QuestionPrompt, QuestionQuizInputAnswerDisplay, QuestionQuizInputMultiLine, useQuizDisplayMode } from './QuestionComponents.tsx';
+import { getAnswerClass, QuestionAnswerOptions, QuestionCodeBlock, QuestionInput, QuestionPrompt, QuestionQuizInputAnswerDisplay, QuestionQuizInputMultiLine, useQuizDisplayMode } from './QuestionComponents.tsx';
 import { createCodeQuestionCore, prepareOptions, type BuildCodeQuestionOpts } from './utils.ts';
-import { Exception, normalizeOutputContainers, runGrabOutput, INPUT_START, INPUT_END, injectInputEcho, removeInputEcho } from '../python.ts';
+import { createException, Exception, normalizeOutputContainers, runGrabOutput, INPUT_START, INPUT_END, injectInputEcho, removeInputEcho } from '../python.ts';
+import { SKIPPED } from '../App.tsx';
 
-function correctOutputString(correct: CodeOutputQuestion['correct']): string {
+function correctOutputString(correct: CodeOutputQuestion['correct'] | typeof SKIPPED | undefined): string {
+  if (correct === undefined || correct === SKIPPED) { return ''; }
   return correct instanceof Error ? correct.name : correct;
 }
 
@@ -13,7 +15,7 @@ function removeTrailingSpaces(s: string): string {
   return s.split('\n').map(line => line.trimEnd()).join('\n');
 }
 
-function correct(userAnswer: string, question: CodeOutputQuestion): boolean {
+function checkAnswerCorrect(userAnswer: string, question: CodeOutputQuestion): boolean {
   let inputs = Array.isArray(question.input) ? question.input : (question.input ? [question.input] : []);
   let correct = correctOutputString(question.correct);
   // if there are inputs or the answer doesn't contain INPUT_START/INPUT_END, deal with input echos
@@ -37,25 +39,20 @@ function checkAnswer(
   return (
     answer === question.correct ||
     answer instanceof Error && question.correct instanceof Error && answer.name === question.correct.name ||
-    typeof answer === 'string' && correct(answer, question)
+    typeof answer === 'string' && checkAnswerCorrect(answer, question)
   );
 }
 
-function answerToString(answer: string | Exception | null): string {
-  if (answer == null) { return ""; }
-  if (answer instanceof Error) { return answer.message; }
-  return answer;
-}
-
-function serialize(
-  question: CodeOutputQuestion,
-  user: UserAnswerFor<'code-output'> | null,
-): SerializedResponse {
-  return {
-    questionPayload: question.code,
-    studentAnswer: answerToString(user),
-    correctAnswer: answerToString(question.correct),
-  };
+function parseAnswer(value: string): string | Exception {
+  const trimmed = value.trim();
+  const errors = [
+    'syntaxerror', 'nameerror', 'attributeerror', 'typeerror', 'valueerror',
+    'zerodivisionerror', 'indexerror', 'keyerror',
+  ];
+  if (errors.includes(trimmed.toLowerCase())) {
+    return createException(trimmed);
+  }
+  return trimmed;
 }
 
 function formatHtmlAnswer(answer: string): React.ReactNode {
@@ -80,25 +77,51 @@ function formatHtmlAnswer(answer: string): React.ReactNode {
   return <code>{outputs}</code>;
 }
 
+function answerToString(answer: string | Exception | null): string {
+  if (answer == null) { return ""; }
+  if (answer instanceof Error) { return answer.name; }
+  return answer;
+}
+
+function serialize(
+  question: CodeOutputQuestion,
+  user: UserAnswerFor<'code-output'> | null,
+): SerializedResponse {
+  return {
+    questionPayload: question.code,
+    studentAnswer: answerToString(user),
+    correctAnswer: answerToString(question.correct),
+  };
+}
+
+function unserialize(response: SerializedResponse): { question: CodeOutputQuestion, userAnswer: string | Exception | undefined } {
+  return {
+    question: {
+      kind: 'code-output',
+      code: response.questionPayload,
+      correct: parseAnswer(response.correctAnswer),
+      options: [],
+    },
+    userAnswer: response.studentAnswer ? parseAnswer(response.studentAnswer) : undefined,
+  };
+}
+
 const CodeOutputView: React.FC<QuestionViewProps<'code-output'>> = ({
   question,
   userAnswer,
   isQuiz,
-  isShowingStats = false,
+  readOnly,
   isCorrect,
   onSkip,
   helpMessage,
   onAnswer,
 }) => {
-  const useQuiz = useQuizDisplayMode(isQuiz, isShowingStats, question.options.length);
-  const readOnly = isShowingStats;
+  const useQuiz = useQuizDisplayMode(isQuiz, readOnly, question.options.length);
 
-  const getAnswerClass = (answer: string) => {
-    if (userAnswer === undefined) { return ''; }
-    if (correct(answer, question)) { return 'correct'; }
-    if (answer === userAnswer && !isCorrect) { return 'incorrect'; }
-    return '';
-  };
+  const userAnswerString = correctOutputString(userAnswer);
+  const correctAnswerString = correctOutputString(question.correct);
+  const myGetAnswerClass = (answer: string) =>
+    getAnswerClass(answer, userAnswerString, correctAnswerString, isCorrect);
 
   return (
     <>
@@ -106,7 +129,7 @@ const CodeOutputView: React.FC<QuestionViewProps<'code-output'>> = ({
       {!readOnly && <QuestionInput input={question.input} />}
       <QuestionPrompt
         prompt={<>What is the <em>output to the user</em>? {useQuiz && !readOnly && <small>You can either include or omit all of the input echos.</small>}</>}
-        helpMessage={readOnly ? undefined : helpMessage}
+        helpMessage={helpMessage}
         onSkip={readOnly ? undefined : onSkip}
       />
       {useQuiz ? (
@@ -130,7 +153,7 @@ const CodeOutputView: React.FC<QuestionViewProps<'code-output'>> = ({
         <QuestionAnswerOptions
           options={question.options}
           onSelect={onAnswer}
-          getAnswerClass={getAnswerClass}
+          getAnswerClass={myGetAnswerClass}
           formatAnswer={formatHtmlAnswer}
           disabled={userAnswer !== undefined}
         />
@@ -142,7 +165,8 @@ const CodeOutputView: React.FC<QuestionViewProps<'code-output'>> = ({
 export const codeOutputDef: QuestionTypeDef<'code-output'> = {
   kind: 'code-output',
   checkAnswer: checkAnswer,
-  serializeResponse: serialize,
+  serialize,
+  unserialize,
   View: CodeOutputView,
 };
 
