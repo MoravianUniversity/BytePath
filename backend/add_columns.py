@@ -77,6 +77,48 @@ with app.app_context():
             ))
             conn.commit()
 
+    # ── fix student_progress unique constraint ───────────────────────────────
+    # Old schema had UNIQUE(user_id, topic); new schema needs UNIQUE(user_id, topic, class_id)
+    with db.engine.connect() as conn:
+        progress_ddl = conn.execute(
+            db.text("SELECT sql FROM sqlite_master WHERE name='student_progress'")
+        ).scalar() or ""
+
+        if "UNIQUE (user_id, topic)" in progress_ddl and "UNIQUE (user_id, topic, class_id)" not in progress_ddl:
+            print("Recreating student_progress to fix unique constraint...")
+            progress_cols = [col["name"] for col in db.inspect(db.engine).get_columns("student_progress")]
+            max_select = (
+                "max_subtopics_completed"
+                if "max_subtopics_completed" in progress_cols
+                else "subtopics_completed"
+            )
+            conn.execute(db.text(f"""
+                CREATE TABLE student_progress_new (
+                    id INTEGER NOT NULL PRIMARY KEY,
+                    user_id INTEGER NOT NULL REFERENCES users(id),
+                    class_id INTEGER REFERENCES classes(id),
+                    topic VARCHAR(100) NOT NULL REFERENCES topics(id),
+                    subtopics_completed INTEGER DEFAULT 0,
+                    max_subtopics_completed INTEGER DEFAULT 0,
+                    total_subtopics INTEGER,
+                    questions_answered INTEGER DEFAULT 0,
+                    last_accessed DATETIME,
+                    UNIQUE (user_id, topic, class_id)
+                )
+            """))
+            conn.execute(db.text(f"""
+                INSERT INTO student_progress_new
+                    (id, user_id, class_id, topic, subtopics_completed,
+                     max_subtopics_completed, total_subtopics, questions_answered, last_accessed)
+                SELECT id, user_id, class_id, topic, subtopics_completed,
+                       {max_select}, total_subtopics, questions_answered, last_accessed
+                FROM student_progress
+            """))
+            conn.execute(db.text("DROP TABLE student_progress"))
+            conn.execute(db.text("ALTER TABLE student_progress_new RENAME TO student_progress"))
+            conn.commit()
+            print("student_progress recreated with UNIQUE(user_id, topic, class_id).")
+
     # ── fix roster_students unique constraint ────────────────────────────────
     # Old schema had UNIQUE(email); new schema needs UNIQUE(email, class_id)
     # SQLite can't drop constraints, so recreate the table if needed.

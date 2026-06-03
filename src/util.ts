@@ -195,10 +195,23 @@ export function deduplicate<T>(array: T[], isSame: (a: T, b: T) => boolean = (a,
   return output;
 }
 
-// Format a date and time as a string
+// Parse API timestamps stored as UTC (often without a Z suffix) into a Date
+export function parseServerUtc(iso: string): Date {
+  const normalized = /(?:Z|[+-]\d{2}:\d{2})$/.test(iso) ? iso : `${iso}Z`;
+  return new Date(normalized);
+}
+
+// Convert an API timestamp stored as UTC into a Unix timestamp in milliseconds
+export function serverTimestampMs(iso: string | null | undefined): number {
+  if (!iso) return 0;
+  const ms = parseServerUtc(iso).getTime();
+  return Number.isNaN(ms) ? 0 : ms;
+}
+
+// Format a UTC API timestamp for display in the user's local timezone.
 export function formatDateTime(isoDate: string | null): string | null {
   if (!isoDate) return null;
-  const date = new Date(isoDate);
+  const date = parseServerUtc(isoDate);
   const today = new Date();
   if (Number.isNaN(date.getTime())) { return null; }
   if (

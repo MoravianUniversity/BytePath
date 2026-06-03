@@ -175,11 +175,11 @@ class StudentProgress(db.Model):
     questions_answered = db.Column(db.Integer, default=0)
     last_accessed = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Ensure one progress record per user per topic
-    __table_args__ = (db.UniqueConstraint("user_id", "topic", "class_id", name="_user_topic_uc"),)
+    # Ensure one progress record per user per topic per class
+    __table_args__ = (db.UniqueConstraint("user_id", "topic", "class_id", name="_user_topic_class_uc"),)
 
     def __repr__(self) -> str:
-        return f"<Progress user={self.user_id} topic={self.topic}>"
+        return f"<Progress user={self.user_id} topic={self.topic} class_id={self.class_id}>"
 
     @staticmethod
     def best_completion_percentage(

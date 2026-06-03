@@ -14,6 +14,7 @@ export type Class = {
   class_name: string;
   instructor_id: number;
   created_at: string;
+  section?: string;
 };
 
 export const classesService = {

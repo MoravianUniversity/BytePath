@@ -19,9 +19,11 @@ def get_by_user(user_id: int, class_id: Optional[int] = None) -> Iterable[Studen
 def get_by_user_and_topic(
     user_id: int, topic_id: str, class_id: Optional[int] = None
 ) -> Optional[StudentProgress]:
-    query = db.select(StudentProgress).filter_by(user_id=user_id, topic=topic_id)
+    print(f"get_by_user_and_topic: user_id={user_id}, topic_id={topic_id}, class_id={class_id}")
     if class_id is not None:
-        query = query.filter(StudentProgress.class_id == class_id)
+        query = db.select(StudentProgress).filter_by(user_id=user_id, topic=topic_id, class_id=class_id)
+    else:
+        query = db.select(StudentProgress).filter_by(user_id=user_id, topic=topic_id)
     return db.session.execute(query).scalar_one_or_none()
 
 

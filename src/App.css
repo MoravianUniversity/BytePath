@@ -317,6 +317,19 @@ select.dashboard-button option {
   background: var(--overlay-warning-10);
 }
 
+.sidebar-item--due-urgent {
+  border-color: var(--color-error) !important;
+  background: var(--overlay-error-12) !important;
+}
+
+.sidebar-item--due-urgent .sidebar-item-title {
+  color: var(--color-error);
+}
+
+.sidebar-item--due-urgent.active {
+  border-left-color: var(--color-error) !important;
+}
+
 .sidebar-item.locked {
   border-color: var(--border-subtle);
   opacity: 0.6;

@@ -26,6 +26,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlayCircle, faRightFromBracket, faTachographDigital } from '@fortawesome/free-solid-svg-icons';
 import { classTopicSettingsService } from './services/classTopicSettings';
 import { buildAvailabilityMap, filterTopicsByAvailability, isTopicEnabled, type TopicAvailabilityMap } from './utils/topicAvailability';
+import {
+  isUpcomingAssignmentDueSoon,
+  resolveEffectiveAssignments,
+  type EffectiveTopicAssignment,
+} from './utils/topicAssignments';
+import type { TopicProgress } from './services/progress';
 
 export const SKIPPED = Symbol('(skipped)');
 
@@ -119,6 +125,10 @@ function App() {
   const isInstructor = currentUser?.role === 'instructor';
   const [instructorPractice, setInstructorPractice] = useState(false);
   const [topicAvailability, setTopicAvailability] = useState<TopicAvailabilityMap>(new Map());
+  const [topicAssignments, setTopicAssignments] = useState<Map<string, EffectiveTopicAssignment>>(
+    new Map(),
+  );
+  const [studentTopicProgress, setStudentTopicProgress] = useState<TopicProgress[]>([]);
   const canBypassAvailability = isInstructor && instructorPractice;
   const [studentClasses, setStudentClasses] = useState<Class[]>([]);
   const hasMountedRef = useRef(false);
@@ -145,6 +155,14 @@ function App() {
       // If multiple classes and no class selected yet, leave null — class picker will show.
     });
   }, [currentUser]);
+
+  useEffect(() => {
+    if (!currentClass || isInstructor) return;
+    const match = studentClasses.find((cls) => cls.id === currentClass.id);
+    if (match && match.section !== currentClass.section) {
+      setCurrentClass(match);
+    }
+  }, [studentClasses, currentClass, isInstructor]);
 
   const clearUrlHash = () => {
     const { pathname, search } = window.location;
@@ -262,6 +280,7 @@ function App() {
   useEffect(() => {
     if (!currentUser || !currentClass) {
       setTopicAvailability(new Map());
+      setTopicAssignments(new Map());
       return;
     }
 
@@ -269,9 +288,13 @@ function App() {
       .getSettings(currentClass.id)
       .then((settings) => {
         setTopicAvailability(buildAvailabilityMap(settings.global_settings));
+        setTopicAssignments(
+          resolveEffectiveAssignments(settings, currentClass.section),
+        );
       })
       .catch(() => {
         setTopicAvailability(new Map());
+        setTopicAssignments(new Map());
       });
   }, [currentUser, currentClass]);
 
@@ -425,11 +448,28 @@ function App() {
         if (completed.length) {
           setCompletedTopics(prev => new Set([...prev, ...completed]));
         }
+        setStudentTopicProgress(progress);
       } catch (error) {
         console.error('Failed to load server progress:', error);
+        setStudentTopicProgress([]);
       }
     })();
   }, [currentUser, currentClass, allTopics]);
+
+  const studentProgressByTopic = useMemo(
+    () => new Map(studentTopicProgress.map((row) => [row.topic, row])),
+    [studentTopicProgress],
+  );
+
+  const isSidebarDueUrgent = (topicId: string): boolean => {
+    if (isInstructor) return false;
+    if (completedTopics.has(topicId)) return false;
+    return isUpcomingAssignmentDueSoon(
+      topicAssignments.get(topicId),
+      studentProgressByTopic.get(topicId),
+      4,
+    );
+  };
 
   const visibleTopics = useMemo(() => {
     if (canBypassAvailability || topicAvailability.size === 0) {
@@ -846,7 +886,7 @@ function App() {
                             return (
                               <div 
                                 key={subItem.id}
-                                className={`sidebar-item ${status} ${currentTopic === subItem ? 'active' : ''}`}
+                                className={`sidebar-item ${status} ${currentTopic === subItem ? 'active' : ''} ${isSidebarDueUrgent(subItem.id) ? 'sidebar-item--due-urgent' : ''}`}
                                 onClick={() => selectTopic(subItem)}
                               >
                                 <div className="sidebar-item-header">
@@ -888,7 +928,7 @@ function App() {
                 return (
                   <div 
                     key={item.id}
-                    className={`sidebar-item ${status} ${currentTopic === item ? 'active' : ''}`}
+                    className={`sidebar-item ${status} ${currentTopic === item ? 'active' : ''} ${isSidebarDueUrgent(item.id) ? 'sidebar-item--due-urgent' : ''}`}
                     onClick={() => selectTopic(item)}
                   >
                     <div className="sidebar-item-header">
@@ -927,7 +967,11 @@ function App() {
                 </div>
               </div>
             ) : !isInstructor ? (
-              <StudentDashboard user={currentUser} currentClassId={currentClass?.id ?? null} />
+              <StudentDashboard
+                user={currentUser}
+                currentClassId={currentClass?.id ?? null}
+                currentClass={currentClass}
+              />
             ) : (
               <div className="welcome-screen">
                 <h2>Welcome to Bytepath</h2>

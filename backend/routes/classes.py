@@ -82,9 +82,17 @@ def get_my_classes():
         func.lower(RosterStudent.email) == func.lower(user.email),
         RosterStudent.deleted_at.is_(None),
     ).all()
-    class_ids = {r.class_id for r in roster_entries if r.class_id is not None}
+    section_by_class_id = {
+        r.class_id: (r.section or "")
+        for r in roster_entries
+        if r.class_id is not None
+    }
+    class_ids = set(section_by_class_id.keys())
     classes = Class.query.filter(Class.id.in_(class_ids)).all()
-    return jsonify([c.to_dict() for c in classes])
+    return jsonify([
+        {**c.to_dict(), "section": section_by_class_id.get(c.id, "")}
+        for c in classes
+    ])
 
 
 @classes_bp.get("/<int:id>")
