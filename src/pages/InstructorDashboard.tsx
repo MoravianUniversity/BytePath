@@ -4,6 +4,7 @@ import RosterPage from './RosterPage';
 import TopicSettingsPage from './TopicSettingsPage';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBook, faGaugeHigh, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { type Class } from '../services/classes';
 import {
   reportsService,
   type ClassOverview,
@@ -60,11 +61,13 @@ export default function InstructorDashboard({
   className,
   activeTab = 'analytics',
   onTabChange,
+  onClassRenamed,
 }: {
   classId: number | null;
   className: string | null;
   activeTab?: 'analytics' | 'roster' | 'topics';
   onTabChange?: (tab: 'analytics' | 'roster' | 'topics') => void;
+  onClassRenamed?: (cls: Class) => void;
 }) {
   const ALL_SECTIONS_VALUE = '__all_sections__';
   const [classOverview, setClassOverview] = useState<ClassOverview | null>(null);
@@ -683,7 +686,7 @@ export default function InstructorDashboard({
         )}
 
         {activeTab === 'roster' ? (
-          <RosterPage classId={classId} />
+          <RosterPage classId={classId} className={className} onClassRenamed={onClassRenamed} />
         ) : activeTab === 'topics' ? (
           <TopicSettingsPage classId={classId} />
         ) : (

@@ -5,9 +5,10 @@ import './ClassSelector.css';
 type Props = {
   currentClassId: number | null;
   onClassChange: (cls: Class | null) => void;
+  activeClass?: Class | null;
 };
 
-export default function ClassSelector({ currentClassId, onClassChange }: Props) {
+export default function ClassSelector({ currentClassId, onClassChange, activeClass }: Props) {
   const [classes, setClasses] = useState<Class[]>([]);
   const [open, setOpen] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -20,6 +21,18 @@ export default function ClassSelector({ currentClassId, onClassChange }: Props) 
   useEffect(() => {
     classesService.list().then(setClasses).catch(console.error);
   }, []);
+
+  useEffect(() => {
+    if (!activeClass) return;
+    setClasses((prev) => {
+      const index = prev.findIndex((c) => c.id === activeClass.id);
+      if (index < 0) return prev;
+      if (prev[index].class_name === activeClass.class_name) return prev;
+      const next = [...prev];
+      next[index] = activeClass;
+      return next;
+    });
+  }, [activeClass?.id, activeClass?.class_name, activeClass?.updated_at]);
 
   // Close dropdown when clicking outside
   useEffect(() => {

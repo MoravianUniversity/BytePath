@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { studentsService, type Student } from "../services/students";
-import { classesService, type CoInstructor } from "../services/classes";
+import { classesService, type Class, type CoInstructor } from "../services/classes";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload, faFilter, faFilterCircleXmark, faSortUp, faSortDown, faSort } from '@fortawesome/free-solid-svg-icons';
 import SectionCombobox from "../components/SectionCombobox";
@@ -12,7 +12,15 @@ type EditingState = {
   value: string;
 };
 
-export default function RosterPage({ classId }: { classId: number | null }) {
+export default function RosterPage({
+  classId,
+  className,
+  onClassRenamed,
+}: {
+  classId: number | null;
+  className?: string | null;
+  onClassRenamed?: (cls: Class) => void;
+}) {
   type SortField = "email" | "first_name" | "last_name" | "section" | "notes" | "created_at";
   const PAGE_SIZE = 10;
 
@@ -83,6 +91,9 @@ export default function RosterPage({ classId }: { classId: number | null }) {
   const [coInstructorEmail, setCoInstructorEmail] = useState("");
   const [coInstructorError, setCoInstructorError] = useState<string | null>(null);
   const [coInstructorSaving, setCoInstructorSaving] = useState(false);
+  const [classNameDraft, setClassNameDraft] = useState(className ?? "");
+  const [classRenameError, setClassRenameError] = useState<string | null>(null);
+  const [classRenameSaving, setClassRenameSaving] = useState(false);
 
   // Keep the current filter context for "load more" without re-creating effects.
   useEffect(() => {
@@ -152,6 +163,11 @@ export default function RosterPage({ classId }: { classId: number | null }) {
   }, [classId]);
 
   useEffect(() => {
+    setClassNameDraft(className ?? "");
+    setClassRenameError(null);
+  }, [className, classId]);
+
+  useEffect(() => {
     setCoInstructorError(null);
     setCoInstructorEmail("");
     if (!classId) {
@@ -163,6 +179,33 @@ export default function RosterPage({ classId }: { classId: number | null }) {
       .then(setCoInstructors)
       .catch(() => setCoInstructors([]));
   }, [classId]);
+
+  const handleSaveClassName = async () => {
+    if (!classId) return;
+    const trimmed = classNameDraft.trim();
+    if (!trimmed) {
+      setClassRenameError("Class name cannot be empty");
+      setClassNameDraft(className ?? "");
+      return;
+    }
+    if (trimmed === (className ?? "").trim()) {
+      setClassRenameError(null);
+      setClassNameDraft(trimmed);
+      return;
+    }
+    setClassRenameSaving(true);
+    setClassRenameError(null);
+    try {
+      const updated = await classesService.rename(classId, trimmed);
+      setClassNameDraft(updated.class_name);
+      onClassRenamed?.(updated);
+    } catch (err) {
+      setClassRenameError(err instanceof Error ? err.message : "Failed to rename class");
+      setClassNameDraft(className ?? "");
+    } finally {
+      setClassRenameSaving(false);
+    }
+  };
 
   const handleFile = async (file: File | null) => {
     if (!file) return;
@@ -391,6 +434,35 @@ export default function RosterPage({ classId }: { classId: number | null }) {
 
   return (
     <div className="students-page">
+      {classId && (
+        <section className="class-rename-panel app-page-panel">
+          <div className="class-rename-panel__header">
+            <h2>Class Name</h2>
+          </div>
+          {classRenameError && <div className="class-rename-error">{classRenameError}</div>}
+          <div className="class-rename-form">
+            <input
+              type="text"
+              value={classNameDraft}
+              onChange={(e) => setClassNameDraft(e.target.value)}
+              onBlur={() => void handleSaveClassName()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") void handleSaveClassName();
+                if (e.key === "Escape") {
+                  setClassNameDraft(className ?? "");
+                  setClassRenameError(null);
+                }
+              }}
+              placeholder="Class name"
+              className="class-rename-input"
+              disabled={classRenameSaving}
+              aria-label="Class name"
+            />
+            {classRenameSaving && <span className="class-rename-saving">Saving…</span>}
+          </div>
+        </section>
+      )}
+
       {classId && (
         <section className="co-instructors-panel app-page-panel">
           <div className="co-instructors-panel__header">

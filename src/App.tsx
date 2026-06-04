@@ -799,6 +799,7 @@ function App() {
               <ClassSelector
                 currentClassId={currentClass?.id ?? null}
                 onClassChange={setCurrentClass}
+                activeClass={currentClass}
               />
             )}
             <button
@@ -833,6 +834,7 @@ function App() {
             className={currentClass?.class_name ?? null}
             activeTab={instructorDashboardTab}
             onTabChange={setInstructorDashboardTab}
+            onClassRenamed={setCurrentClass}
           />
         ) : isLoading ? (
           <div className="loading-screen">

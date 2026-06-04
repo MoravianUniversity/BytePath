@@ -89,6 +89,31 @@ def _ensure_primary_instructor(email: str) -> User:
     return instructor
 
 
+def _ensure_instructor_class(
+    instructor: User,
+    class_name: str = DEMO_CLASS_NAME,
+) -> Class:
+    """Ensure the instructor owns at least one class."""
+
+    existing = db.session.execute(
+        db.select(Class).filter_by(instructor_id=instructor.id).limit(1)
+    ).scalar_one_or_none()
+    if existing:
+        return existing
+
+    new_class = Class(class_name=class_name, instructor_id=instructor.id)
+    db.session.add(new_class)
+    db.session.flush()
+    print(f"Created class for {instructor.email}: {class_name}")
+    return new_class
+
+
+def _primary_instructor() -> User | None:
+    return db.session.execute(
+        db.select(User).where(User.role == "instructor").order_by(User.id)
+    ).scalars().first()
+
+
 def initialise_database(
     seed: bool = False,
     realistic: bool = False,
@@ -109,6 +134,10 @@ def initialise_database(
                     "--instructor-email, or set BYTEPATH_INSTRUCTOR_EMAIL."
                 )
             _ensure_primary_instructor(resolved)
+
+        primary_instructor = _primary_instructor()
+        if primary_instructor:
+            _ensure_instructor_class(primary_instructor)
 
         if seed:
             _seed_topics()
@@ -167,22 +196,14 @@ def seed_realistic_dataset(*, instructor_email: str | None = None) -> None:
     _seed_topics()
     _seed_users()
 
-    instructor = db.session.execute(
-        db.select(User).where(User.role == "instructor").order_by(User.id)
-    ).scalars().first()
+    instructor = _primary_instructor()
     if not instructor:
         resolved = _resolve_instructor_email(instructor_email)
         if not resolved:
             raise RuntimeError("seed_realistic_dataset requires an instructor account")
         instructor = _ensure_primary_instructor(resolved)
 
-    demo_class = db.session.execute(
-        db.select(Class).filter_by(class_name=DEMO_CLASS_NAME, instructor_id=instructor.id)
-    ).scalar_one_or_none()
-    if not demo_class:
-        demo_class = Class(class_name=DEMO_CLASS_NAME, instructor_id=instructor.id)
-        db.session.add(demo_class)
-        db.session.flush()
+    demo_class = _ensure_instructor_class(instructor)
 
     student_profiles = [
         ("mia.hughes@bytepath.dev", "Mia Hughes", "strong"),
