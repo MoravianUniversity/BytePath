@@ -47,6 +47,16 @@ def get_class_overview():
     return jsonify(overview), 200
 
 
+@reports_bp.get("/class/results")
+def get_class_results():
+    class_id = request.args.get("class_id", type=int)
+    section = request.args.get("section")
+    service = current_app.config.get("REPORT_SERVICE", ReportService)
+    normalized_section = _normalize_section(section)
+    results = service.get_class_results(class_id=class_id, section=normalized_section)
+    return jsonify(results), 200
+
+
 @reports_bp.get("/question/<string:topic_id>/analytics")
 def get_question_analytics(topic_id: str):
     subtopic_type = request.args.get("subtopic_type")

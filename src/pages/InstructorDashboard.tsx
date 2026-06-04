@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState, type KeyboardEvent } from 'react';
 import Button from '../components/ui/Button';
 import RosterPage from './RosterPage';
 import TopicSettingsPage from './TopicSettingsPage';
+import ResultsPage from './ResultsPage';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBook, faGaugeHigh, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { faBook, faGaugeHigh, faTableCells, faUsers } from '@fortawesome/free-solid-svg-icons';
 import { type Class } from '../services/classes';
 import {
   reportsService,
@@ -65,8 +66,8 @@ export default function InstructorDashboard({
 }: {
   classId: number | null;
   className: string | null;
-  activeTab?: 'analytics' | 'roster' | 'topics';
-  onTabChange?: (tab: 'analytics' | 'roster' | 'topics') => void;
+  activeTab?: 'analytics' | 'roster' | 'topics' | 'results';
+  onTabChange?: (tab: 'analytics' | 'roster' | 'topics' | 'results') => void;
   onClassRenamed?: (cls: Class) => void;
 }) {
   const ALL_SECTIONS_VALUE = '__all_sections__';
@@ -85,17 +86,42 @@ export default function InstructorDashboard({
   const [selectedQuestion, setSelectedQuestion] = useState<QuestionAnalyticsResponse['analytics'][number] | null>(null);
   const [selectedSubtopic, setSelectedSubtopic] = useState<string | null>(null);
   const pageTitle = className
-    ? `${className} ${activeTab === 'analytics' ? 'Analytics' : activeTab === 'roster' ? 'Roster' : 'Topics'}`
+    ? `${className} ${activeTab === 'analytics' ? 'Analytics' : activeTab === 'roster' ? 'Roster' : activeTab === 'results' ? 'Results' : 'Topics'}`
     : activeTab === 'analytics'
       ? 'All Class Analytics'
       : activeTab === 'roster'
         ? 'Class Roster'
-        : 'Topic Settings';
+        : activeTab === 'results'
+          ? 'Class Results'
+          : 'Topic Settings';
   const pageSubtitle = activeTab === 'analytics'
     ? 'Comprehensive overview of student progress and performance'
     : activeTab === 'roster'
       ? 'Manage co-instructors and the class roster.'
-      : 'Configure topic availability and schedules.';
+      : activeTab === 'results'
+        ? 'Student grades across assignments.'
+        : 'Configure topic availability and schedules.';
+
+  const renderDashboardTabs = () => (
+    <>
+      <button className={`dashboard-tab ${activeTab === 'analytics' ? 'is-active' : ''}`} onClick={() => onTabChange?.('analytics')}>
+        <FontAwesomeIcon icon={faGaugeHigh} aria-hidden="true" />
+        <span className="dashboard-tab__label">Analytics</span>
+      </button>
+      <button className={`dashboard-tab ${activeTab === 'results' ? 'is-active' : ''}`} onClick={() => onTabChange?.('results')}>
+        <FontAwesomeIcon icon={faTableCells} aria-hidden="true" />
+        <span className="dashboard-tab__label">Results</span>
+      </button>
+      <button className={`dashboard-tab ${activeTab === 'topics' ? 'is-active' : ''}`} onClick={() => onTabChange?.('topics')}>
+        <FontAwesomeIcon icon={faBook} aria-hidden="true" />
+        <span className="dashboard-tab__label">Topics</span>
+      </button>
+      <button className={`dashboard-tab ${activeTab === 'roster' ? 'is-active' : ''}`} onClick={() => onTabChange?.('roster')}>
+        <FontAwesomeIcon icon={faUsers} aria-hidden="true" />
+        <span className="dashboard-tab__label">Roster</span>
+      </button>
+    </>
+  );
 
   useEffect(() => {
     setSelectedStudent(null);
@@ -108,9 +134,15 @@ export default function InstructorDashboard({
     setTopicLoading(false);
     setSelectedQuestion(null);
     setSelectedSubtopic(null);
+
+    if (activeTab !== 'analytics') {
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     loadClassOverview();
-  }, [classId, selectedSection]);
+  }, [classId, selectedSection, activeTab]);
 
   const loadClassOverview = async () => {
     try {
@@ -233,18 +265,7 @@ export default function InstructorDashboard({
             <div className="dashboard-subtitle">Loading dashboard…</div>
           </div>
           <div className="dashboard-header__actions dashboard-header__actions--tabs">
-            <button className={`dashboard-tab ${activeTab === 'analytics' ? 'is-active' : ''}`} onClick={() => onTabChange?.('analytics')}>
-              <FontAwesomeIcon icon={faGaugeHigh} aria-hidden="true" />
-              <span className="dashboard-tab__label">Analytics</span>
-            </button>
-            <button className={`dashboard-tab ${activeTab === 'roster' ? 'is-active' : ''}`} onClick={() => onTabChange?.('roster')}>
-              <FontAwesomeIcon icon={faUsers} aria-hidden="true" />
-              <span className="dashboard-tab__label">Roster</span>
-            </button>
-            <button className={`dashboard-tab ${activeTab === 'topics' ? 'is-active' : ''}`} onClick={() => onTabChange?.('topics')}>
-              <FontAwesomeIcon icon={faBook} aria-hidden="true" />
-              <span className="dashboard-tab__label">Topics</span>
-            </button>
+            {renderDashboardTabs()}
           </div>
         </header>
       </div>
@@ -265,18 +286,7 @@ export default function InstructorDashboard({
             <p className="dashboard-subtitle">{pageSubtitle}</p>
           </div>
           <div className="dashboard-header__actions dashboard-header__actions--tabs">
-            <button className={`dashboard-tab ${activeTab === 'analytics' ? 'is-active' : ''}`} onClick={() => onTabChange?.('analytics')}>
-              <FontAwesomeIcon icon={faGaugeHigh} aria-hidden="true" />
-              <span className="dashboard-tab__label">Analytics</span>
-            </button>
-            <button className={`dashboard-tab ${activeTab === 'roster' ? 'is-active' : ''}`} onClick={() => onTabChange?.('roster')}>
-              <FontAwesomeIcon icon={faUsers} aria-hidden="true" />
-              <span className="dashboard-tab__label">Roster</span>
-            </button>
-            <button className={`dashboard-tab ${activeTab === 'topics' ? 'is-active' : ''}`} onClick={() => onTabChange?.('topics')}>
-              <FontAwesomeIcon icon={faBook} aria-hidden="true" />
-              <span className="dashboard-tab__label">Topics</span>
-            </button>
+            {renderDashboardTabs()}
           </div>
         </header>
         <div className="dashboard-scroll-content">
@@ -647,18 +657,7 @@ export default function InstructorDashboard({
           <p className="dashboard-subtitle">{pageSubtitle}</p>
         </div>
         <div className="dashboard-header__actions dashboard-header__actions--tabs">
-          <button className={`dashboard-tab ${activeTab === 'analytics' ? 'is-active' : ''}`} onClick={() => onTabChange?.('analytics')}>
-            <FontAwesomeIcon icon={faGaugeHigh} aria-hidden="true" />
-            <span className="dashboard-tab__label">Analytics</span>
-          </button>
-          <button className={`dashboard-tab ${activeTab === 'roster' ? 'is-active' : ''}`} onClick={() => onTabChange?.('roster')}>
-            <FontAwesomeIcon icon={faUsers} aria-hidden="true" />
-            <span className="dashboard-tab__label">Roster</span>
-          </button>
-          <button className={`dashboard-tab ${activeTab === 'topics' ? 'is-active' : ''}`} onClick={() => onTabChange?.('topics')}>
-            <FontAwesomeIcon icon={faBook} aria-hidden="true" />
-            <span className="dashboard-tab__label">Topics</span>
-          </button>
+          {renderDashboardTabs()}
         </div>
       </header>
       <div className="dashboard-scroll-content">
@@ -689,6 +688,8 @@ export default function InstructorDashboard({
           <RosterPage classId={classId} className={className} onClassRenamed={onClassRenamed} />
         ) : activeTab === 'topics' ? (
           <TopicSettingsPage classId={classId} />
+        ) : activeTab === 'results' ? (
+          <ResultsPage classId={classId} />
         ) : (
           <>
       <section className="dashboard-overview">

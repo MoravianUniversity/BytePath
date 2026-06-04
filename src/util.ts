@@ -208,27 +208,37 @@ export function serverTimestampMs(iso: string | null | undefined): number {
   return Number.isNaN(ms) ? 0 : ms;
 }
 
+const MS_PER_YEAR = 365.25 * 24 * 60 * 60 * 1000;
+
+function isAssignmentEndOfDay(date: Date): boolean {
+  return date.getHours() === 23 && date.getMinutes() === 59;
+}
+
 // Format a UTC API timestamp for display in the user's local timezone.
 export function formatDateTime(isoDate: string | null): string | null {
   if (!isoDate) return null;
   const date = parseServerUtc(isoDate);
-  const today = new Date();
-  if (Number.isNaN(date.getTime())) { return null; }
-  if (
-    date.getFullYear() === today.getFullYear() ||
-    (date.getFullYear() === today.getFullYear()-1 && date.getMonth() > today.getMonth())
-  ) {
-    return date.toLocaleString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-    });
-  } else {
-    return date.toLocaleString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
+  if (Number.isNaN(date.getTime())) {
+    return null;
   }
-};
+
+  const now = new Date();
+  const withinOneYear = Math.abs(now.getTime() - date.getTime()) < MS_PER_YEAR;
+  const dateOptions: Intl.DateTimeFormatOptions = {
+    month: 'short',
+    day: 'numeric',
+  };
+  if (!withinOneYear) {
+    dateOptions.year = 'numeric';
+  }
+
+  if (isAssignmentEndOfDay(date)) {
+    return date.toLocaleDateString(undefined, dateOptions);
+  }
+
+  return date.toLocaleString(undefined, {
+    ...dateOptions,
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}

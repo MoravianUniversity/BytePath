@@ -10,6 +10,8 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding-right: 0.5rem;
 }
 
 .dashboard-header__actions {
@@ -58,7 +60,7 @@
   background: var(--bg-dashboard-card);
   border: 1px solid var(--border-dashboard-card);
   color: var(--text-dashboard);
-  padding: 0.75rem 1.5rem;
+  padding: 0.75rem;
   border-radius: 10px;
   cursor: pointer;
   font-weight: 500;
@@ -76,6 +78,13 @@
   padding: 0.75rem 0.9rem;
   border-radius: 10px;
   min-width: 170px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.dashboard-toolbar-select:hover {
+  background: var(--bg-dashboard-card-hover);
 }
 
 .dashboard-overview {

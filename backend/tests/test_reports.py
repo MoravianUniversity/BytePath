@@ -35,6 +35,20 @@ def test_get_class_overview(client):
     assert "topics_overview" in data
 
 
+def test_get_class_results(client):
+    response = client.get("/api/reports/class/results")
+    assert response.status_code == 200
+    data = response.get_json()
+    assert "students" in data
+    assert "sections" in data
+    assert "topic_settings" in data
+    assert "progress" in data
+    assert "activity_bounds" in data
+    assert "responses" in data
+    assert isinstance(data["students"], list)
+    assert isinstance(data["responses"], list)
+
+
 def test_get_question_analytics(client):
     response = client.get("/api/reports/question/test-topic-1/analytics")
     assert response.status_code == 200

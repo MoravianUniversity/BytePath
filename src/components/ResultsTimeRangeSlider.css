@@ -1,0 +1,97 @@
+.results-time-range {
+  margin-bottom: 1.25rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border-dashboard-card);
+  border-radius: 12px;
+  background: var(--bg-dashboard-card);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.results-time-range:hover {
+  background: var(--bg-dashboard-card-hover);
+}
+
+.results-time-range__label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.75;
+}
+
+.results-time-range__slider {
+  --handle-height: 24px;
+  margin: 0.5rem 2rem 0.5rem;
+  min-height: var(--handle-height);
+}
+
+.results-time-range .noUi-target {
+  background: var(--bg-dashboard-card-hover);
+  border: none;
+  box-shadow: none;
+}
+
+.results-time-range .noUi-connect {
+  background: var(--color-primary);
+}
+
+.results-time-range__slider .noUi-draggable {
+  cursor: default;
+}
+
+.results-time-range__slider .noUi-handle {
+  cursor: ew-resize;
+  height: var(--handle-height);
+  top: 0;
+  border-color: var(--color-primary);
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.results-time-range__slider .noUi-handle::before, .results-time-range__slider .noUi-handle::after {
+  top: 4px;
+  background: var(--color-primary);
+}
+
+.results-time-range .noUi-tooltip {
+  display: none;
+  font-size: 0.75rem;
+  border: 1px solid var(--border-dashboard-card);
+  border-radius: 8px;
+  background: var(--bg-dashboard-card);
+  color: var(--text-dashboard);
+  bottom: calc(0.25rem + var(--handle-height));
+  padding: 0.1rem 0.2rem;
+}
+
+.results-time-range .noUi-handle:hover .noUi-tooltip {
+  display: block;
+}
+
+.results-time-range .noUi-pips {
+  height: var(--handle-height);
+  top: 0;
+}
+
+.results-time-range .noUi-marker {
+  cursor: pointer;
+  top: 0;
+  width: 2px;
+  height: var(--handle-height);
+  background: var(--color-accent);
+  z-index: 1;
+  opacity: 0.85;
+}
+
+.results-time-range .noUi-value {
+  cursor: pointer;
+  top: 50%;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  color: var(--text-dashboard);
+  opacity: 0.9;
+  white-space: nowrap;
+  margin-top: 0.7rem;
+}

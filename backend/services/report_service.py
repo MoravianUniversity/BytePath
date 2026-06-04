@@ -3,9 +3,10 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 
-from sqlalchemy import case, func, and_, desc
+from sqlalchemy import case, func, and_, desc, or_
 
 from backend.models import RosterStudent, StudentProgress, StudentResponse, Topic, User, db
+from backend.services.class_topic_settings_service import ClassTopicSettingsService
 
 
 class ReportService:
@@ -784,6 +785,193 @@ class ReportService:
             "struggling_students": struggling_list,
             "recent_activity": recent_activity_list,
             "sections": section_options,
+        }
+
+    @staticmethod
+    def get_class_results(
+        class_id: Optional[int] = None,
+        section: Optional[str] = None,
+    ) -> Dict:
+        roster_filter = [User.role == "student", RosterStudent.deleted_at.is_(None)]
+        entry_filter = [RosterStudent.deleted_at.is_(None)]
+        if class_id is not None:
+            roster_filter.append(RosterStudent.class_id == class_id)
+            entry_filter.append(RosterStudent.class_id == class_id)
+        if section is not None:
+            roster_filter.append(RosterStudent.section == section)
+            entry_filter.append(RosterStudent.section == section)
+
+        rostered_students_subquery = (
+            db.select(User.id)
+            .select_from(User)
+            .join(
+                RosterStudent,
+                func.lower(RosterStudent.email) == func.lower(User.email),
+            )
+            .filter(*roster_filter)
+            .subquery()
+        )
+
+        roster_entries = (
+            db.session.execute(
+                db.select(
+                    RosterStudent.first_name,
+                    RosterStudent.last_name,
+                    RosterStudent.section,
+                    RosterStudent.email,
+                    User.id.label("user_id"),
+                    User.name.label("user_name"),
+                )
+                .select_from(RosterStudent)
+                .join(
+                    User,
+                    func.lower(User.email) == func.lower(RosterStudent.email),
+                    isouter=True,
+                )
+                .filter(*entry_filter)
+                .order_by(RosterStudent.last_name, RosterStudent.first_name)
+            )
+            .mappings()
+            .all()
+        )
+
+        seen_emails: set = set()
+        students = []
+        for entry in roster_entries:
+            email_key = entry["email"].lower()
+            if email_key in seen_emails:
+                continue
+            seen_emails.add(email_key)
+            students.append({
+                "student_id": entry["user_id"],
+                "student_name": (
+                    entry["user_name"]
+                    or f"{entry['first_name']} {entry['last_name']}".strip()
+                    or entry["email"]
+                ),
+                "student_email": entry["email"],
+                "section": (entry["section"] or "").strip(),
+            })
+
+        section_query = db.select(RosterStudent.section).filter(
+            RosterStudent.deleted_at.is_(None)
+        )
+        if class_id is not None:
+            section_query = section_query.filter(RosterStudent.class_id == class_id)
+
+        section_options = sorted(
+            {
+                (row[0] or "").strip()
+                for row in db.session.execute(section_query.distinct()).all()
+            },
+            key=lambda s: (s != "", s.lower()),
+        )
+
+        topic_settings: Dict = {"global_settings": [], "section_overrides": {}}
+        if class_id is not None:
+            topic_settings = ClassTopicSettingsService.list_settings(class_id)
+
+        topic_names = {
+            row.id: row.name
+            for row in db.session.execute(db.select(Topic)).scalars().all()
+        }
+
+        prog_filter = [StudentProgress.user_id.in_(rostered_students_subquery)]
+        if class_id is not None:
+            prog_filter.append(StudentProgress.class_id == class_id)
+
+        progress_rows: List[StudentProgress] = (
+            db.session.execute(db.select(StudentProgress).filter(*prog_filter))
+            .scalars()
+            .all()
+        )
+
+        progress: Dict[str, Dict[str, Dict]] = {}
+        for row in progress_rows:
+            user_key = str(row.user_id)
+            if user_key not in progress:
+                progress[user_key] = {}
+            max_completed = row.max_subtopics_completed or 0
+            total = row.total_subtopics or 0
+            progress[user_key][row.topic] = {
+                "max_subtopics_completed": max_completed,
+                "total_subtopics": total,
+                "best_completion_percentage": round(
+                    StudentProgress.best_completion_percentage(max_completed, total),
+                    2,
+                ),
+            }
+
+        if class_id is not None:
+            resp_filter = [
+                StudentResponse.user_id.in_(rostered_students_subquery),
+                or_(
+                    StudentResponse.class_id == class_id,
+                    StudentResponse.class_id.is_(None),
+                ),
+            ]
+        else:
+            resp_filter = [StudentResponse.user_id.in_(rostered_students_subquery)]
+
+        activity_bounds = {"min": None, "max": None}
+        activity_row = db.session.execute(
+            db.select(
+                func.min(StudentResponse.attempted_at),
+                func.max(StudentResponse.attempted_at),
+            ).filter(*resp_filter)
+        ).one()
+        if activity_row[0] is not None and activity_row[1] is not None:
+            activity_bounds = {
+                "min": activity_row[0].isoformat(),
+                "max": activity_row[1].isoformat(),
+            }
+        else:
+            progress_activity = db.session.execute(
+                db.select(
+                    func.min(StudentProgress.last_accessed),
+                    func.max(StudentProgress.last_accessed),
+                ).filter(*prog_filter)
+            ).one()
+            if progress_activity[0] is not None and progress_activity[1] is not None:
+                activity_bounds = {
+                    "min": progress_activity[0].isoformat(),
+                    "max": progress_activity[1].isoformat(),
+                }
+
+        response_rows = (
+            db.session.execute(
+                db.select(
+                    StudentResponse.user_id,
+                    StudentResponse.topic,
+                    StudentResponse.subtopic_type,
+                    StudentResponse.is_correct,
+                    StudentResponse.attempted_at,
+                )
+                .filter(*resp_filter)
+                .order_by(StudentResponse.attempted_at.asc())
+            )
+            .all()
+        )
+
+        responses = [
+            {
+                "user_id": row.user_id,
+                "topic": row.topic,
+                "subtopic_type": row.subtopic_type,
+                "is_correct": bool(row.is_correct),
+                "attempted_at": row.attempted_at.isoformat(),
+            }
+            for row in response_rows
+        ]
+
+        return {
+            "students": students,
+            "sections": section_options,
+            "topic_settings": topic_settings,
+            "topic_names": topic_names,
+            "progress": progress,
+            "activity_bounds": activity_bounds,
+            "responses": responses,
         }
 
     @staticmethod

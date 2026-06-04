@@ -36,14 +36,15 @@ import type { TopicProgress } from './services/progress';
 export const SKIPPED = Symbol('(skipped)');
 
 type AppScreen = 'welcome' | 'question' | 'locked-topic' | 'roster' | 'topics' | 'dashboard';
-type DashboardTab = 'analytics' | 'roster' | 'topics';
+type DashboardTab = 'analytics' | 'roster' | 'topics' | 'results';
 
 const getScreenFromPath = (path: string): AppScreen | null => {
   if (
     path === '/dashboard' ||
     path === '/dashboard/analytics' ||
     path === '/dashboard/roster' ||
-    path === '/dashboard/topics'
+    path === '/dashboard/topics' ||
+    path === '/dashboard/results'
   ) {
     return 'dashboard';
   }
@@ -53,6 +54,7 @@ const getScreenFromPath = (path: string): AppScreen | null => {
 const getDashboardTabFromPath = (path: string): DashboardTab => {
   if (path === '/dashboard/roster') return 'roster';
   if (path === '/dashboard/topics') return 'topics';
+  if (path === '/dashboard/results') return 'results';
   return 'analytics';
 };
 

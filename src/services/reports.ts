@@ -1,4 +1,5 @@
 import api from './api';
+import type { ClassTopicSettingsResponse } from './classTopicSettings';
 
 export interface StudentReport {
   student_id: number;
@@ -111,6 +112,42 @@ export interface QuestionAnalyticsResponse {
   }>;
 }
 
+export interface ResultsProgressCell {
+  max_subtopics_completed: number;
+  total_subtopics: number;
+  best_completion_percentage: number;
+}
+
+export interface ClassResultsStudent {
+  student_id: number | null;
+  student_name: string;
+  student_email: string;
+  section: string;
+}
+
+export interface ResultsActivityBounds {
+  min: string | null;
+  max: string | null;
+}
+
+export interface ResultsResponseRow {
+  user_id: number;
+  topic: string;
+  subtopic_type: string;
+  is_correct: boolean;
+  attempted_at: string;
+}
+
+export interface ClassResultsResponse {
+  students: ClassResultsStudent[];
+  sections: string[];
+  topic_settings: ClassTopicSettingsResponse;
+  topic_names: Record<string, string>;
+  progress: Record<string, Record<string, ResultsProgressCell>>;
+  activity_bounds: ResultsActivityBounds;
+  responses: ResultsResponseRow[];
+}
+
 export const reportsService = {
   async getStudentReport(
     studentId: number,
@@ -132,6 +169,20 @@ export const reportsService = {
     const qs = params.toString();
     const response = await api.get(`reports/class/overview${qs ? `?${qs}` : ''}`);
     return response.data;
+  },
+
+  async getClassResults(classId?: number | null, section?: string | null): Promise<ClassResultsResponse> {
+    const params = new URLSearchParams();
+    if (classId) params.set('class_id', String(classId));
+    if (section != null) params.set('section', section);
+    const qs = params.toString();
+    const response = await api.get(`reports/class/results${qs ? `?${qs}` : ''}`);
+    const data = response.data;
+    return {
+      ...data,
+      activity_bounds: data.activity_bounds ?? { min: null, max: null },
+      responses: data.responses ?? [],
+    };
   },
 
   async getTopicReport(topicId: string, classId?: number | null, section?: string | null): Promise<TopicReport> {
