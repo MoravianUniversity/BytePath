@@ -12,6 +12,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from backend.models import db
 from backend.services import student_service
+from backend.services.class_service import touch_class_updated_at
 from backend.services.student_service import RosterStudentRow, normalize_section
 
 students_bp = Blueprint("students", __name__, url_prefix="/api/students")
@@ -208,6 +209,7 @@ def create_student():
             last_updated_via="manual",
         )
         db.session.add(student)
+        touch_class_updated_at(class_id)
         db.session.commit()
         return jsonify(student.to_dict()), 201
     except IntegrityError:
@@ -246,10 +248,13 @@ def update_student(id: int):
     if "section" in data:
         student.section = normalize_section(data["section"])
     if "class_id" in data:
-        student.class_id = data["class_id"] or None
-    
+        new_class_id = data["class_id"] or None
+        if new_class_id != student.class_id:
+            student.class_id = new_class_id
+            touch_class_updated_at(new_class_id)
+
     student.last_updated_via = "inline"
-    
+
     try:
         db.session.commit()
         return jsonify(student.to_dict())

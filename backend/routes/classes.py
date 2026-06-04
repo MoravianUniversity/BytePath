@@ -9,6 +9,7 @@ from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
 from backend.models import Class, Instructor, RosterStudent, User, db
+from backend.services.class_service import sort_classes_by_updated, touch_class_updated_at
 from backend.services.class_topic_settings_service import ClassTopicSettingsService
 
 classes_bp = Blueprint("classes", __name__, url_prefix="/api/classes")
@@ -47,8 +48,7 @@ def list_classes():
     co_classes = Class.query.filter(
         Class.id.in_(co_class_ids), Class.instructor_id != user_id
     ).all()
-    all_classes = sorted(owned + co_classes, key=lambda c: c.created_at, reverse=True)
-    return jsonify([c.to_dict() for c in all_classes])
+    return jsonify([c.to_dict() for c in sort_classes_by_updated(owned + co_classes)])
 
 
 @classes_bp.post("")
@@ -91,7 +91,7 @@ def get_my_classes():
     classes = Class.query.filter(Class.id.in_(class_ids)).all()
     return jsonify([
         {**c.to_dict(), "section": section_by_class_id.get(c.id, "")}
-        for c in classes
+        for c in sort_classes_by_updated(classes)
     ])
 
 
@@ -157,6 +157,7 @@ def assign_student(id: int, student_id: int):
         return jsonify({"error": "Student not found"}), 404
 
     student.class_id = id
+    touch_class_updated_at(id)
     try:
         db.session.commit()
     except IntegrityError:
@@ -220,6 +221,7 @@ def add_class_instructor(id: int):
 
     entry = Instructor(user_id=user.id, class_id=id, added_by=current_user_id)
     db.session.add(entry)
+    touch_class_updated_at(id)
     db.session.commit()
     return jsonify(entry.to_dict()), 201
 

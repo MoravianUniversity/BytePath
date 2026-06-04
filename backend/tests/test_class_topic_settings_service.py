@@ -56,8 +56,16 @@ def test_bulk_upsert_replace_scope_deletes_missing(monkeypatch):
         staticmethod(lambda *_args, **_kwargs: None),
     )
     monkeypatch.setattr(
+        "backend.services.class_topic_settings_service.class_topic_settings_repository.get_by_class_and_topic",
+        lambda *_args, **_kwargs: None,
+    )
+    monkeypatch.setattr(
         "backend.services.class_topic_settings_service.class_topic_settings_repository.upsert",
         lambda class_id, topic_id, **kwargs: upserts.append((class_id, topic_id, kwargs)),
+    )
+    monkeypatch.setattr(
+        "backend.services.class_topic_settings_service.touch_class_updated_at",
+        lambda *_args, **_kwargs: None,
     )
     monkeypatch.setattr(
         "backend.services.class_topic_settings_service.class_topic_settings_repository.delete_missing_for_scope",

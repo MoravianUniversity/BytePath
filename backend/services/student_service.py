@@ -15,6 +15,7 @@ from typing import Iterable, Tuple
 from sqlalchemy import func, or_
 
 from backend.models import RosterStudent, UploadHistory, db
+from backend.services.class_service import touch_class_updated_at
 
 SECTION_MAX_LENGTH = 64
 
@@ -265,6 +266,9 @@ def add_students_from_csv(
                 "last_name": last_name,
                 "action": f"{first_name} {last_name} added",
             })
+
+    if class_id is not None and (added > 0 or restored > 0):
+        touch_class_updated_at(class_id)
 
     # Create upload history record
     upload_history = UploadHistory(

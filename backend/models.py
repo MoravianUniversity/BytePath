@@ -65,7 +65,8 @@ class Class(db.Model):
     class_name = db.Column(db.String(100), nullable=False)
     instructor_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
     # Relationship
     instructor = db.relationship("User", backref="classes")
 
@@ -77,7 +78,8 @@ class Class(db.Model):
             "id": self.id,
             "class_name": self.class_name,
             "instructor_id": self.instructor_id,
-            "created_at": self.created_at.isoformat(),
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
 
 

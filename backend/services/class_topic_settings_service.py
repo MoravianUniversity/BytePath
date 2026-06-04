@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 from backend.models import db
 from backend.repositories import class_topic_settings_repository, topic_repository
+from backend.services.class_service import touch_class_updated_at
 
 
 class ClassTopicSettingsService:
@@ -61,6 +62,7 @@ class ClassTopicSettingsService:
                 row.updated_at = now
                 changed = True
         if changed:
+            touch_class_updated_at(class_id)
             db.session.commit()
 
     @staticmethod
@@ -92,21 +94,44 @@ class ClassTopicSettingsService:
         }
 
     @staticmethod
+    def _topic_schedule_changed(
+        existing,
+        *,
+        is_enabled: bool,
+        due_at,
+    ) -> bool:
+        if existing is None:
+            return is_enabled or due_at is not None
+        if existing.is_enabled != is_enabled:
+            return True
+        return existing.due_at != due_at
+
+    @staticmethod
     def bulk_upsert(class_id: int, settings: list[dict], section: str | None = None, replace_scope: bool = False):
         now = datetime.utcnow()
         normalized_section = ClassTopicSettingsService.normalize_section(section)
         keep_topic_ids: set[str] = set()
+        class_touched = False
         for item in settings:
             topic_id = str(item['topic_id'])
             ClassTopicSettingsService.ensure_topic(topic_id, item.get('name'))
+            existing = class_topic_settings_repository.get_by_class_and_topic(
+                class_id, topic_id, normalized_section
+            )
+            is_enabled = bool(item.get('is_enabled', True))
+            due_at = ClassTopicSettingsService._parse_due_at(item.get('due_at'))
+            if ClassTopicSettingsService._topic_schedule_changed(
+                existing, is_enabled=is_enabled, due_at=due_at
+            ):
+                class_touched = True
             class_topic_settings_repository.upsert(
                 class_id,
                 topic_id,
                 section=normalized_section,
-                is_enabled=bool(item.get('is_enabled', True)),
+                is_enabled=is_enabled,
                 available_at=ClassTopicSettingsService._parse_available_at(item.get('available_at')),
                 is_assigned=bool(item.get('is_assigned', False)),
-                due_at=ClassTopicSettingsService._parse_due_at(item.get('due_at')),
+                due_at=due_at,
                 updated_at=now,
             )
             keep_topic_ids.add(topic_id)
@@ -116,6 +141,8 @@ class ClassTopicSettingsService:
                 section=normalized_section,
                 keep_topic_ids=keep_topic_ids,
             )
+        if class_touched:
+            touch_class_updated_at(class_id)
         db.session.commit()
         return ClassTopicSettingsService.list_settings(class_id)
 
@@ -125,26 +152,37 @@ class ClassTopicSettingsService:
             payload.get('section', section)
         )
         row = class_topic_settings_repository.get_by_class_and_topic(class_id, topic_id, normalized_section)
+        is_enabled = bool(payload.get('is_enabled', row.is_enabled if row else True))
+        due_at = (
+            ClassTopicSettingsService._parse_due_at(payload.get('due_at'))
+            if 'due_at' in payload
+            else (row.due_at if row else None)
+        )
+        class_touched = ClassTopicSettingsService._topic_schedule_changed(
+            row, is_enabled=is_enabled, due_at=due_at
+        )
         if row is None:
-            row = class_topic_settings_repository.upsert(
+            class_topic_settings_repository.upsert(
                 class_id,
                 topic_id,
                 section=normalized_section,
-                is_enabled=bool(payload.get('is_enabled', True)),
+                is_enabled=is_enabled,
                 available_at=ClassTopicSettingsService._parse_available_at(payload.get('available_at')),
                 is_assigned=bool(payload.get('is_assigned', False)),
-                due_at=ClassTopicSettingsService._parse_due_at(payload.get('due_at')),
+                due_at=due_at,
             )
         else:
             class_topic_settings_repository.upsert(
                 class_id,
                 topic_id,
                 section=normalized_section,
-                is_enabled=bool(payload.get('is_enabled', row.is_enabled)),
+                is_enabled=is_enabled,
                 available_at=ClassTopicSettingsService._parse_available_at(payload.get('available_at')) if 'available_at' in payload else row.available_at,
                 is_assigned=bool(payload.get('is_assigned', row.is_assigned)),
-                due_at=ClassTopicSettingsService._parse_due_at(payload.get('due_at')) if 'due_at' in payload else row.due_at,
+                due_at=due_at,
             )
+        if class_touched:
+            touch_class_updated_at(class_id)
         db.session.commit()
         ClassTopicSettingsService.apply_due_schedules(class_id)
         setting = class_topic_settings_repository.get_by_class_and_topic(class_id, topic_id, normalized_section)
