@@ -6,9 +6,13 @@ import { createCodeQuestionCore, prepareOptions, type BuildCodeQuestionOpts } fr
 import { createException, Exception, normalizeOutputContainers, runGrabOutput, INPUT_START, INPUT_END, injectInputEcho, removeInputEcho } from '../python.ts';
 import { SKIPPED } from '../App.tsx';
 
-function correctOutputString(correct: CodeOutputQuestion['correct'] | typeof SKIPPED | undefined): string {
-  if (correct === undefined || correct === SKIPPED) { return ''; }
+function correctOutputString(correct: CodeOutputQuestion['correct']): string {
   return correct instanceof Error ? correct.name : correct;
+}
+
+function correctOutputStringWithSkipped(correct: CodeOutputQuestion['correct'] | typeof SKIPPED | undefined): string | typeof SKIPPED | undefined {
+  if (correct === undefined || correct === SKIPPED) { return correct; }
+  return correctOutputString(correct);
 }
 
 function removeTrailingSpaces(s: string): string {
@@ -119,7 +123,7 @@ const CodeOutputView: React.FC<QuestionViewProps<'code-output'>> = ({
 }) => {
   const useQuiz = useQuizDisplayMode(isQuiz, readOnly, question.options.length);
 
-  const userAnswerString = correctOutputString(userAnswer);
+  const userAnswerString = correctOutputStringWithSkipped(userAnswer);
   const correctAnswerString = correctOutputString(question.correct);
   const myGetAnswerClass = (answer: string) =>
     getAnswerClass(answer, userAnswerString, correctAnswerString, isCorrect);

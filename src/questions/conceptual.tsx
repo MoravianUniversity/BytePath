@@ -1,4 +1,4 @@
-import { getAnswerClass, QuestionAnswerOptions, QuestionPrompt, QuestionQuizInputAnswerDisplay, QuestionQuizInputSingleLine, QuestionSkipButton, useQuizDisplayMode } from "./QuestionComponents";
+import { getAnswerClass, QuestionAnswerOptions, QuestionPrompt, QuestionQuizInputAnswerDisplay, QuestionQuizInputSingleLine, useQuizDisplayMode } from "./QuestionComponents";
 import { fuzzyMatch } from "./fuzzyMatch";
 import { QuestionTypeDef, QuestionViewProps, SerializedResponse } from "./registry";
 import { ConceptualQuestion, UserAnswerFor } from "./types";
@@ -81,7 +81,6 @@ const ConceptualView: React.FC<QuestionViewProps<'conceptual'>> = ({
 
   return (
     <>
-      <QuestionSkipButton onClick={readOnly ? undefined : onSkip} />
       <QuestionPrompt
         prompt={question.prompt}
         helpMessage={helpMessage}
