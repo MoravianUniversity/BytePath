@@ -99,8 +99,11 @@ function App() {
   useEffect(() => { localStorage.setItem('mode', mode); }, [mode]);
   let [currentTopic, setCurrentTopic] = useState<Topic | null>(null);
   const [allTopics] = useState<Topic[]>(getAllTopics());
-  let [context, setContext] = useState<TopicContext | null>(null);
   const [currentSubtopic, setCurrentSubtopic] = useState<Subtopic | null>(null);
+  type ContextConstructor = new () => TopicContext;
+  const contextCacheRef = useRef(new Map<ContextConstructor, TopicContext>());
+  const staleConstructorsRef = useRef(new Set<ContextConstructor>());
+  const contextByQuestionIndexRef = useRef<(TopicContext | null)[]>([]);
   const [completedTopics, setCompletedTopics] = useState<Set<string>>(() => {
     let saved = localStorage.getItem('completedTopics');
     saved = saved?.replaceAll('_', '-') || null; // convert old format to new format
@@ -244,8 +247,8 @@ function App() {
     });
   }, [completedTopics]);
 
-  // Syntax highlighting for shared code
-  useEffect(() => { Prism.highlightAll(); }, [context]);
+  // Syntax highlighting for question code blocks
+  useEffect(() => { Prism.highlightAll(); }, [questionList]);
   useEffect(()=>{
     // Adjust token types for some keywords
     Prism.hooks.add('after-tokenize', function(env) {
@@ -368,11 +371,31 @@ function App() {
     syncPathForScreen(currentScreen, instructorDashboardTab);
   }, [currentScreen, instructorDashboardTab]);
 
+  const clearContextCache = () => {
+    contextCacheRef.current.clear();
+    staleConstructorsRef.current.clear();
+    contextByQuestionIndexRef.current = [];
+  };
+
+  const resolveContext = (subtopic: Subtopic | null): TopicContext | null => {
+    const Ctor = subtopic?.contextConstructor;
+    if (!Ctor) return null;
+
+    const cache = contextCacheRef.current;
+    const stale = staleConstructorsRef.current;
+
+    if (!cache.has(Ctor) || stale.has(Ctor)) {
+      cache.set(Ctor, new Ctor());
+      stale.delete(Ctor);
+    }
+    return cache.get(Ctor)!;
+  };
+
   const resetState = () => {
     setCurrentScreen('welcome');
     setCurrentTopic(null);
     setCurrentSubtopic(null);
-    setContext(null);
+    clearContextCache();
     setQuestionList([]);
     setQuestionAnswers([]);
     setCompletedTopics(new Set());
@@ -568,8 +591,7 @@ function App() {
   };
 
   function startTopic() {
-    context = currentTopic?.generateContext() ?? new TopicContext();
-    setContext(context);
+    clearContextCache();
     setQuestionList([]);
     setQuestionAnswers([]);
     addQuestion();
@@ -588,7 +610,9 @@ function App() {
         });
       } else {
         // Topic is not completed, add a new question
-        const nextQuestion = subtopic.generateQuestion(context ?? new TopicContext());
+        const ctx = resolveContext(subtopic);
+        contextByQuestionIndexRef.current.push(ctx);
+        const nextQuestion = subtopic.generateQuestion(ctx);
         setQuestionList(prev => [...prev, nextQuestion]);
         setQuestionStartTime(Date.now());
       }
@@ -609,6 +633,12 @@ function App() {
 
     const skipped = answer === undefined;
     const isCorrect = skipped || (await Promise.resolve(checkAnswer(question, answer)));
+    const questionIndex = questionAnswers.length;
+    const questionContext = contextByQuestionIndexRef.current[questionIndex] ?? null;
+
+    if (!isCorrect && 'sharedCode' in question && question.sharedCode && currentSubtopic?.contextConstructor) {
+      staleConstructorsRef.current.add(currentSubtopic.contextConstructor);
+    }
 
     // Update the answer state for this specific question
     setQuestionAnswers(prev => [...prev, skipped ? SKIPPED : answer]);
@@ -651,7 +681,7 @@ function App() {
           isCorrect,
           Math.floor((Date.now() - questionStartTime) / 1000),
           currentClass?.id ?? null,
-          context ?? undefined,
+          questionContext ?? undefined,
         );
 
         await responsesService.submitResponse(responseData);
@@ -1014,14 +1044,6 @@ function App() {
 
               {currentScreen === 'question' && (
                 <div className="topic-container">
-                  {context?.sharedCode && questionList.length > 0 && questionList[0] !== null && (
-                    <div className="shared-code">
-                  <div className="shared-code-header">Code shared by all questions in this topic:</div>
-                  <code className="language-python">
-                    {context?.sharedCode}
-                  </code>
-                </div>
-              )}
               <div className="questions-container">
                 {questionList.map((question, index) => (
                   question === null ? 

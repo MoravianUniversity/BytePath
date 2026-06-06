@@ -42,11 +42,19 @@ export function getAnswerClass<T>(
 }
 
 
-export const QuestionCodeBlock: React.FC<{code: string, language?: string}> = (
-  {code, language = 'python'}
-) => {
+export const QuestionCodeBlock: React.FC<{
+  code: string;
+  sharedCode?: string;
+  language?: string;
+}> = ({ code, sharedCode, language = 'python' }) => {
   return (
     <div className="code-block">
+      {sharedCode && (
+        <>
+          <code className={`language-${language} shared-code-section`}>{sharedCode}</code>
+          <div className="question-code-divider" />
+        </>
+      )}
       <code className={`language-${language}`}>{code}</code>
     </div>
   );

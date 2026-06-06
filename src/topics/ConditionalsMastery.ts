@@ -55,21 +55,27 @@ class ConditionalsMasteryContext extends TopicContext {
 }
 
 class ConditionalsMastery_0 extends EvalLastLineSubtopic {
+  readonly contextConstructor = ConditionalsMasteryContext;
   gen(ctx: ConditionalsMasteryContext): string { return `${ctx.var1} ${randChoice(['+', '-', '*'])} ${ctx.var2}`; }
 }
 class ConditionalsMastery_1 extends EvalLastLineSubtopic {
+  readonly contextConstructor = ConditionalsMasteryContext;
   gen(ctx: ConditionalsMasteryContext): string { return `${ctx.var1} ** ${ctx.var2}`; }
 }
 class ConditionalsMastery_2 extends EvalLastLineSubtopic {
+  readonly contextConstructor = ConditionalsMasteryContext;
   gen(ctx: ConditionalsMasteryContext): string { return `${ctx.var1} // ${ctx.var2}`; }
 }
 class ConditionalsMastery_3 extends EvalLastLineSubtopic {
+  readonly contextConstructor = ConditionalsMasteryContext;
   gen(ctx: ConditionalsMasteryContext): string { return `${ctx.var1} / ${ctx.var2}`; }
 }
 class ConditionalsMastery_4 extends EvalLastLineSubtopic {
+  readonly contextConstructor = ConditionalsMasteryContext;
   gen(ctx: ConditionalsMasteryContext): string { return `${ctx.var1} % ${ctx.var2}`; }
 }
 class ConditionalsMastery_5 extends EvalLastLineSubtopic {
+  readonly contextConstructor = ConditionalsMasteryContext;
   gen(ctx: ConditionalsMasteryContext): string {
     const cond1 = `${ctx.var2} ${randChoice(["<", "<="])} ${randInt(1n, 10n)}`;
     const cond2 = `${ctx.var1} ${randChoice([">", ">="])} ${randInt(1n, 10n)}`;
@@ -77,11 +83,13 @@ class ConditionalsMastery_5 extends EvalLastLineSubtopic {
   }
 }
 class ConditionalsMastery_6 extends EvalLastLineSubtopic {
+  readonly contextConstructor = ConditionalsMasteryContext;
   gen(ctx: ConditionalsMasteryContext): string {
     return `${ctx.var3} ${randChoice(["in", "not in"])} ${ctx.var4}`;
   }
 }
 class ConditionalsMastery_7 extends EvalLastLineSubtopic {
+  readonly contextConstructor = ConditionalsMasteryContext;
   gen(ctx: ConditionalsMasteryContext): string {
     const idx = randIntNum(1, ctx.vals[2].length - 3);
     let string_sub = ctx.vals[2].slice(idx, idx + 2);
@@ -92,12 +100,14 @@ class ConditionalsMastery_7 extends EvalLastLineSubtopic {
   }
 }
 class ConditionalsMastery_8 extends EvalLastLineSubtopic {
+  readonly contextConstructor = ConditionalsMasteryContext;
   gen(ctx: ConditionalsMasteryContext): string {
     const len = BigInt(ctx.vals[2].length);
     return `len(${ctx.var3}) ${randChoice(['==', '!='])} ${randInt(len-1n, len+1n)}`;
   }
 }
 class ConditionalsMastery_9 extends EvalLastLineSubtopic {
+  readonly contextConstructor = ConditionalsMasteryContext;
   gen(ctx: ConditionalsMasteryContext): string {
     return `${ctx.var3}[${ctx.var2}] ${randChoice(['==', '!='])} ${toPyStr(ctx.vals[3])}`;
   }
@@ -168,4 +178,4 @@ export const CONDITIONALS_MASTERY = new Topic('conditionals-mastery', 'Condition
     BASIC_FUNCTIONS, FUNC_WITH_MULTIPLE_ARGS, FUNC_WITH_MULTIPLE_CALLS, FUNC_WITH_PRINT,
     BASIC_RELATIONAL_OPERATORS, BASIC_BOOLEAN_OPERATORS, MEMBERSHIP_OPERATORS,
     BASIC_BRANCHING, CHAINED_BRANCHES,
-], {order: 'sequential', forceQuiz: true, generateContext: () => new ConditionalsMasteryContext()});
+], {order: 'sequential', forceQuiz: true});

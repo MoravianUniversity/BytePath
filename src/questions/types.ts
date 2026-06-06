@@ -24,6 +24,7 @@ export interface EvalLastLineQuestion extends QuestionBase<'eval-last-line'> {
   correct: Answer;
   options: Answer[];
   input?: string[] | string;
+  sharedCode?: string;
 }
 
 export interface CodeOutputQuestion extends QuestionBase<'code-output'> {
@@ -31,6 +32,7 @@ export interface CodeOutputQuestion extends QuestionBase<'code-output'> {
   correct: string | Exception;
   options: (string | Exception)[];
   input?: string[] | string;
+  sharedCode?: string;
 }
 
 export interface CodeWriteQuestion extends QuestionBase<'code-write'> {

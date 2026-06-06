@@ -43,36 +43,46 @@ class ListMasteryContext extends TopicContext {
 }
 
 class ListMastery_1 extends EvalLastLineSubtopic {
+  readonly contextConstructor = ListMasteryContext;
   gen(ctx: ListMasteryContext): string { return `${ctx.var3}[1]`; }
 }
 class ListMastery_2 extends EvalLastLineSubtopic {
+  readonly contextConstructor = ListMasteryContext;
   gen(ctx: ListMasteryContext): string { return `${ctx.var3}[-1]`; }
 }
 class ListMastery_3 extends EvalLastLineSubtopic {
+  readonly contextConstructor = ListMasteryContext;
   gen(ctx: ListMasteryContext): string { return `${ctx.var3}[${ctx.var1}]`; }
 }
 class ListMastery_4 extends EvalLastLineSubtopic {
+  readonly contextConstructor = ListMasteryContext;
   gen(ctx: ListMasteryContext): string { return `${ctx.var3}[${ctx.start}:${ctx.stop}]`; }
 }
 class ListMastery_5 extends EvalLastLineSubtopic {
+  readonly contextConstructor = ListMasteryContext;
   gen(ctx: ListMasteryContext): string { return `${ctx.var3}[:${ctx.start}] + ${ctx.var3}[${ctx.stop}:]`; }
 }
 class ListMastery_6 extends EvalLastLineSubtopic {
+  readonly contextConstructor = ListMasteryContext;
   gen(ctx: ListMasteryContext): string { return `len(${ctx.var3})`; }
 }
 class ListMastery_7 extends EvalLastLineSubtopic {
+  readonly contextConstructor = ListMasteryContext;
   gen(ctx: ListMasteryContext): string { return `len(${ctx.var3}[${randInt(1n, BigInt(ctx.list.length-1))}]))`; }
 }
 class ListMastery_8 extends EvalLastLineSubtopic {
+  readonly contextConstructor = ListMasteryContext;
   gen(ctx: ListMasteryContext): string { return `${ctx.var2} ${randChoice(["not ", ""])}in ${ctx.var3}`; }
 }
 class ListMastery_9 extends EvalLastLineSubtopic {
+  readonly contextConstructor = ListMasteryContext;
   gen(ctx: ListMasteryContext): string {
     const ch = randChoice([...ctx.list.slice(0, 2).join("")]);
     return `${toPyAtom(ch)} ${randChoice(["not ", ""])}in ${ctx.var3}`;
   }
 }
 class ListMastery_10 extends EvalLastLineSubtopic {
+  readonly contextConstructor = ListMasteryContext;
   gen(ctx: ListMasteryContext): string {
     const ch = randChoice([...ctx.list.slice(1, 3).join("")]);
     return `${toPyAtom(ch)} in ${ctx.var3}[${randInt(1n, 3n)}]`;
@@ -125,4 +135,4 @@ export const LIST_MASTERY = new Topic('list-mastery', 'List Mastery', [
   new ListMastery_10(),
   new ListMastery_Long(),
 ], [LIST_BASICS, MEMBERSHIP_OPERATORS, LIST_SLICING],
-{order: 'sequential', forceQuiz: true, generateContext: () => new ListMasteryContext()});
+{order: 'sequential', forceQuiz: true});

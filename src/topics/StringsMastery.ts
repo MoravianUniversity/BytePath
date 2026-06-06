@@ -47,21 +47,27 @@ class StringMasteryContext extends TopicContext {
 }
 
 class StringsMastery_1 extends EvalLastLineSubtopic {
+  readonly contextConstructor = StringMasteryContext;
   gen(ctx: StringMasteryContext): string { return `len(${ctx.var3})`; }
 }
 class StringsMastery_2 extends EvalLastLineSubtopic {
+  readonly contextConstructor = StringMasteryContext;
   gen(ctx: StringMasteryContext): string { return `${ctx.var3}[-1]`; }
 }
 class StringsMastery_3 extends EvalLastLineSubtopic {
+  readonly contextConstructor = StringMasteryContext;
   gen(ctx: StringMasteryContext): string { return `${ctx.var3}[${ctx.var1}]`; }
 }
 class StringsMastery_4 extends EvalLastLineSubtopic {
+  readonly contextConstructor = StringMasteryContext;
   gen(ctx: StringMasteryContext): string { return `${ctx.var3}[${ctx.start}:${ctx.var2}]`; }
 }
 class StringsMastery_5 extends EvalLastLineSubtopic {
+  readonly contextConstructor = StringMasteryContext;
   gen(ctx: StringMasteryContext): string { return `${ctx.var3}[:${ctx.start}] + ${ctx.var3}[${ctx.var2}:]`; }
 }
 class StringsMastery_6 extends EvalLastLineSubtopic {
+  readonly contextConstructor = StringMasteryContext;
   gen(ctx: StringMasteryContext): string {
     const char = randChoice([
       ...ASCII_LETTERS,
@@ -85,6 +91,7 @@ class StringsMastery_7 extends EvalLastLineSubtopic {
   }
 }
 class StringsMastery_8 extends EvalLastLineSubtopic {
+  readonly contextConstructor = StringMasteryContext;
   gen(ctx: StringMasteryContext): string {
     const var_f = randBool() ? `{${ctx.var3}}` : ctx.var3
     const add_f = randBool() ? `{${ctx.var1}}+{${ctx.var2}}` : `{${ctx.var1}+${ctx.var2}}`
@@ -92,15 +99,19 @@ class StringsMastery_8 extends EvalLastLineSubtopic {
   }
 }
 class StringsMastery_9 extends EvalLastLineSubtopic {
+  readonly contextConstructor = StringMasteryContext;
   gen(ctx: StringMasteryContext): string { return randBool() ? `${ctx.var3}.lower()` : `${ctx.var3}.upper()`; }
 }
 class StringsMastery_10 extends EvalLastLineSubtopic {
+  readonly contextConstructor = StringMasteryContext;
   gen(ctx: StringMasteryContext): string { return `${toPyStr(randChoices([...DIGITS, ...ctx.var1, ...ctx.var2], 3).join(""))}.isdigit()`; }
 }
 class StringsMastery_11 extends EvalLastLineSubtopic {
+  readonly contextConstructor = StringMasteryContext;
   gen(ctx: StringMasteryContext): string { return `${ctx.var3}.${randChoice(['find', 'index'])}(${toPyStr(randChoice([...ctx.str]))})`; }
 }
 class StringsMastery_12 extends EvalLastLineSubtopic {
+  readonly contextConstructor = StringMasteryContext;
   gen(ctx: StringMasteryContext): string {
     const char = randChoice([
       ...ctx.str.toLowerCase(),
@@ -169,5 +180,5 @@ export const STRINGS_MASTERY = new Topic('strings-mastery', 'Strings Mastery', [
   ], [
       BASIC_ARITHMETIC, BASIC_VARIABLES, BASIC_PRINTS, STRING_LENGTH, STRING_CONCAT, STRING_INDEX,
       STRING_SLICING, STRING_NEG_INDEX, MEMBERSHIP_OPERATORS, STRING_METHODS, SPLITTING_AND_JOINING, F_STRINGS,
-  ], {order: 'sequential', forceQuiz: true, generateContext: () => new StringMasteryContext()}
+  ], {order: 'sequential', forceQuiz: true}
 );

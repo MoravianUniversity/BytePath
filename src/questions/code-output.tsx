@@ -130,7 +130,7 @@ const CodeOutputView: React.FC<QuestionViewProps<'code-output'>> = ({
 
   return (
     <>
-      <QuestionCodeBlock code={question.code} />
+      <QuestionCodeBlock code={question.code} sharedCode={question.sharedCode} />
       {!readOnly && <QuestionInput input={question.input} />}
       <QuestionPrompt
         prompt={<>What is the <em>output to the user</em>? {useQuiz && !readOnly && <small>You can either include or omit all of the input echos.</small>}</>}
@@ -179,7 +179,7 @@ export function createCodeOutputQuestion(
   code: string,
   options: (string | Exception | undefined)[],
   opts: BuildCodeQuestionOpts<string | Exception>,
-  ctx: TopicContext,
+  ctx?: TopicContext | null,
 ): CodeOutputQuestion {
   const { code: cleaned_code, correct, input } = createCodeQuestionCore(
     code, opts, runGrabOutput, (a, b) => a === b, ctx
@@ -190,5 +190,6 @@ export function createCodeOutputQuestion(
     correct: correct,
     options: prepareOptions(correct, options),
     input,
+    sharedCode: ctx?.sharedCode,
   };
 }

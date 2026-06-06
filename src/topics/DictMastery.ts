@@ -40,27 +40,35 @@ class DictMasteryContext extends TopicContext {
 }
 
 class DictMastery_1 extends EvalLastLineSubtopic {
+  readonly contextConstructor = DictMasteryContext;
   gen(ctx: DictMasteryContext): string { return `len(${ctx.var4})`; }
 }
 class DictMastery_2 extends EvalLastLineSubtopic {
+  readonly contextConstructor = DictMasteryContext;
   gen(ctx: DictMasteryContext): string { return `${ctx.var4}[toPyStr(${ctx.var1})]`; }
 }
 class DictMastery_3 extends EvalLastLineSubtopic {
+  readonly contextConstructor = DictMasteryContext;
   gen(ctx: DictMasteryContext): string { return `${ctx.var4}[${ctx.var1}]`; }
 }
 class DictMastery_4 extends EvalLastLineSubtopic {
+  readonly contextConstructor = DictMasteryContext;
   gen(ctx: DictMasteryContext): string { return `${ctx.var4}[${ctx.int1}]`; }
 }
 class DictMastery_5 extends EvalLastLineSubtopic {
+  readonly contextConstructor = DictMasteryContext;
   gen(ctx: DictMasteryContext): string { return `${ctx.var2} in ${ctx.var4}`; }
 }
 class DictMastery_6 extends EvalLastLineSubtopic {
+  readonly contextConstructor = DictMasteryContext;
   gen(ctx: DictMasteryContext): string { return `${toPyStr(ctx.var2)} in ${ctx.var4}`; }
 }
 class DictMastery_7 extends EvalLastLineSubtopic {
+  readonly contextConstructor = DictMasteryContext;
   gen(ctx: DictMasteryContext): string { return `${ctx.var3} in ${ctx.var4}`; }
 }
 class DictMastery_8 extends EvalLastLineSubtopic {
+  readonly contextConstructor = DictMasteryContext;
   gen(ctx: DictMasteryContext): string { return `${toPyStr(ctx.str1)} in ${ctx.var4}`; }
 }
 
@@ -151,4 +159,4 @@ export const DICT_MASTERY = new Topic('dict-mastery', 'Dict Mastery', [
   new DictMastery_8(),
   new DictMastery_Long(),
 ], [DICT_BASICS, DICT_WITH_LOOPS],
-{order: 'sequential', forceQuiz: true, generateContext: () => new DictMasteryContext()});
+{order: 'sequential', forceQuiz: true});

@@ -16,7 +16,7 @@ export function createCodeQuestionCore<T>(
   opts: BuildCodeQuestionOpts<T>,
   execute: (code: string) => T | undefined,
   isSame: (a: T, b: T) => boolean,
-  ctx: TopicContext,
+  ctx?: TopicContext | null,
 ): {
   code: string;
   correct: T;
@@ -25,7 +25,7 @@ export function createCodeQuestionCore<T>(
   if (code[0] === '\n' || code[0] === ' ') { code = dedent(code); }
   const { input } = opts;
   if (input !== undefined) { setInput(input); }
-  const sharedCode = ctx.sharedCode;
+  const sharedCode = ctx?.sharedCode;
   const fullCode = sharedCode ? `${sharedCode}\n${code}` : code;
   const actual = execute(fullCode);
   const correct = opts.correct !== undefined ? opts.correct : actual;

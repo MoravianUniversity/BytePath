@@ -84,7 +84,7 @@ const EvalLastLineView: React.FC<QuestionViewProps<'eval-last-line'>> = ({
 
   return (
     <>
-      <QuestionCodeBlock code={question.code} />
+      <QuestionCodeBlock code={question.code} sharedCode={question.sharedCode} />
       {!readOnly && <QuestionInput input={question.input} />}
       <QuestionPrompt
         prompt="What is the value of the final line of code?"
@@ -134,7 +134,7 @@ export function createEvalLastLineQuestion(
   code: string,
   options: (Answer | undefined)[],
   opts: BuildCodeQuestionOpts<Answer>,
-  ctx: TopicContext,
+  ctx?: TopicContext | null,
 ): EvalLastLineQuestion {
   const { code: cleaned_code, correct, input } = createCodeQuestionCore(
     code, opts, runLastLine, isAnswerSame, ctx
@@ -145,5 +145,6 @@ export function createEvalLastLineQuestion(
     correct: correct,
     options: prepareOptions(correct, options.map((o) => (typeof o === 'number' ? +o.toFixed(5) : o)), isAnswerSame),
     input,
+    sharedCode: ctx?.sharedCode,
   };
 }

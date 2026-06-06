@@ -549,33 +549,6 @@ select.dashboard-button option {
   flex-direction: column;
 }
 
-.shared-code {
-  padding: 2rem;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  mask: linear-gradient(to top, transparent, black 1.5rem);
-  backdrop-filter: blur(15px);
-  padding-bottom: 2rem;
-}
-.shared-code > * {
-  max-width: calc(650px + 1rem);
-}
-.shared-code-header {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-.shared-code code {
-  max-height: min(calc(50vh - 8.5rem), 250px);
-  overflow-y: auto;
-  font-size: 0.9rem;
-}
-
-.shared-code ~ .questions-container {
-  padding-top: 0;
-}
-
 .questions-container {
   flex: 1;
   width: calc(100% - 4rem);

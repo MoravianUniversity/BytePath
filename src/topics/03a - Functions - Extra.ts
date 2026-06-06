@@ -54,18 +54,21 @@ class Func3AExtraContext extends TopicContext {
 }
 
 class Func3AExtra_1 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Func3AExtraContext;
   gen(ctx: Func3AExtraContext): EvalLastLineQuestionGen {
     return { code: `len(${ctx.vars[randIntNum(1, 2)]})`, options: [0n, 1n, 2n, 3n, 4n, 5n, 6n, 7n, 8n, 9n] };
   }
 }
 
 class Func3AExtra_2 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Func3AExtraContext;
   gen(ctx: Func3AExtraContext): EvalLastLineQuestionGen {
     return { code: `${ctx.vars[randIntNum(1, 2)]}[${ctx.vars[0]}]`, options: [...ctx.val2, ...ctx.val3] };
   }
 }
 
 class Func3AExtra_3 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Func3AExtraContext;
   gen(ctx: Func3AExtraContext): EvalLastLineQuestionGen {
     const [var1, var2] = randChoices(ctx.vars.slice(1), 2);
     return {
@@ -76,6 +79,7 @@ class Func3AExtra_3 extends EvalLastLineSubtopic {
 }
 
 class Func3AExtra_4 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Func3AExtraContext;
   gen(ctx: Func3AExtraContext): EvalLastLineQuestionGen {
     return {
       code: `waldo("${ctx.vars[randIntNum(1, 2)]}")`,
@@ -94,6 +98,7 @@ class Func3AExtra_5 extends EvalLastLineSubtopic {
 }
 
 class Func3AExtra_6 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Func3AExtraContext;
   gen(ctx: Func3AExtraContext): EvalLastLineQuestionGen {
     return {
       code: `waldo(${ctx.vars[randIntNum(1, 2)]})`,
@@ -103,6 +108,7 @@ class Func3AExtra_6 extends EvalLastLineSubtopic {
 }
 
 class Func3AExtra_7 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Func3AExtraContext;
   gen(ctx: Func3AExtraContext): EvalLastLineQuestionGen {
     return {
       code: `carmen("${ctx.vars[1]}", "${ctx.vars[2]}${ctx.vars[0]}")`,
@@ -124,6 +130,7 @@ class Func3AExtra_7 extends EvalLastLineSubtopic {
 }
 
 class Func3AExtra_8 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Func3AExtraContext;
   gen(ctx: Func3AExtraContext): EvalLastLineQuestionGen {
     return {
       code: `carmen(${ctx.vars[1]}, ${ctx.vars[2]})`,
@@ -143,6 +150,7 @@ class Func3AExtra_8 extends EvalLastLineSubtopic {
 }
 
 class Func3AExtra_9 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Func3AExtraContext;
   gen(ctx: Func3AExtraContext): EvalLastLineQuestionGen {
     return {
       code: `carmen(${ctx.vars[2]}, ${ctx.vars[1]})`,
@@ -162,6 +170,7 @@ class Func3AExtra_9 extends EvalLastLineSubtopic {
 }
 
 class Func3AExtra_10 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Func3AExtraContext;
   gen(ctx: Func3AExtraContext): EvalLastLineQuestionGen {
     return {
       code: `carmen(${ctx.vars[1]}, carmen(${ctx.vars[1]}, ${ctx.vars[2]}))`,
@@ -182,6 +191,7 @@ class Func3AExtra_10 extends EvalLastLineSubtopic {
 }
 
 class Func3AExtra_11 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Func3AExtraContext;
   gen(ctx: Func3AExtraContext): EvalLastLineQuestionGen {
     return {
       code: `carmen(carmen(${ctx.vars[1]}, ${ctx.vars[2]}), ${ctx.vars[1]})`,
@@ -202,6 +212,7 @@ class Func3AExtra_11 extends EvalLastLineSubtopic {
 }
 
 class Func3AExtra_12 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Func3AExtraContext;
   gen(ctx: Func3AExtraContext): EvalLastLineQuestionGen {
     return {
       code: `waldo(carmen(${ctx.vars[2]}, ${ctx.vars[1]}))`,
@@ -228,4 +239,4 @@ export const PRACTICE_03A_FUNCTIONS_EXTRA = new Topic('practice-03a-functions-ex
   new Func3AExtra_10(),
   new Func3AExtra_11(),
   new Func3AExtra_12(),
-], [PRACTICE_03A_FUNCTIONS], {order: 'sequential', generateContext: () => new Func3AExtraContext()});
+], [PRACTICE_03A_FUNCTIONS], {order: 'sequential'});

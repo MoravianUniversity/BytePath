@@ -45,6 +45,7 @@ const COMMON_MISTAKES = `Common mistakes:
 * When there are multiple function calls, evaluate inside parentheses first, using return values from one call as the argument for the next function call.`;
 
 class FunctionMastery1 extends EvalLastLineSubtopic {
+  readonly contextConstructor = FunctionMasteryContext;
   readonly help = [{ afterFailedAttempts: 1, message: COMMON_MISTAKES }];
   gen(ctx: FunctionMasteryContext): string {
     return (ctx.n_args == 1) ? `${ctx.fun}("${ctx.var1}")` : `${ctx.fun}("${ctx.var1}", "${ctx.var2}")`;
@@ -52,6 +53,7 @@ class FunctionMastery1 extends EvalLastLineSubtopic {
 }
 
 class FunctionMastery2 extends EvalLastLineSubtopic {
+  readonly contextConstructor = FunctionMasteryContext;
   readonly help = [{ afterFailedAttempts: 1, message: COMMON_MISTAKES }];
   gen(ctx: FunctionMasteryContext): string {
     return (ctx.n_args == 1) ? `${ctx.fun}(${ctx.var1})` : `${ctx.fun}(${ctx.var1}, ${ctx.var2})`;
@@ -59,6 +61,7 @@ class FunctionMastery2 extends EvalLastLineSubtopic {
 }
 
 class FunctionMastery3 extends EvalLastLineSubtopic {
+  readonly contextConstructor = FunctionMasteryContext;
   readonly help = [{ afterFailedAttempts: 1, message: COMMON_MISTAKES }];
   gen(ctx: FunctionMasteryContext): string {
     return (ctx.n_args == 1) ? `${ctx.fun}(${ctx.fun}(${ctx.var2}))` : `${ctx.fun}(${ctx.var2}, ${ctx.fun}(${ctx.var1}, ${ctx.var2}))`;
@@ -183,4 +186,4 @@ export const FUNCTIONS_MASTERY = new Topic('functions-mastery', 'Functions Maste
   new FunctionOutputs(),
   new UserInputs(),
   new UserOutputs(),
-], [PRACTICE_03A_FUNCTIONS], {order: 'sequential', forceQuiz: true, generateContext: () => new FunctionMasteryContext()});
+], [PRACTICE_03A_FUNCTIONS], {order: 'sequential', forceQuiz: true});

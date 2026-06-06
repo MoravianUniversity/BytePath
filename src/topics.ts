@@ -99,6 +99,8 @@ export abstract class Subtopic<K extends QuestionKind = QuestionKind> {
   readonly help?: QuestionHelp;
   /** Whether to show the workspace for this question type. */
   showWorkspace?: boolean;
+  /** Context class for shared setup code. Subtopics sharing the same constructor reuse one instance per topic session. */
+  contextConstructor?: new () => TopicContext;
 
   getActiveHelpMessage(): string | undefined {
     return getActiveHelpMessage(this.help, this.failedAttempts);
@@ -107,29 +109,29 @@ export abstract class Subtopic<K extends QuestionKind = QuestionKind> {
     return getActiveHelpMessage(this.help, Number.MAX_SAFE_INTEGER);
   }
 
-  abstract generateQuestion(ctx: TopicContext): QuestionFor<K>;
+  abstract generateQuestion(ctx?: TopicContext | null): QuestionFor<K>;
 }
 
 export type EvalLastLineQuestionGen = {code: string, options?: (Answer | undefined)[], opts?: BuildCodeQuestionOpts<Answer>};
 export abstract class EvalLastLineSubtopic extends Subtopic<'eval-last-line'> {
   readonly kind = 'eval-last-line' as const;
-  generateQuestion(ctx: TopicContext): QuestionFor<'eval-last-line'> {
+  generateQuestion(ctx?: TopicContext | null): QuestionFor<'eval-last-line'> {
     const gen = this.gen(ctx);
     const {code, options, opts} = typeof gen === 'string' ? {code: gen, options: [], opts: {}} : gen;
     return createEvalLastLineQuestion(code, options || [], opts || {}, ctx);
   }
-  abstract gen(ctx: TopicContext): EvalLastLineQuestionGen|string
+  abstract gen(ctx?: TopicContext | null): EvalLastLineQuestionGen|string
 }
 
 export type CodeOutputQuestionGen = {code: string, options?: (string | Exception | undefined)[], opts?: BuildCodeQuestionOpts<string | Exception>};
 export abstract class CodeOutputSubtopic extends Subtopic<'code-output'> {
   readonly kind = 'code-output' as const;
-  generateQuestion(ctx: TopicContext): QuestionFor<'code-output'> {
+  generateQuestion(ctx?: TopicContext | null): QuestionFor<'code-output'> {
     const gen = this.gen(ctx);
     const {code, options, opts} = typeof gen === 'string' ? {code: gen, options: [], opts: {}} : gen;
     return createCodeOutputQuestion(code, options || [], opts || {}, ctx);
   }
-  abstract gen(ctx: TopicContext): CodeOutputQuestionGen|string
+  abstract gen(ctx?: TopicContext | null): CodeOutputQuestionGen|string
 }
 
 export type CodeWriteQuestionGen = {
@@ -143,7 +145,7 @@ export type CodeWriteQuestionGen = {
 };
 export abstract class CodeWriteSubtopic extends Subtopic<'code-write'> {
   readonly kind = 'code-write' as const;
-  generateQuestion(ctx: TopicContext): QuestionFor<'code-write'> {
+  generateQuestion(ctx?: TopicContext | null): QuestionFor<'code-write'> {
     const {prompt, correct, options = [], variables = [], testCases, testsUseOutput = false, transform = undefined} = this.gen(ctx);
     return {
       kind: 'code-write' as const,
@@ -156,7 +158,7 @@ export abstract class CodeWriteSubtopic extends Subtopic<'code-write'> {
       transform,
     };
   }
-  abstract gen(ctx: TopicContext): CodeWriteQuestionGen;
+  abstract gen(ctx?: TopicContext | null): CodeWriteQuestionGen;
 }
 
 export type FuncWriteQuestionGen = {
@@ -169,7 +171,7 @@ export type FuncWriteQuestionGen = {
 };
 export abstract class FuncWriteSubtopic extends Subtopic<'func-write'> {
   readonly kind = 'func-write' as const;
-  generateQuestion(ctx: TopicContext): QuestionFor<'func-write'> {
+  generateQuestion(ctx?: TopicContext | null): QuestionFor<'func-write'> {
     const {prompt, correct, options = [], name, testCases, testsUseOutput = false} = this.gen(ctx);
     return {
       kind: 'func-write' as const,
@@ -181,7 +183,7 @@ export abstract class FuncWriteSubtopic extends Subtopic<'func-write'> {
       testsUseOutput,
     };
   }
-  abstract gen(ctx: TopicContext): FuncWriteQuestionGen;
+  abstract gen(ctx?: TopicContext | null): FuncWriteQuestionGen;
 }
 
 export type ConceptualQuestionGen = {
@@ -192,7 +194,7 @@ export type ConceptualQuestionGen = {
 };
 export abstract class ConceptualSubtopic extends Subtopic<'conceptual'> {
   readonly kind = 'conceptual' as const;
-  generateQuestion(ctx: TopicContext): QuestionFor<'conceptual'> {
+  generateQuestion(ctx?: TopicContext | null): QuestionFor<'conceptual'> {
     const {prompt, correct, options = [], fuzzyMatch = true} = this.gen(ctx);
     const singleCorrect = typeof correct === 'string' ? correct : Array.isArray(correct) ? randChoice(correct) : correct.display;
     return {
@@ -203,7 +205,7 @@ export abstract class ConceptualSubtopic extends Subtopic<'conceptual'> {
       fuzzyMatch,
     };
   }
-  abstract gen(ctx: TopicContext): ConceptualQuestionGen;
+  abstract gen(ctx?: TopicContext | null): ConceptualQuestionGen;
 }
 
 /**
@@ -216,22 +218,18 @@ export class Topic {
   dependencies: Topic[];
   order: 'random' | 'random-beginning' | 'sequential' = 'random-beginning';
   forceQuiz: boolean = false;
-  generateContext: () => TopicContext;
 
   constructor(id: string, name: string, subtopics: Subtopic[], dependencies: Topic[] = [],
     {order = 'random-beginning',
-      forceQuiz = false,
-      generateContext = () => new TopicContext()}:
+      forceQuiz = false}:
     {order?: 'random' | 'random-beginning' | 'sequential',
-      forceQuiz?: boolean,
-      generateContext?: () => TopicContext} = {}) {
+      forceQuiz?: boolean} = {}) {
     this.id = id;
     this.name = name;
     this.subtopics = subtopics;
     this.dependencies = dependencies;
     this.order = order;
     this.forceQuiz = forceQuiz;
-    this.generateContext = generateContext;
   }
 
   // Get a random subtopic that needs work

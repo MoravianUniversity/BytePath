@@ -77,24 +77,28 @@ class Practice03ABasicFunctionsContext extends TopicContext {
 }
 
 class Practice03ABasicFunctions_1 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Practice03ABasicFunctionsContext;
   gen(ctx: Practice03ABasicFunctionsContext): EvalLastLineQuestionGen {
     return { code: `${ctx.funs[0]}(${randInt(1n, 8n)})`, options: [...range(1n, 12n)] };
   }
 }
 
 class Practice03ABasicFunctions_2 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Practice03ABasicFunctionsContext;
   gen(ctx: Practice03ABasicFunctionsContext): EvalLastLineQuestionGen {
     return { code: `${ctx.funs[0]}(${ctx.var2})`, options: [...range(1n, 12n)] };
   }
 }
 
 class Practice03ABasicFunctions_3 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Practice03ABasicFunctionsContext;
   gen(ctx: Practice03ABasicFunctionsContext): EvalLastLineQuestionGen {
     return { code: `${ctx.funs[0]}(${ctx.var3})`, options: [...range(1n, 12n)] };
   }
 }
 
 class Practice03ABasicFunctions_4 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Practice03ABasicFunctionsContext;
   gen(ctx: Practice03ABasicFunctionsContext): EvalLastLineQuestionGen {
     const lastString = randChoice(STRINGS);
     return {
@@ -105,6 +109,7 @@ class Practice03ABasicFunctions_4 extends EvalLastLineSubtopic {
 }
 
 class Practice03ABasicFunctions_5 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Practice03ABasicFunctionsContext;
   gen(ctx: Practice03ABasicFunctionsContext): EvalLastLineQuestionGen {
     return {
       code: `${ctx.funs[1]}(${ctx.var3})`,
@@ -114,6 +119,7 @@ class Practice03ABasicFunctions_5 extends EvalLastLineSubtopic {
 }
 
 class Practice03ABasicFunctions_6 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Practice03ABasicFunctionsContext;
   gen(ctx: Practice03ABasicFunctionsContext): EvalLastLineQuestionGen {
     return {
       code: `${ctx.funs[1]}(${ctx.var4})`,
@@ -123,18 +129,21 @@ class Practice03ABasicFunctions_6 extends EvalLastLineSubtopic {
 }
 
 class Practice03ABasicFunctions_7 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Practice03ABasicFunctionsContext;
   gen(ctx: Practice03ABasicFunctionsContext): EvalLastLineQuestionGen {
     return { code: `${ctx.funs[0]}(${ctx.funs[0]}(0))`, options: [...range(1n, 12n)] };
   }
 }
 
 class Practice03ABasicFunctions_8 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Practice03ABasicFunctionsContext;
   gen(ctx: Practice03ABasicFunctionsContext): EvalLastLineQuestionGen {
     return { code: `${ctx.funs[0]}(${ctx.funs[0]}(${ctx.var1}))`, options: [...range(1n, 15n)] };
   }
 }
 
 class Practice03ABasicFunctions_9 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Practice03ABasicFunctionsContext;
   gen(ctx: Practice03ABasicFunctionsContext): EvalLastLineQuestionGen {
     return {
       code: `${ctx.funs[0]}(len(${ctx.funs[1]}(${ctx.var3})))`,
@@ -144,6 +153,7 @@ class Practice03ABasicFunctions_9 extends EvalLastLineSubtopic {
 }
 
 class Practice03ABasicFunctions_10 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Practice03ABasicFunctionsContext;
   gen(ctx: Practice03ABasicFunctionsContext): EvalLastLineQuestionGen {
     return {
       code: `str(${ctx.funs[0]}(${ctx.var1})) + ${ctx.funs[1]}(${ctx.var4})`,
@@ -165,24 +175,28 @@ class Practice03ABasicFunctions_10 extends EvalLastLineSubtopic {
 }
 
 class Practice03ABasicFunctions_11 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Practice03ABasicFunctionsContext;
   gen(ctx: Practice03ABasicFunctionsContext): EvalLastLineQuestionGen {
     return { code: `${ctx.funs[0]}(${ctx.var3}) + len(${ctx.funs[1]}(${ctx.var4}))`, options: [...range(0n, 15n)] };
   }
 }
 
 class Practice03ABasicFunctions_12 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Practice03ABasicFunctionsContext;
   gen(ctx: Practice03ABasicFunctionsContext): EvalLastLineQuestionGen {
     return { code: `${ctx.funs[2]}(${ctx.var1}, ${ctx.var2})`, options: [...range(0n, 20n)] };
   }
 }
 
 class Practice03ABasicFunctions_13 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Practice03ABasicFunctionsContext;
   gen(ctx: Practice03ABasicFunctionsContext): EvalLastLineQuestionGen {
     return { code: `${ctx.funs[2]}(${ctx.var2}), ${ctx.var1})`, options: [...range(0n, 20n)] };
   }
 }
 
 class Practice03ABasicFunctions_14 extends EvalLastLineSubtopic {
+  readonly contextConstructor = Practice03ABasicFunctionsContext;
   gen(ctx: Practice03ABasicFunctionsContext): EvalLastLineQuestionGen {
     return { code: `${ctx.funs[2]}(len(${ctx.var3}), len(${ctx.var4}))`, options: [...range(0n, 20n)] };
   }
@@ -204,4 +218,4 @@ export const PRACTICE_03A_BASIC_FUNCTIONS = new Topic('practice-03a-basic-functi
   new Practice03ABasicFunctions_13(),
   new Practice03ABasicFunctions_14(),
 ], [BASIC_FUNCTIONS, FUNC_WITH_MULTIPLE_ARGS, FUNC_WITH_MULTIPLE_CALLS, STRING_CONCAT, STRING_LENGTH, STRING_INDEX],
-{order: 'sequential', generateContext: () => new Practice03ABasicFunctionsContext()});
+{order: 'sequential'});
