@@ -122,6 +122,7 @@ const CodeOutputView: React.FC<QuestionViewProps<'code-output'>> = ({
   onAnswer,
 }) => {
   const useQuiz = useQuizDisplayMode(isQuiz, readOnly, question.options.length);
+  const containsInput = question.code.includes("input(");
 
   const userAnswerString = correctOutputStringWithSkipped(userAnswer);
   const correctAnswerString = correctOutputString(question.correct);
@@ -133,7 +134,7 @@ const CodeOutputView: React.FC<QuestionViewProps<'code-output'>> = ({
       <QuestionCodeBlock code={question.code} sharedCode={question.sharedCode} />
       {!readOnly && <QuestionInput input={question.input} />}
       <QuestionPrompt
-        prompt={<>What is the <em>output to the user</em>? {useQuiz && !readOnly && <small>You can either include or omit all of the input echos.</small>}</>}
+        prompt={<>What is the <em>output to the user</em>? {useQuiz && !readOnly && containsInput ? <small>You can either include or omit all of the input echos.</small> : null}</>}
         helpMessage={helpMessage}
         onSkip={readOnly ? undefined : onSkip}
       />
