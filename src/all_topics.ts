@@ -111,8 +111,8 @@ const FUNCTIONS_GROUP = new TopicGroup('functions', 'Functions', [
   BASIC_FUNCTIONS,
   FUNC_WITH_MULTIPLE_ARGS,
   FUNC_WITH_MULT_OR_NO_RETURN,
-  FUNC_WITH_MULTIPLE_CALLS,
   FUNC_WITH_PRINT,
+  FUNC_WITH_MULTIPLE_CALLS,
 ]);
 
 const BRANCHING_GROUP = new TopicGroup('branching', 'Branching & Logical Operators', [
