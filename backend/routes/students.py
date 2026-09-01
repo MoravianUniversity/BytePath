@@ -58,33 +58,43 @@ def list_students():
     return jsonify(data)
 
 
-@students_bp.post("/add")
-def add_students():
-    """Add students to the roster bank via CSV upload."""
+def read_csv_file() -> list[RosterStudentRow] | tuple[str, int]:
+    """Read a CSV file and return a list of RosterStudentRow objects."""
     if "file" not in request.files:
-        return jsonify({"error": "Missing file field"}), 400
+        return "Missing file field", 400
 
     file = request.files["file"]
     if not file.filename:
-        return jsonify({"error": "Missing filename"}), 400
+        return "Missing filename", 400
 
     try:
         stream = StringIO(file.stream.read().decode("utf-8"))
     except UnicodeDecodeError:
-        return jsonify({"error": "Unable to decode file; make sure it is UTF-8"}), 400
+        return "Unable to decode file; make sure it is UTF-8", 400
 
-    reader = csv.DictReader(stream)
-    rows: list[RosterStudentRow] = []
+    # skip BOM if it exists
+    if stream.getvalue()[:1] == "\ufeff":
+        stream.seek(1)
 
     for csv_row in reader:
         rows.append(
             RosterStudentRow(
-                first_name=csv_row.get("first_name", "") or "",
-                last_name=csv_row.get("last_name", "") or "",
-                email=csv_row.get("email", "") or "",
-                section=csv_row.get("section", "") or "",
+                first_name=csv_row.get("first_name", ""),
+                last_name=csv_row.get("last_name", ""),
+                email=csv_row.get("email", ""),
+                section=csv_row.get("section", ""),
             )
         )
+
+    return rows
+
+
+@students_bp.post("/add")
+def add_students():
+    """Add students to the roster bank via CSV upload."""
+    rows = read_csv_file()
+    if isinstance(rows, tuple):
+        return jsonify({"error": rows[0]}), rows[1]
 
     try:
         user_id = session.get("user_id")
@@ -113,29 +123,9 @@ def add_students():
 @students_bp.post("/drop")
 def drop_students():
     """Drop (soft delete) students from the roster bank via CSV upload."""
-    if "file" not in request.files:
-        return jsonify({"error": "Missing file field"}), 400
-
-    file = request.files["file"]
-    if not file.filename:
-        return jsonify({"error": "Missing filename"}), 400
-
-    try:
-        stream = StringIO(file.stream.read().decode("utf-8"))
-    except UnicodeDecodeError:
-        return jsonify({"error": "Unable to decode file; make sure it is UTF-8"}), 400
-
-    reader = csv.DictReader(stream)
-    rows: list[RosterStudentRow] = []
-
-    for csv_row in reader:
-        rows.append(
-            RosterStudentRow(
-                first_name=csv_row.get("first_name", "") or "",
-                last_name=csv_row.get("last_name", "") or "",
-                email=csv_row.get("email", "") or "",
-            )
-        )
+    rows = read_csv_file()
+    if isinstance(rows, tuple):
+        return jsonify({"error": rows[0]}), rows[1]
 
     try:
         user_id = session.get("user_id")

@@ -146,7 +146,7 @@ def bulk_upsert(
             errors.append(
                 {
                     "line": line_number,
-                    "reason": "Missing first_name/last_name/email",
+                    "reason": f"Missing first_name/last_name/email ('{first_name}', '{last_name}', '{email}')",
                 }
             )
             skipped += 1
@@ -206,7 +206,7 @@ def add_students_from_csv(
                 {
                     "line": line_number,
                     "email": email,
-                    "reason": "Missing first_name/last_name/email",
+                    "reason": f"Missing first_name/last_name/email ('{first_name}', '{last_name}', '{email}')",
                 }
             )
             skipped += 1
@@ -325,7 +325,7 @@ def drop_students_from_csv(
                 {
                     "line": line_number,
                     "email": email,
-                    "reason": "Missing first_name/last_name/email",
+                    "reason": f"Missing first_name/last_name/email ('{first_name}', '{last_name}', '{email}')",
                 }
             )
             skipped += 1
