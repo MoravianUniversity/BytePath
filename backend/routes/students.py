@@ -75,6 +75,9 @@ def read_csv_file() -> list[RosterStudentRow] | tuple[str, int]:
     # skip BOM if it exists
     if stream.getvalue()[:1] == "\ufeff":
         stream.seek(1)
+    
+    reader = csv.DictReader(stream)
+    rows = []
 
     for csv_row in reader:
         rows.append(
@@ -102,7 +105,7 @@ def add_students():
         default_section = normalize_section(request.form.get("default_section"))
         summary, errors, upload_history = student_service.add_students_from_csv(
             enumerate(rows, start=2),  # header is line 1
-            filename=file.filename,
+            filename=request.files["file"].filename,
             user_id=user_id,
             class_id=class_id,
             default_section=default_section,
@@ -131,7 +134,7 @@ def drop_students():
         user_id = session.get("user_id")
         summary, errors, upload_history = student_service.drop_students_from_csv(
             enumerate(rows, start=2),  # header is line 1
-            filename=file.filename,
+            filename=request.files["file"].filename,
             user_id=user_id,
         )
     except SQLAlchemyError as e:
