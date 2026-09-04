@@ -114,6 +114,27 @@ function App() {
     return new Set<string>(saved ? JSON.parse(saved) : []);
   });
   const [currentUser, setCurrentUser] = useState<User | null>(() => authService.getCurrentUser());
+  // Sync role/profile from the server so promotions (e.g. co-instructor) take effect
+  // without requiring a logout. Also picks up Google OAuth sessions after redirect.
+  useEffect(() => {
+    let cancelled = false;
+    authService.getProfile()
+      .then((user) => {
+        if (cancelled) return;
+        authService.saveUser(user);
+        setCurrentUser(user);
+      })
+      .catch((err: { response?: { status?: number } }) => {
+        if (cancelled) return;
+        if (err?.response?.status === 401) {
+          authService.clearStoredUser();
+          setCurrentUser(null);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   useEffect(() => {
     localStorage.setItem('completedTopics', JSON.stringify(Array.from(completedTopics)));
   }, [completedTopics]);

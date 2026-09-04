@@ -129,12 +129,19 @@ def google_callback():
     email = userinfo.get("email")
     if not email:
         return jsonify({"error": "Email not available from Google"}), 400
+    given_name = userinfo.get("given_name") or None
+    family_name = userinfo.get("family_name") or None
     display_name = userinfo.get("name") or " ".join(
-        part for part in [userinfo.get("given_name"), userinfo.get("family_name")] if part
+        part for part in [given_name, family_name] if part
     ).strip() or None
 
     service = get_auth_service()
-    user = service.login_or_create_user(email, display_name=display_name)
+    user = service.login_or_create_user(
+        email,
+        display_name=display_name,
+        given_name=given_name,
+        family_name=family_name,
+    )
     session["user_id"] = user.id
 
     frontend_url = current_app.config.get("FRONTEND_URL", "http://localhost:5173")

@@ -207,17 +207,21 @@ def add_class_instructor(id: int):
 
     user = User.query.filter(func.lower(User.email) == email).first()
     if not user:
-        return jsonify({"error": "No user with that email found. They must log in first."}), 404
+        # Allow inviting before first login: create a stub instructor account.
+        name = email.split("@")[0].replace(".", " ").title()
+        user = User(email=email, name=name, role="instructor")
+        db.session.add(user)
+        db.session.flush()
+    else:
+        if user.id == c.instructor_id:
+            return jsonify({"error": "That user is already the class owner"}), 400
 
-    if user.id == c.instructor_id:
-        return jsonify({"error": "That user is already the class owner"}), 400
+        existing = Instructor.query.filter_by(user_id=user.id, class_id=id).first()
+        if existing:
+            return jsonify({"error": "That user is already a co-instructor for this class"}), 409
 
-    existing = Instructor.query.filter_by(user_id=user.id, class_id=id).first()
-    if existing:
-        return jsonify({"error": "That user is already a co-instructor for this class"}), 409
-
-    if user.role != "instructor":
-        user.role = "instructor"
+        if user.role != "instructor":
+            user.role = "instructor"
 
     entry = Instructor(user_id=user.id, class_id=id, added_by=current_user_id)
     db.session.add(entry)

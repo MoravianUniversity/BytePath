@@ -142,11 +142,11 @@ def bulk_upsert(
         last_name = row.last_name.strip()
         email = row.email.strip().lower()
 
-        if not first_name or not last_name or not email:
+        if not email:
             errors.append(
                 {
                     "line": line_number,
-                    "reason": f"Missing first_name/last_name/email ('{first_name}', '{last_name}', '{email}')",
+                    "reason": f"Missing email ('{email}')",
                 }
             )
             skipped += 1
@@ -154,8 +154,10 @@ def bulk_upsert(
 
         existing = RosterStudent.query.filter_by(email=email).first()
         if existing:
-            existing.first_name = first_name
-            existing.last_name = last_name
+            if first_name:
+                existing.first_name = first_name
+            if last_name:
+                existing.last_name = last_name
             updated += 1
         else:
             db.session.add(
@@ -201,16 +203,18 @@ def add_students_from_csv(
         row_section = normalize_section(row.section)
         section = row_section if row_section else fallback_section
 
-        if not first_name or not last_name or not email:
+        if not email:
             errors.append(
                 {
                     "line": line_number,
                     "email": email,
-                    "reason": f"Missing first_name/last_name/email ('{first_name}', '{last_name}', '{email}')",
+                    "reason": "Missing email",
                 }
             )
             skipped += 1
             continue
+
+        display = f"{first_name} {last_name}".strip() or email
 
         # Check if student exists in this class (not soft-deleted)
         existing = RosterStudent.query.filter_by(
@@ -224,7 +228,7 @@ def add_students_from_csv(
                 "email": email,
                 "first_name": first_name,
                 "last_name": last_name,
-                "action": f"{first_name} {last_name} already exists",
+                "action": f"{display} already exists",
             })
             continue
 
@@ -235,17 +239,19 @@ def add_students_from_csv(
 
         if deleted:
             deleted.deleted_at = None
-            deleted.first_name = first_name
-            deleted.last_name = last_name
+            if first_name:
+                deleted.first_name = first_name
+            if last_name:
+                deleted.last_name = last_name
             deleted.section = section
             deleted.last_updated_via = "csv_add"
             restored += 1
             changes.append({
                 "type": "restored",
                 "email": email,
-                "first_name": first_name,
-                "last_name": last_name,
-                "action": f"{first_name} {last_name} restored",
+                "first_name": deleted.first_name,
+                "last_name": deleted.last_name,
+                "action": f"{display} restored",
             })
         else:
             # Create new
@@ -264,7 +270,7 @@ def add_students_from_csv(
                 "email": email,
                 "first_name": first_name,
                 "last_name": last_name,
-                "action": f"{first_name} {last_name} added",
+                "action": f"{display} added",
             })
 
     if class_id is not None and (added > 0 or restored > 0):
@@ -320,16 +326,18 @@ def drop_students_from_csv(
         last_name = row.last_name.strip()
         email = row.email.strip().lower()
 
-        if not first_name or not last_name or not email:
+        if not email:
             errors.append(
                 {
                     "line": line_number,
                     "email": email,
-                    "reason": f"Missing first_name/last_name/email ('{first_name}', '{last_name}', '{email}')",
+                    "reason": "Missing email",
                 }
             )
             skipped += 1
             continue
+
+        display = f"{first_name} {last_name}".strip() or email
 
         # Find active student (not soft-deleted)
         student = RosterStudent.query.filter_by(
@@ -344,9 +352,9 @@ def drop_students_from_csv(
             changes.append({
                 "type": "removed",
                 "email": email,
-                "first_name": first_name,
-                "last_name": last_name,
-                "action": f"{first_name} {last_name} removed",
+                "first_name": student.first_name,
+                "last_name": student.last_name,
+                "action": f"{display} removed",
             })
         else:
             # Not found in active roster
@@ -356,7 +364,7 @@ def drop_students_from_csv(
                 "email": email,
                 "first_name": first_name,
                 "last_name": last_name,
-                "action": f"{first_name} {last_name} not found in active roster",
+                "action": f"{display} not found in active roster",
             })
 
     # Create upload history record
@@ -398,6 +406,6 @@ def template_csv() -> str:
     return (
         "first_name,last_name,email,section\n"
         "Ada,Lovelace,ada@example.com,Section A\n"
-        "Alan,Turing,alan@example.com,\n"
+        ",,alan@example.com,\n"
     )
 

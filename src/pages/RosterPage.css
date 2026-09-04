@@ -138,6 +138,13 @@
   font-size: 1.1rem;
 }
 
+.co-instructors-panel__hint {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-dashboard-muted, var(--text-dashboard));
+  opacity: 0.75;
+}
+
 .class-rename-form {
   display: flex;
   gap: 0.5rem;

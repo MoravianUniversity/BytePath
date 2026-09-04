@@ -109,8 +109,8 @@ export const studentsService = {
 
   async create(data: {
     email: string;
-    first_name: string;
-    last_name: string;
+    first_name?: string;
+    last_name?: string;
     notes?: string;
     section?: string;
     class_id?: number | null;

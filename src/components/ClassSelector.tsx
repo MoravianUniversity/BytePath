@@ -19,8 +19,31 @@ export default function ClassSelector({ currentClassId, onClassChange, activeCla
   const currentClass = classes.find(c => c.id === currentClassId) ?? null;
 
   useEffect(() => {
-    classesService.list().then(setClasses).catch(console.error);
+    let cancelled = false;
+    classesService.list()
+      .then((list) => {
+        if (!cancelled) setClasses(list);
+      })
+      .catch(console.error);
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  // Auto-select when there is exactly one class, or clear a stale selection.
+  useEffect(() => {
+    if (classes.length === 0) return;
+    if (currentClassId != null) {
+      const stillValid = classes.some((c) => c.id === currentClassId);
+      if (!stillValid) {
+        onClassChange(classes.length === 1 ? classes[0] : null);
+      }
+      return;
+    }
+    if (classes.length === 1) {
+      onClassChange(classes[0]);
+    }
+  }, [classes, currentClassId, onClassChange]);
 
   useEffect(() => {
     if (!activeClass) return;

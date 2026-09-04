@@ -22,6 +22,11 @@ export const authService = {
     localStorage.setItem('currentUser', JSON.stringify(user));
   },
 
+  clearStoredUser(): void {
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('authToken');
+  },
+
   getCurrentUser(): User | null {
     const userStr = localStorage.getItem('currentUser');
     return userStr ? JSON.parse(userStr) : null;
@@ -33,7 +38,6 @@ export const authService = {
     } catch (error) {
       console.error('Failed to clear server session:', error);
     }
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('authToken');
+    this.clearStoredUser();
   },
 };

@@ -466,7 +466,12 @@ export default function RosterPage({
       {classId && (
         <section className="co-instructors-panel app-page-panel">
           <div className="co-instructors-panel__header">
-            <h2>Co-Instructors</h2>
+            <div>
+              <h2>Co-Instructors</h2>
+              <p className="co-instructors-panel__hint">
+                Add by email. They do not need to have logged in yet.
+              </p>
+            </div>
           </div>
           {coInstructorError && <div className="co-instructor-error">{coInstructorError}</div>}
           <div className="co-instructor-add">
@@ -545,7 +550,7 @@ export default function RosterPage({
               </span>
             )}
           </div>
-          <p>Columns: first_name, last_name, email, section (optional).</p>
+          <p>Columns: email (required), first_name, last_name, section (optional). Names are filled in when the student logs in if omitted.</p>
         </div>
         
         {uploading && (
@@ -864,7 +869,7 @@ export default function RosterPage({
                     type="text"
                     value={manualForm.first_name}
                     onChange={e => setManualForm(f => ({ ...f, first_name: e.target.value }))}
-                    placeholder="First"
+                    placeholder="First (optional)"
                     className="inline-edit-input"
                   />
                 </td>
@@ -873,7 +878,7 @@ export default function RosterPage({
                     type="text"
                     value={manualForm.last_name}
                     onChange={e => setManualForm(f => ({ ...f, last_name: e.target.value }))}
-                    placeholder="Last"
+                    placeholder="Last (optional)"
                     className="inline-edit-input"
                   />
                 </td>
@@ -898,7 +903,7 @@ export default function RosterPage({
                   <button
                     onClick={handleManualSubmit}
                     className="students-primary-button"
-                    disabled={manualSaving || !manualForm.email || !manualForm.first_name || !manualForm.last_name}
+                    disabled={manualSaving || !manualForm.email.trim()}
                   >
                     {manualSaving ? "Saving…" : "Save"}
                   </button>

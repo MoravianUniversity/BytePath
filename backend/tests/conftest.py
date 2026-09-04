@@ -134,7 +134,7 @@ def _install_fake_auth_service(app):
     user_repo = app.config["USER_REPOSITORY"]
 
     class FakeAuthService:
-        def login_or_create_user(self, email: str, display_name=None):
+        def login_or_create_user(self, email: str, display_name=None, given_name=None, family_name=None):
             user = user_repo.get_by_email(email)
             if user:
                 return user

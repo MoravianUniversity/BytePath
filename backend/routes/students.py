@@ -183,8 +183,8 @@ def create_student():
     section = normalize_section(data.get("section"))
     class_id = data.get("class_id") or None
 
-    if not email or not first_name or not last_name:
-        return jsonify({"error": "Email, first_name, and last_name are required"}), 400
+    if not email:
+        return jsonify({"error": "Email is required"}), 400
 
     # Check if already exists in the same class (not soft-deleted)
     existing = RosterStudent.query.filter_by(email=email, class_id=class_id, deleted_at=None).first()
