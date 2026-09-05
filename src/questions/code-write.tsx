@@ -40,35 +40,58 @@ function* testResults(question: CodeWriteQuestion, answer: string): Generator<Py
       if (!printMatch) {
         yield createException('SyntaxError', `Your code must end with a print statement. Add a print statement and try again.`);
       } else {
-        yield runGrabOutput(code);
+        try {
+          yield runGrabOutput(code);
+        } catch (error) {
+          console.error('Failed to run code-write output test:', error);
+          yield createException('RuntimeError', 'Could not run your code. Please try again.');
+        }
       }
     } else {
       if (printMatch) {
         yield createException('SyntaxError', `Your code must end with a simple expression, not a print statement. Remove the print statement and try again.`);
       } else {
-        yield runLastLine(code);
+        try {
+          yield runLastLine(code);
+        } catch (error) {
+          console.error('Failed to run code-write expression test:', error);
+          yield createException('RuntimeError', 'Could not run your code. Please try again.');
+        }
       }
     }
   }
 }
 
 function findFirstFailure(question: CodeWriteQuestion, answer: string): { result: PyType | undefined, testCase: { values: PyType[], expected: PyType } } | null {
-  for (const [result, testCase] of zip(testResults(question, answer), question.testCases)) {
-    if (result === undefined || !isAnswerSame(result, testCase.expected)) {
-      return { result, testCase };
+  try {
+    for (const [result, testCase] of zip(testResults(question, answer), question.testCases)) {
+      if (result === undefined || !isAnswerSame(result, testCase.expected)) {
+        return { result, testCase };
+      }
     }
+    return null;
+  } catch (error) {
+    console.error('Failed to find code-write failure:', error);
+    return {
+      result: createException('RuntimeError', 'Could not run your code. Please try again.'),
+      testCase: question.testCases[0] ?? { values: [], expected: '' },
+    };
   }
-  return null;
 }
 
 function checkAnswer(
   question: CodeWriteQuestion,
   answer: string,
 ): boolean {
-  for (const [result, testCase] of zip(testResults(question, answer), question.testCases)) {
-    if (result === undefined || !isAnswerSame(result, testCase.expected)) { return false; }
+  try {
+    for (const [result, testCase] of zip(testResults(question, answer), question.testCases)) {
+      if (result === undefined || !isAnswerSame(result, testCase.expected)) { return false; }
+    }
+    return true;
+  } catch (error) {
+    console.error('Failed to check code-write answer:', error);
+    return false;
   }
-  return true;
 }
 
 function formatHtmlAnswer(answer: string): React.ReactNode {

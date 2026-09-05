@@ -24,30 +24,53 @@ function* testResults(question: FuncWriteQuestion, answer: string): Generator<Py
     }
 
     if (testsUseOutput) {
-      yield runGrabOutput(code);
+      try {
+        yield runGrabOutput(code);
+      } catch (error) {
+        console.error('Failed to run func-write output test:', error);
+        yield createException('RuntimeError', 'Could not run your code. Please try again.');
+      }
     } else {
-      yield runLastLine(code);
+      try {
+        yield runLastLine(code);
+      } catch (error) {
+        console.error('Failed to run func-write expression test:', error);
+        yield createException('RuntimeError', 'Could not run your code. Please try again.');
+      }
     }
   }
 }
 
 function findFirstFailure(question: FuncWriteQuestion, answer: string): { result: PyType | undefined, testCase: { args: PyType[], expected: PyType } } | null {
-  for (const [result, testCase] of zip(testResults(question, answer), question.testCases)) {
-    if (result === undefined || !isAnswerSame(result, testCase.expected)) {
-      return { result, testCase };
+  try {
+    for (const [result, testCase] of zip(testResults(question, answer), question.testCases)) {
+      if (result === undefined || !isAnswerSame(result, testCase.expected)) {
+        return { result, testCase };
+      }
     }
+    return null;
+  } catch (error) {
+    console.error('Failed to find func-write failure:', error);
+    return {
+      result: createException('RuntimeError', 'Could not run your code. Please try again.'),
+      testCase: question.testCases[0] ?? { args: [], expected: '' },
+    };
   }
-  return null;
 }
 
 function checkAnswer(
   question: FuncWriteQuestion,
   answer: string,
 ): boolean {
-  for (const [result, testCase] of zip(testResults(question, answer), question.testCases)) {
-    if (result === undefined || !isAnswerSame(result, testCase.expected)) { return false; }
+  try {
+    for (const [result, testCase] of zip(testResults(question, answer), question.testCases)) {
+      if (result === undefined || !isAnswerSame(result, testCase.expected)) { return false; }
+    }
+    return true;
+  } catch (error) {
+    console.error('Failed to check func-write answer:', error);
+    return false;
   }
-  return true;
 }
 
 function formatHtmlAnswer(answer: string): React.ReactNode {

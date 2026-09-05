@@ -412,6 +412,7 @@
   border: none !important;
   padding: 0 !important;
   overflow-x: visible;
+  pointer-events: none;
 }
 .answer-option.correct {
   background: var(--syntax-success-bg) !important;

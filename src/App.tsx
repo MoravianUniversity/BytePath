@@ -668,7 +668,15 @@ function App() {
     if (answer === undefined && !completedTopics.has(currentTopic?.id || '')) { return; }
 
     const skipped = answer === undefined;
-    const isCorrect = skipped || (await Promise.resolve(checkAnswer(question, answer)));
+    let isCorrect = skipped;
+    if (!skipped) {
+      try {
+        isCorrect = await Promise.resolve(checkAnswer(question, answer));
+      } catch (error) {
+        console.error('Failed to check answer:', error);
+        isCorrect = false;
+      }
+    }
     const questionIndex = questionAnswers.length;
     const questionContext = contextByQuestionIndexRef.current[questionIndex] ?? null;
 

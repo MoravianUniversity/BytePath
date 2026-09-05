@@ -146,8 +146,9 @@ export const QuestionAnswerOptions: React.FC<{
       {options.map((option, index) => (
         <button
           key={index}
+          type="button"
           className={`answer-option ${getAnswerClass(option)}`} 
-          onClick={(e) => onSelect(e.target, option)}
+          onClick={(e) => onSelect(e.currentTarget, option)}
           disabled={disabled}
         >
           {formatAnswer(option)}

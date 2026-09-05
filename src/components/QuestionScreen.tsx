@@ -35,7 +35,14 @@ const QuestionScreen: React.FC<QuestionScreenProps> = ({
   const def = QUESTION_TYPES[question.kind];
   const isCompleted = userAnswer !== undefined;
   const skipped = userAnswer === SKIPPED;
-  const isCorrect = isCompleted && !skipped && checkAnswer(question, userAnswer) === true;
+  let isCorrect = false;
+  if (isCompleted && !skipped) {
+    try {
+      isCorrect = checkAnswer(question, userAnswer) === true;
+    } catch (error) {
+      console.error('Failed to check answer:', error);
+    }
+  }
 
   useEffect(() => {
     Prism.highlightAll();
@@ -48,7 +55,14 @@ const QuestionScreen: React.FC<QuestionScreenProps> = ({
     answer: UserAnswer | undefined,
   ) => {
     if (answer === undefined && !canSkip) { return; }
-    const correct = answer !== undefined && checkAnswer(question, answer) === true;
+    let correct = false;
+    if (answer !== undefined) {
+      try {
+        correct = checkAnswer(question, answer) === true;
+      } catch (error) {
+        console.error('Failed to check answer:', error);
+      }
+    }
     if (element instanceof HTMLElement && correct) {
       const rect = element.getBoundingClientRect();
       const originX = (rect.x + 0.5 * rect.width) / window.innerWidth;
