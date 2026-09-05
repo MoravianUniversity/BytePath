@@ -23,6 +23,8 @@ import { getInitials } from '../util';
 type DifficultyLevel = 'very-hard' | 'hard' | 'medium' | 'easy';
 type SubtopicSortKey = 'order' | 'success' | 'completion' | 'time' | 'attempts';
 type SubtopicSortDir = 'asc' | 'desc';
+type TopicsPerformanceSortKey = 'order' | 'accuracy' | 'completion';
+type TopicsPerformanceSortDir = 'asc' | 'desc';
 
 const SIDEBAR_TOPIC_IDS: string[] = [];
 const SUBTOPIC_ORDER_BY_TOPIC_ID = new Map<string, string[]>();
@@ -60,8 +62,24 @@ const SUBTOPIC_SORT_OPTIONS: Array<{ key: SubtopicSortKey; label: string }> = [
   { key: 'attempts', label: 'Attempts' },
 ];
 
+const TOPICS_PERFORMANCE_SORT_OPTIONS: Array<{
+  key: TopicsPerformanceSortKey;
+  label: string;
+}> = [
+  { key: 'order', label: 'Order' },
+  { key: 'accuracy', label: 'Accuracy' },
+  { key: 'completion', label: 'Completion' },
+];
+
 const defaultSubtopicSortDir = (key: SubtopicSortKey): SubtopicSortDir =>
   key === 'success' || key === 'order' ? 'asc' : 'desc';
+
+const topicCompletionRate = (
+  topic: ClassOverview['topics_overview'][number],
+): number =>
+  topic.students_started > 0
+    ? (topic.students_completed / topic.students_started) * 100
+    : 0;
 
 const describeDifficulty = (accuracy: number): { level: DifficultyLevel; label: string } => {
   if (accuracy >= 80) return { level: 'easy', label: 'Easy' };
@@ -123,6 +141,11 @@ export default function InstructorDashboard({
   const [rosterSearchTerm, setRosterSearchTerm] = useState('');
   const [lookupError, setLookupError] = useState<string | null>(null);
   const [showRoster, setShowRoster] = useState(false);
+  const [topicsSearchTerm, setTopicsSearchTerm] = useState('');
+  const [topicsPerformanceSort, setTopicsPerformanceSort] = useState<{
+    key: TopicsPerformanceSortKey;
+    dir: TopicsPerformanceSortDir;
+  }>({ key: 'accuracy', dir: 'asc' });
   const [selectedTopic, setSelectedTopic] = useState<ClassOverview['topics_overview'][number] | null>(null);
   const [topicReport, setTopicReport] = useState<TopicReport | null>(null);
   const [topicQuestionAnalytics, setTopicQuestionAnalytics] = useState<QuestionAnalyticsResponse | null>(null);
@@ -399,6 +422,17 @@ export default function InstructorDashboard({
       return { key, dir: defaultSubtopicSortDir(key) };
     });
   };
+
+  const handleTopicsPerformanceSort = (key: TopicsPerformanceSortKey) => {
+    setTopicsPerformanceSort((current) => {
+      if (key === 'order') return { key: 'order', dir: 'asc' };
+      if (current.key === key) {
+        return { key, dir: current.dir === 'asc' ? 'desc' : 'asc' };
+      }
+      return { key, dir: 'asc' };
+    });
+  };
+
   const normalizedRosterSearch = rosterSearchTerm.trim().toLowerCase();
   const rosterMatches = useMemo(() => {
     if (!normalizedRosterSearch) return rosteredStudents;
@@ -408,6 +442,42 @@ export default function InstructorDashboard({
       return name.includes(normalizedRosterSearch) || email.includes(normalizedRosterSearch);
     });
   }, [rosteredStudents, normalizedRosterSearch]);
+
+  const normalizedTopicsSearch = topicsSearchTerm.trim().toLowerCase();
+  const filteredTopicsOverview = useMemo(() => {
+    const filtered = !normalizedTopicsSearch
+      ? topicsOverview
+      : topicsOverview.filter((topic) => {
+          const name = topic.topic_name?.toLowerCase() ?? '';
+          const id = topic.topic?.toLowerCase() ?? '';
+          return name.includes(normalizedTopicsSearch) || id.includes(normalizedTopicsSearch);
+        });
+
+    if (topicsPerformanceSort.key === 'order') {
+      const orderIndex = new Map(SIDEBAR_TOPIC_IDS.map((id, index) => [id, index]));
+      return filtered.slice().sort((a, b) => {
+        const aIndex = orderIndex.get(a.topic) ?? Number.MAX_SAFE_INTEGER;
+        const bIndex = orderIndex.get(b.topic) ?? Number.MAX_SAFE_INTEGER;
+        if (aIndex !== bIndex) return aIndex - bIndex;
+        return a.topic_name.localeCompare(b.topic_name, undefined, { sensitivity: 'base' });
+      });
+    }
+
+    const dirSign = topicsPerformanceSort.dir === 'asc' ? 1 : -1;
+    return filtered.slice().sort((a, b) => {
+      const aValue =
+        topicsPerformanceSort.key === 'accuracy'
+          ? a.avg_accuracy
+          : topicCompletionRate(a);
+      const bValue =
+        topicsPerformanceSort.key === 'accuracy'
+          ? b.avg_accuracy
+          : topicCompletionRate(b);
+      const diff = (aValue - bValue) * dirSign;
+      if (diff !== 0) return diff;
+      return a.topic_name.localeCompare(b.topic_name, undefined, { sensitivity: 'base' });
+    });
+  }, [topicsOverview, normalizedTopicsSearch, topicsPerformanceSort]);
   const sectionOptions = classOverview?.sections ?? [];
   const showSectionSelector = sectionOptions.length > 1;
 
@@ -1199,17 +1269,70 @@ export default function InstructorDashboard({
       </section>
 
       <section className="dashboard-section">
-        <h2>Topics Performance</h2>
+        <div className="section-header topics-performance-header">
+          <h2>Topics</h2>
+          <div className="topics-performance-controls">
+            <input
+              type="search"
+              placeholder="Search topics…"
+              className="search-input"
+              value={topicsSearchTerm}
+              onChange={(event) => setTopicsSearchTerm(event.target.value)}
+              aria-label="Search topics"
+            />
+            <div
+              className="topics-performance-sort"
+              role="group"
+              aria-label="Sort topics"
+            >
+              {TOPICS_PERFORMANCE_SORT_OPTIONS.map((option) => {
+                const isActive = topicsPerformanceSort.key === option.key;
+                const directionHint =
+                  isActive && option.key !== 'order'
+                    ? topicsPerformanceSort.dir === 'asc'
+                      ? ' ↑'
+                      : ' ↓'
+                    : '';
+                return (
+                  <button
+                    key={option.key}
+                    type="button"
+                    className={`topics-performance-sort__btn${
+                      isActive ? ' topics-performance-sort__btn--active' : ''
+                    }`}
+                    onClick={() => handleTopicsPerformanceSort(option.key)}
+                    aria-pressed={isActive}
+                    title={
+                      option.key === 'order'
+                        ? 'Sort by defined topic order'
+                        : isActive
+                          ? `Sort by ${option.label.toLowerCase()} (${
+                              topicsPerformanceSort.dir === 'asc'
+                                ? 'low to high'
+                                : 'high to low'
+                            }). Click again to reverse.`
+                          : `Sort by ${option.label.toLowerCase()}`
+                    }
+                  >
+                    {option.label}
+                    {directionHint}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
         <div className="topics-performance-grid">
-          {topicsOverview
-            .slice()
-            .sort((a, b) => a.avg_accuracy - b.avg_accuracy)
-            .map((topic) => {
+          {filteredTopicsOverview.length === 0 ? (
+            <div className="students-table__empty">
+              {normalizedTopicsSearch
+                ? 'No topics match that search.'
+                : 'No topic data yet.'}
+            </div>
+          ) : (
+            filteredTopicsOverview.map((topic) => {
               const difficulty = describeDifficulty(topic.avg_accuracy);
-              const completionRate =
-                topic.students_started > 0
-                  ? (topic.students_completed / topic.students_started) * 100
-                  : 0;
+              const completionRate = topicCompletionRate(topic);
               return (
                 <div
                   key={topic.topic}
@@ -1248,13 +1371,14 @@ export default function InstructorDashboard({
                   </div>
                 </div>
               );
-            })}
+            })
+          )}
         </div>
       </section>
 
       <section className="dashboard-section">
         <div className="section-header">
-          <h2>Student Lookup</h2>
+          <h2>Students</h2>
           <input
             type="search"
             placeholder="Search by name or email…"
@@ -1273,29 +1397,33 @@ export default function InstructorDashboard({
           {rosterMatches.length === 0 ? (
             <div className="students-table__empty">No students match that search.</div>
           ) : (
-            rosterMatches.map((student, index) => (
-              <button
-                key={`${student.student_email}-${student.student_id ?? `pending-${index}`}`}
-                className="roster-lookup-card"
-                onClick={() => handleRosterSelection(student.student_id)}
-                type="button"
-              >
-                <div className="roster-lookup-card__avatar">
-                  {getInitials(student.student_name)}
-                </div>
-                <div className="roster-lookup-card__info">
-                  <div className="roster-lookup-card__name">{student.student_name}</div>
-                  <div className="roster-lookup-card__email">{student.student_email}</div>
-                </div>
-                <div
-                  className={`roster-lookup-card__status ${
-                    student.student_id ? 'roster-lookup-card__status--ready' : 'roster-lookup-card__status--inactive'
+            rosterMatches.map((student, index) => {
+              const isSignedIn = Boolean(student.student_id);
+              return (
+                <button
+                  key={`${student.student_email}-${student.student_id ?? `pending-${index}`}`}
+                  className={`roster-lookup-card${
+                    isSignedIn ? '' : ' roster-lookup-card--inactive'
                   }`}
+                  onClick={() => handleRosterSelection(student.student_id)}
+                  type="button"
+                  title={isSignedIn ? undefined : 'Never signed in'}
+                  aria-label={
+                    isSignedIn
+                      ? `View analytics for ${student.student_name}`
+                      : `${student.student_name} has never signed in`
+                  }
                 >
-                  {student.student_id ? 'View analytics' : 'Not signed in yet'}
-                </div>
-              </button>
-            ))
+                  <div className="roster-lookup-card__avatar">
+                    {getInitials(student.student_name)}
+                  </div>
+                  <div className="roster-lookup-card__info">
+                    <div className="roster-lookup-card__name">{student.student_name}</div>
+                    <div className="roster-lookup-card__email">{student.student_email}</div>
+                  </div>
+                </button>
+              );
+            })
           )}
         </div>
       </section>

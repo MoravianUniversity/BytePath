@@ -127,6 +127,44 @@
   gap: 1rem;
 }
 
+.topics-performance-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.topics-performance-sort {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  flex-shrink: 0;
+}
+
+.topics-performance-sort__btn {
+  border: 1px solid var(--border-dashboard-card);
+  background: transparent;
+  color: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.4rem 0.65rem;
+  border-radius: 8px;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.topics-performance-sort__btn:hover {
+  opacity: 1;
+  background: var(--bg-dashboard-card-hover);
+}
+
+.topics-performance-sort__btn--active {
+  opacity: 1;
+  border-color: var(--overlay-info-50);
+  background: var(--overlay-info-20);
+}
+
 @media (max-width: 1024px) {
   .topics-performance-grid {
     grid-template-columns: repeat(2, minmax(220px, 1fr));
@@ -295,12 +333,24 @@
   color: var(--text-dashboard);
   cursor: pointer;
   text-align: left;
-  transition: box-shadow 0.2s, background 0.2s;
+  transition: box-shadow 0.2s, background 0.2s, opacity 0.2s, border-color 0.2s;
 }
 
 .roster-lookup-card:hover {
   box-shadow: var(--shadow-elevated);
   background: var(--bg-dashboard-card-hover);
+}
+
+.roster-lookup-card--inactive {
+  opacity: 0.55;
+  border-style: dashed;
+  background: transparent;
+}
+
+.roster-lookup-card--inactive:hover {
+  opacity: 0.7;
+  box-shadow: none;
+  background: var(--bg-dashboard-card);
 }
 
 .roster-lookup-card__avatar {
@@ -314,6 +364,13 @@
   font-size: 0.85rem;
   letter-spacing: 0.02em;
   color: var(--text-on-primary-btn);
+  flex-shrink: 0;
+}
+
+.roster-lookup-card--inactive .roster-lookup-card__avatar {
+  background: var(--border-dashboard-card);
+  color: var(--text-dashboard);
+  opacity: 0.8;
 }
 
 .roster-lookup-card__info {
@@ -333,27 +390,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.roster-lookup-card__status {
-  font-size: 0.85rem;
-  font-weight: 700;
-  padding: 0.35rem 0.65rem;
-  border-radius: 999px;
-  white-space: nowrap;
-  border: 1px solid var(--border-dashboard-card);
-}
-
-.roster-lookup-card__status--ready {
-  background: var(--overlay-success-15);
-  color: var(--color-success-darker);
-  border-color: var(--overlay-success-bright-30);
-}
-
-.roster-lookup-card__status--inactive {
-  background: var(--overlay-warning-15);
-  color: var(--color-warning-dark);
-  border-color: var(--overlay-warning-35);
 }
 
 .back-button {
@@ -1336,6 +1372,11 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
+  }
+
+  .topics-performance-controls {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .search-input {
