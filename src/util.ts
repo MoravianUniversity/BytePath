@@ -154,6 +154,16 @@ export function maybeNot(probability: number = 0.2): string { return Math.random
 // Capitalize the first character of a string
 export function capitalize(s: string): string { return s.charAt(0).toUpperCase() + s.slice(1); }
 
+/** First + last word initials from a display name (e.g. "Ada Lovelace" → "AL"). */
+export function getInitials(name: string | null | undefined): string {
+  if (!name?.trim()) return '?';
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 1) {
+    return parts[0].charAt(0).toUpperCase();
+  }
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+}
+
 // Write a list of values, separated by commas and/or and as appropriate
 export function written_list_of_values(values: any[]): string {
   if (values.length === 0) { return ''; }

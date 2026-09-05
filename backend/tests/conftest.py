@@ -247,6 +247,28 @@ def _install_fake_report_service(app):
                 },
                 "subtopic_difficulty": [],
                 "most_missed_questions": [],
+                "student_status": {
+                    "not_started": [],
+                    "in_progress": [
+                        {
+                            "student_id": self.s1_id,
+                            "student_name": "Fake Student 1",
+                            "student_email": "student1@test.com",
+                            "completion_percentage": 50.0,
+                            "completed_subtopics": ["Addition"],
+                            "remaining_subtopics": ["Subtraction", "Multiplication"],
+                        },
+                        {
+                            "student_id": self.s2_id,
+                            "student_name": "Fake Student 2",
+                            "student_email": "student2@test.com",
+                            "completion_percentage": 25.0,
+                            "completed_subtopics": [],
+                            "remaining_subtopics": ["Addition", "Subtraction"],
+                        },
+                    ],
+                    "completed": [],
+                },
             }
 
         def get_class_overview(self, class_id=None, section=None):

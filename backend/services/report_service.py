@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import Counter
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 
@@ -7,6 +8,7 @@ from sqlalchemy import case, func, and_, desc, or_
 
 from backend.models import RosterStudent, StudentProgress, StudentResponse, Topic, User, db
 from backend.services.class_topic_settings_service import ClassTopicSettingsService
+from backend.services.subtopic_completion import slot_progress, slots_for_topic
 
 
 class ReportService:
@@ -290,6 +292,21 @@ class ReportService:
         if section is not None:
             roster_filter.append(RosterStudent.section == section)
 
+        rostered_student_rows = (
+            db.session.execute(
+                db.select(User.id, User.name, User.email)
+                .select_from(User)
+                .join(
+                    RosterStudent,
+                    func.lower(RosterStudent.email) == func.lower(User.email),
+                )
+                .filter(*roster_filter)
+                .distinct()
+            )
+            .mappings()
+            .all()
+        )
+
         rostered_students_subquery = (
             db.select(User.id)
             .select_from(User)
@@ -316,48 +333,102 @@ class ReportService:
             .all()
         )
 
+        started_user_ids = {r.user_id for r in responses}
+
+        responses_by_user: Dict[int, list] = {}
+        for response in responses:
+            responses_by_user.setdefault(response.user_id, []).append(response)
+
+        topic_slots = slots_for_topic(topic_id)
+
+        def student_slot_progress(user_id: int):
+            """Same slot-credit replay used by live progress updates."""
+            user_responses = responses_by_user.get(user_id, [])
+            slots = topic_slots
+            if not slots:
+                # Fallback when catalog is missing: one slot per distinct type.
+                slots = sorted(
+                    {
+                        response.subtopic_type
+                        for response in user_responses
+                        if response.subtopic_type
+                    }
+                )
+            return slot_progress(slots, user_responses)
+
+        def response_complete(user_id: int) -> bool:
+            completed_slots, remaining_slots, completed_count = student_slot_progress(
+                user_id
+            )
+            total = len(completed_slots) + len(remaining_slots)
+            return total > 0 and completed_count >= total and len(remaining_slots) == 0
+
+        # Authoritative completion comes from response replay + slot catalog
+        # (same rules as ProgressService), not from the progress table alone.
+        completed_user_ids = {
+            user_id for user_id in responses_by_user if response_complete(user_id)
+        }
+
+        def student_entry(row, *, include_progress: bool = False) -> Dict:
+            entry = {
+                "student_id": row["id"],
+                "student_name": row["name"] or row["email"],
+                "student_email": row["email"],
+            }
+            if include_progress:
+                completed_slots, remaining_slots, completed_count = student_slot_progress(
+                    row["id"]
+                )
+                total = len(completed_slots) + len(remaining_slots)
+                entry["completion_percentage"] = (
+                    round(completed_count / total * 100, 2) if total > 0 else 0.0
+                )
+                entry["completed_subtopics"] = completed_slots
+                entry["remaining_subtopics"] = remaining_slots
+            return entry
+
+        not_started_students = []
+        in_progress_students = []
+        completed_students = []
+        for row in rostered_student_rows:
+            if row["id"] in completed_user_ids:
+                completed_students.append(student_entry(row))
+            elif row["id"] in started_user_ids:
+                in_progress_students.append(student_entry(row, include_progress=True))
+            else:
+                not_started_students.append(student_entry(row))
+
+        sort_key = lambda s: (s["student_name"] or "").lower()
+        not_started_students.sort(key=sort_key)
+        in_progress_students.sort(key=sort_key)
+        completed_students.sort(key=sort_key)
+
+        student_status = {
+            "not_started": not_started_students,
+            "in_progress": in_progress_students,
+            "completed": completed_students,
+        }
+
+        total_students = len(rostered_student_rows)
+        students_started = len(started_user_ids)
+        students_completed = len(completed_user_ids)
+
         if not responses:
             return {
                 "topic": topic_id,
                 "topic_name": topic.name,
                 "overall_stats": {
-                    "total_students": 0,
+                    "total_students": total_students,
                     "students_started": 0,
-                    "students_completed": 0,
+                    "students_completed": students_completed,
                     "total_attempts": 0,
                     "avg_accuracy": 0,
                     "avg_time_per_question": 0,
                 },
                 "subtopic_difficulty": [],
                 "most_missed_questions": [],
+                "student_status": student_status,
             }
-
-        total_students = (
-            db.session.execute(
-                db.select(func.count()).select_from(rostered_students_subquery)
-            ).scalar_one()
-        )
-
-        students_started = db.session.execute(
-            db.select(func.count(func.distinct(StudentResponse.user_id)))
-            .select_from(StudentResponse)
-            .filter(*response_base_filter)
-        ).scalar_one()
-
-        progress_completed_filter = [
-            StudentProgress.topic == topic_id,
-            StudentProgress.total_subtopics > 0,
-            StudentProgress.subtopics_completed >= StudentProgress.total_subtopics,
-            StudentProgress.user_id.in_(rostered_students_subquery),
-        ]
-        if class_id is not None:
-            progress_completed_filter.append(StudentProgress.class_id == class_id)
-
-        students_completed = db.session.execute(
-            db.select(func.count(StudentProgress.id))
-            .select_from(StudentProgress)
-            .filter(and_(*progress_completed_filter))
-        ).scalar_one()
 
         non_skipped = [r for r in responses if r.status != "skipped"]
         total_attempts = len(responses)
@@ -406,6 +477,23 @@ class ReportService:
                 return "Hard"
             return "Very Hard"
 
+        # Per-type completion among topic starters (slot-credit model; duplicates count).
+        slot_counts = Counter(topic_slots)
+        completed_counts_by_user: Dict[int, Counter] = {}
+        for user_id in started_user_ids:
+            completed_slots, _, _ = student_slot_progress(user_id)
+            completed_counts_by_user[user_id] = Counter(completed_slots)
+
+        def completion_rate_for_type(subtopic_type: str) -> float:
+            required = slot_counts.get(subtopic_type, 1) or 1
+            if not started_user_ids:
+                return 0.0
+            done = sum(
+                min(completed_counts_by_user[user_id].get(subtopic_type, 0), required)
+                for user_id in started_user_ids
+            )
+            return round(done / (len(started_user_ids) * required) * 100, 2)
+
         subtopic_difficulty = [
             {
                 "subtopic_type": stat["subtopic_type"],
@@ -414,6 +502,7 @@ class ReportService:
                 "success_rate": round(float(stat["success_rate"]), 2)
                 if stat["success_rate"]
                 else 0,
+                "completion_rate": completion_rate_for_type(stat["subtopic_type"]),
                 "avg_time": round(float(stat["avg_time"]), 2) if stat["avg_time"] else 0,
                 "difficulty_rating": difficulty(float(stat["success_rate"]) if stat["success_rate"] else 0),
             }
@@ -474,6 +563,7 @@ class ReportService:
             },
             "subtopic_difficulty": subtopic_difficulty,
             "most_missed_questions": most_missed,
+            "student_status": student_status,
         }
 
     @staticmethod

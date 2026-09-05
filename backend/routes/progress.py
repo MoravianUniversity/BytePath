@@ -147,6 +147,7 @@ def update_topic_progress(user_id: int, topic_id: str):
         {
             "subtopics_completed": subtopics_completed,
             "total_subtopics": total_subtopics,
+            "subtopic_slots": payload.get("subtopic_slots"),
         },
         class_id=class_id,
     )

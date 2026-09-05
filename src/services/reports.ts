@@ -70,6 +70,21 @@ export interface ClassOverview {
   }>;
 }
 
+export interface TopicReportStudent {
+  student_id: number;
+  student_name: string;
+  student_email: string;
+  /** Present for in-progress students: current topic completion percent. */
+  completion_percentage?: number;
+  /** Present for in-progress students: subtopic_type values with a latest correct response. */
+  completed_subtopics?: string[];
+  /**
+   * Present for in-progress students: observed subtopic_types not yet correct.
+   * Prefer the frontend topic catalog when available; this is a fallback.
+   */
+  remaining_subtopics?: string[];
+}
+
 export interface TopicReport {
   topic: string;
   topic_name: string;
@@ -86,6 +101,7 @@ export interface TopicReport {
     attempts: number;
     unique_students: number;
     success_rate: number;
+    completion_rate: number;
     avg_time: number;
     difficulty_rating: string;
   }>;
@@ -95,6 +111,11 @@ export interface TopicReport {
     attempts: number;
     success_rate: number;
   }>;
+  student_status: {
+    not_started: TopicReportStudent[];
+    in_progress: TopicReportStudent[];
+    completed: TopicReportStudent[];
+  };
 }
 
 export interface QuestionAnalyticsResponse {

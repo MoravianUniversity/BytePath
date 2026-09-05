@@ -31,6 +31,10 @@ import {
   resolveEffectiveAssignments,
   type EffectiveTopicAssignment,
 } from './utils/topicAssignments';
+import {
+  completionCreditsByType,
+  replaySubtopicCompletion,
+} from './utils/subtopicCompletion';
 import type { TopicProgress } from './services/progress';
 
 export const SKIPPED = Symbol('(skipped)');
@@ -452,33 +456,44 @@ function App() {
           .filter(p => p.total_subtopics > 0 && p.subtopics_completed >= p.total_subtopics)
           .map(p => p.topic);
 
-        const latestBySubtopic = new Map<string, typeof responses[number]>();
+        // Restore per-slot completion: each type earns credits from the
+        // two-correct-after-wrong replay; credits fill duplicate slots in order.
+        const responsesByTopic = new Map<string, typeof responses>();
         responses.forEach((response) => {
-          const key = `${response.topic}::${response.subtopic_type}`;
-          const existing = latestBySubtopic.get(key);
-          if (!existing || new Date(response.attempted_at) > new Date(existing.attempted_at)) {
-            latestBySubtopic.set(key, response);
-          }
-        });
-
-        // Restore subtopic-level completion based on the latest response per subtopic.
-        const responsesBySubtopic = new Map<string, typeof responses>();
-        responses.forEach((response) => {
-          const key = `${response.topic}::${response.subtopic_type}`;
-          const list = responsesBySubtopic.get(key) ?? [];
+          const list = responsesByTopic.get(response.topic) ?? [];
           list.push(response);
-          responsesBySubtopic.set(key, list);
+          responsesByTopic.set(response.topic, list);
         });
 
         allTopics.forEach((topic) => {
+          const topicResponses = responsesByTopic.get(topic.id) ?? [];
+          const credits = completionCreditsByType(topicResponses);
+          const remainingCredits = new Map(credits);
+          const pendingStateApplied = new Set<string>();
+          const responsesByType = new Map<string, typeof responses>();
+          topicResponses.forEach((response) => {
+            const list = responsesByType.get(response.subtopic_type) ?? [];
+            list.push(response);
+            responsesByType.set(response.subtopic_type, list);
+          });
+
           topic.subtopics.forEach((subtopic) => {
-            const key = `${topic.id}::${subtopic.constructor.name}`;
-            const response = latestBySubtopic.get(key);
-            const history = responsesBySubtopic.get(key) ?? [];
-            subtopic.failedAttempts = history.filter(r => !r.is_correct).length;
-            if (response) {
-              subtopic.completed = response.is_correct;
-              subtopic.incorrectLastTime = !response.is_correct;
+            const typeName = subtopic.constructor.name;
+            const history = responsesByType.get(typeName) ?? [];
+            subtopic.failedAttempts = history.filter((r) => !r.is_correct).length;
+            const available = remainingCredits.get(typeName) ?? 0;
+            if (available > 0) {
+              // One credit fills this catalog slot; duplicates need more credits.
+              subtopic.completed = true;
+              subtopic.incorrectLastTime = false;
+              remainingCredits.set(typeName, available - 1);
+            } else if (history.length > 0 && !pendingStateApplied.has(typeName)) {
+              // Mid two-correct-after-wrong state applies only to the next
+              // incomplete instance of this type; later duplicates start fresh.
+              const state = replaySubtopicCompletion(history);
+              subtopic.completed = false;
+              subtopic.incorrectLastTime = state.incorrectLastTime;
+              pendingStateApplied.add(typeName);
             } else {
               subtopic.completed = false;
               subtopic.incorrectLastTime = false;
@@ -665,7 +680,8 @@ function App() {
     setQuestionAnswers(prev => [...prev, skipped ? SKIPPED : answer]);
 
     if (currentTopic) {
-      // Update subtopic progress
+      // Update only the presented slot. Duplicate listings of the same type are
+      // separate slots and must each be completed independently.
       if (currentSubtopic) {
         currentSubtopic.completed = currentSubtopic.incorrectLastTime ? false : isCorrect;
         currentSubtopic.incorrectLastTime = !isCorrect;

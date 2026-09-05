@@ -19,6 +19,8 @@ def test_get_topic_report(client):
     assert data["topic"] == "test-topic-1"
     assert "overall_stats" in data
     assert "subtopic_difficulty" in data
+    assert "student_status" in data
+    assert set(data["student_status"].keys()) == {"not_started", "in_progress", "completed"}
 
 
 def test_get_topic_report_not_found(client):
