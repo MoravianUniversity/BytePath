@@ -838,7 +838,9 @@ export default function InstructorDashboard({
                   </div>
 
                   <div className="topic-analytics-section">
-                    <h3>Student Status</h3>
+                    <div className="topic-analytics-sticky-header">
+                      <h3>Student Status</h3>
+                    </div>
                     <div className="topic-student-status">
                       {(
                         [
@@ -1004,7 +1006,7 @@ export default function InstructorDashboard({
                   </div>
 
                   <div className="topic-analytics-section">
-                    <div className="ranked-subtopics-header">
+                    <div className="ranked-subtopics-header topic-analytics-sticky-header">
                       <h3>Subtopics</h3>
                       {topicReport.subtopic_difficulty.length > 0 && (
                         <div
@@ -1086,7 +1088,9 @@ export default function InstructorDashboard({
                   </div>
 
                   <div className="topic-analytics-section">
-                    <h3>Questions for Selected Subtopic</h3>
+                    <div className="topic-questions-header topic-analytics-sticky-header">
+                      <h3>Questions for Selected Subtopic</h3>
+                    </div>
                     {!selectedSubtopic ? (
                       <p className="topic-analytics-empty">Select a subtopic to view its questions.</p>
                     ) : subtopicQuestions.length === 0 ? (

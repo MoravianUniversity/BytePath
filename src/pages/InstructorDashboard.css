@@ -727,6 +727,15 @@
   gap: 1rem;
   padding: 0.75rem 1.25rem;
   border-bottom: 1px solid var(--border-dashboard-card);
+  /* Opaque so subpixel flex gaps don't show scrolling content through. */
+  background: #ffffff;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 3;
+}
+
+[data-theme='dark'] .topic-analytics-modal__header {
+  background: #1e293b;
 }
 
 .topic-analytics-modal__title-block {
@@ -804,12 +813,19 @@
 }
 
 .topic-analytics-modal__body {
-  padding: 1.25rem 1.5rem 1.5rem;
+  /* No top padding — sticky headers need to sit flush with the scrollport. */
+  padding: 0 1.5rem 1.5rem;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.topic-analytics-modal__body > :first-child {
+  padding-top: 1.25rem;
 }
 
 .topic-analytics-modal__body--loading {
@@ -1078,7 +1094,32 @@
 }
 
 .topic-analytics-section h3 {
+  margin: 0;
+}
+
+.topic-analytics-sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  /* Match modal chrome with an opaque fill — --bg-modal is translucent, so
+     subpixel rounding gaps at some viewport heights otherwise show through. */
+  background: #ffffff;
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
   margin-bottom: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid var(--border-dashboard-card);
+  box-shadow: 0 -8px 0 #ffffff;
+}
+
+[data-theme='dark'] .topic-analytics-sticky-header {
+  background: #1e293b;
+  box-shadow: 0 -8px 0 #1e293b;
+}
+
+.topic-questions-header {
+  display: flex;
+  align-items: center;
 }
 
 .topic-analytics-list {
@@ -1130,7 +1171,6 @@
   justify-content: space-between;
   gap: 0.75rem;
   flex-wrap: wrap;
-  margin-bottom: 0.75rem;
 }
 
 .ranked-subtopics-header h3 {
@@ -1171,12 +1211,6 @@
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
-  /* ~50% of the modal area so Subtopics + Questions headers stay visible. */
-  max-height: calc(85vh * 0.5);
-  overflow-y: auto;
-  overflow-x: hidden;
-  min-height: 0;
-  padding-bottom: 0.25rem;
 }
 
 .ranked-subtopic-row {
