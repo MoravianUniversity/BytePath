@@ -199,7 +199,11 @@ paths:
         - Students
       summary: Create a single student manually
       description: |
-        Creates a new student record. Email must be unique.
+        Creates a new student record. Email must be unique within a class.
+
+        If a student with the same email was previously removed (soft deleted)
+        from the class, their existing record is reactivated and updated with
+        any supplied details instead of a new record being created.
       operationId: createStudent
       requestBody:
         required: true
@@ -224,6 +228,12 @@ paths:
                 class_name:
                   type: string
       responses:
+        '200':
+          description: Previously removed student reactivated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RosterStudent'
         '201':
           description: Student created successfully
           content:
@@ -237,7 +247,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '409':
-          description: Conflict - student with this email already exists
+          description: Conflict - student is already active in this class
           content:
             application/json:
               schema:

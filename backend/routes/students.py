@@ -191,6 +191,28 @@ def create_student():
     if existing:
         return jsonify({"error": "Student with this email already exists in this class"}), 409
 
+    # Removing a student only soft-deletes their row, so re-adding them has to
+    # reactivate it rather than insert a duplicate (email, class_id) pair.
+    removed = (
+        RosterStudent.query.filter_by(email=email, class_id=class_id)
+        .filter(RosterStudent.deleted_at.isnot(None))
+        .first()
+    )
+    if removed:
+        removed.deleted_at = None
+        if first_name:
+            removed.first_name = first_name
+        if last_name:
+            removed.last_name = last_name
+        if notes is not None:
+            removed.notes = notes
+        if section:
+            removed.section = section
+        removed.last_updated_via = "manual"
+        touch_class_updated_at(class_id)
+        db.session.commit()
+        return jsonify(removed.to_dict()), 200
+
     try:
         student = RosterStudent(
             email=email,
@@ -243,6 +265,7 @@ def update_student(id: int):
     if "class_id" in data:
         new_class_id = data["class_id"] or None
         if new_class_id != student.class_id:
+            touch_class_updated_at(student.class_id)
             student.class_id = new_class_id
             touch_class_updated_at(new_class_id)
 
@@ -267,7 +290,8 @@ def delete_student(id: int):
         return jsonify({"error": "Student not found"}), 404
     
     hard = request.args.get("hard", default=False, type=bool)
-    
+    class_id = student.class_id  # captured before a hard delete detaches the row
+
     if hard:
         # Permanent delete (admin only - consider adding permission check)
         db.session.delete(student)
@@ -275,7 +299,8 @@ def delete_student(id: int):
         # Soft delete
         student.deleted_at = datetime.utcnow()
         student.last_updated_via = "manual"
-    
+
+    touch_class_updated_at(class_id)
     db.session.commit()
     return "", 204
 
@@ -294,6 +319,7 @@ def restore_student(id: int):
     
     student.deleted_at = None
     student.last_updated_via = "manual"
+    touch_class_updated_at(student.class_id)
     db.session.commit()
     
     return jsonify(student.to_dict())
@@ -313,16 +339,21 @@ def bulk_delete_students():
         return jsonify({"error": "student_ids array is required"}), 400
     
     deleted_count = 0
+    affected_class_ids = set()
     for student_id in student_ids:
         student = db.session.get(RosterStudent, student_id)
         if student:
+            affected_class_ids.add(student.class_id)
             if hard:
                 db.session.delete(student)
             else:
                 student.deleted_at = datetime.utcnow()
                 student.last_updated_via = "manual"
             deleted_count += 1
-    
+
+    for class_id in affected_class_ids:
+        touch_class_updated_at(class_id)
+
     db.session.commit()
     return jsonify({"deleted": deleted_count})
 

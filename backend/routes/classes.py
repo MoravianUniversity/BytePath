@@ -4,6 +4,8 @@ Routes for class management.
 
 from __future__ import annotations
 
+from datetime import datetime
+
 from flask import Blueprint, jsonify, request, session
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
@@ -153,10 +155,14 @@ def assign_student(id: int, student_id: int):
         return jsonify({"error": "Class not found"}), 404
 
     student = db.session.get(RosterStudent, student_id)
-    if not student or student.deleted_at:
+    if not student:
         return jsonify({"error": "Student not found"}), 404
 
+    # Removal soft-deletes the roster row, so assigning the student again
+    # reactivates it instead of reporting them as missing.
+    student.deleted_at = None
     student.class_id = id
+    student.last_updated_via = "manual"
     touch_class_updated_at(id)
     try:
         db.session.commit()
@@ -169,12 +175,14 @@ def assign_student(id: int, student_id: int):
 
 @classes_bp.delete("/<int:id>/students/<int:student_id>")
 def remove_student(id: int, student_id: int):
-    """Remove a student from this class (clears their class assignment)."""
+    """Remove a student from this class (soft delete, so they can be re-added)."""
     student = RosterStudent.query.filter_by(id=student_id, class_id=id, deleted_at=None).first()
     if not student:
         return jsonify({"error": "Student not found in this class"}), 404
 
-    student.class_id = None
+    student.deleted_at = datetime.utcnow()
+    student.last_updated_via = "manual"
+    touch_class_updated_at(id)
     db.session.commit()
     return "", 204
 
