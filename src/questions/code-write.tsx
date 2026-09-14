@@ -13,9 +13,10 @@ function* testResults(question: CodeWriteQuestion, answer: string): Generator<Py
   const testsUseOutput = question.testsUseOutput;
   for (const testCase of testCases) {
     const code = (
-      Array.from(zip(variables, testCase.values).map(
-        ([variable, value]) => `${variable} = ${toPyAtom(value)}`
-      )).join('\n')
+      Array.from(
+        zip(variables, testCase.values),
+        ([variable, value]) => `${variable} = ${toPyAtom(value)}`,
+      ).join('\n')
     ) + '\n' + (question.transform ? question.transform(answer) : answer);
     const lines = code.trimEnd().split('\n');
 
