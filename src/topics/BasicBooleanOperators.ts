@@ -29,34 +29,82 @@ export class BooleanOperatorFixed extends EvalLastLineSubtopic {
 }
 
 export class AndOperator_True_True extends BooleanOperatorFixed {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The and operator only gives true if both operands are true, e.g. is this apple green and sour?.',
+    },
+  ];
   constructor() { super('and', true, true); }
 }
 
 export class AndOperator_True_False extends BooleanOperatorFixed {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The and operator only gives true if both operands are true, e.g. is this apple green and sour?',
+    },
+  ];
   constructor() { super('and', true, false); }
 }
 
 export class AndOperator_False_True extends BooleanOperatorFixed {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The and operator only gives true if both operands are true, e.g. is this apple green and sour?',
+    },
+  ];
   constructor() { super('and', false, true); }
 }
 
 export class AndOperator_False_False extends BooleanOperatorFixed {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The and operator only gives true if both operands are true, e.g. is this apple green and sour?',
+    },
+  ];
   constructor() { super('and', false, false); }
 }
 
 export class OrOperator_True_True extends BooleanOperatorFixed {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The or operator gives true if at least one operand is true.',
+    },
+  ];
   constructor() { super('or', true, true); }
 }
 
 export class OrOperator_True_False extends BooleanOperatorFixed {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The or operator gives true if at least one operand is true.',
+    },
+  ];
   constructor() { super('or', true, false); }
 }
 
 export class OrOperator_False_True extends BooleanOperatorFixed {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The or operator gives true if at least one operand is true.',
+    },
+  ];
   constructor() { super('or', false, true); }
 }
 
 export class OrOperator_False_False extends BooleanOperatorFixed {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The or operator gives true if at least one operand is true.',
+    },
+  ];
   constructor() { super('or', false, false); }
 }
 

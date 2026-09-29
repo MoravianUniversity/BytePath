@@ -176,14 +176,14 @@ export class UserOutputs extends ConceptualSubtopic {
 }
 
 export const FUNCTIONS_MASTERY = new Topic('functions-mastery', 'Functions Mastery', [
-  new FunctionMastery1(),
-  new FunctionMastery2(),
-  new FunctionMastery3(),
-  new ReadFunctionCode(),
   new WriteCallLine(),
   new WriteDefLine(),
   new InputsToFunctions(),
   new FunctionOutputs(),
   new UserInputs(),
   new UserOutputs(),
+  new FunctionMastery1(),
+  new FunctionMastery2(),
+  new FunctionMastery3(),
+  new ReadFunctionCode(),
 ], [PRACTICE_03A_FUNCTIONS], {order: 'sequential', forceQuiz: true});

@@ -15,6 +15,12 @@ function combos(letters: string[]): string[] {
 }
 
 export class ChainedBranches extends CodeOutputSubtopic {
+  readonly help = [
+    {
+        afterFailedAttempts: 2,
+        message: 'Only one of the print statements in the if/elif block will be executed.',
+    },
+  ];
   gen(): CodeOutputQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 5n, 4);
@@ -37,6 +43,12 @@ export class ChainedBranches extends CodeOutputSubtopic {
 }
 
 export class NestedBranches1 extends CodeOutputSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'You must carefully check the conditions and the code blocks. When an if is inside another if, the inner if is only executed if the outer if is true. Make sure that an else is paired with the correct if.',
+    },
+  ];
   gen(): CodeOutputQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 5n, 4);
@@ -60,6 +72,12 @@ export class NestedBranches1 extends CodeOutputSubtopic {
 }
 
 export class NestedBranches2 extends CodeOutputSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'You must carefully check the conditions and the code blocks. When an if is inside another if, the inner if is only executed if the outer if is true. Make sure that an else is paired with the correct if.',
+    },
+  ];
   gen(): CodeOutputQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 5n, 4);
@@ -83,6 +101,12 @@ export class NestedBranches2 extends CodeOutputSubtopic {
 }
 
 export class NestedBranches3 extends CodeOutputSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'You must carefully check the conditions and the code blocks. When an if is inside another if, the inner if is only executed if the outer if is true. Make sure that an else is paired with the correct if.',
+    },
+  ];
   gen(): CodeOutputQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 5n, 4);
@@ -108,6 +132,12 @@ export class NestedBranches3 extends CodeOutputSubtopic {
 }
 
 export class NestedBranches4 extends CodeOutputSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'You must carefully check the conditions and the code blocks. When an if is inside another if, the inner if is only executed if the outer if is true. Make sure that an else is paired with the correct if.',
+    },
+  ];
   gen(): CodeOutputQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 5n, 4);
@@ -133,6 +163,12 @@ export class NestedBranches4 extends CodeOutputSubtopic {
 }
 
 export class NestedBranches5 extends CodeOutputSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'You must carefully check the conditions and the code blocks. When an if is inside another if, the inner if is only executed if the outer if is true. Make sure that an else is paired with the correct if.',
+    },
+  ];
   gen(): CodeOutputQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 5n, 4);
@@ -158,6 +194,12 @@ export class NestedBranches5 extends CodeOutputSubtopic {
 }
 
 export class NestedBranches6 extends CodeOutputSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'You must carefully check the conditions and the code blocks. When an if is inside another if, the inner if is only executed if the outer if is true. Make sure that an else is paired with the correct if.',
+    },
+  ];
   gen(): CodeOutputQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e] = randInts(1n, 5n, 5);
@@ -184,6 +226,12 @@ export class NestedBranches6 extends CodeOutputSubtopic {
 }
 
 export class NestedBranches7 extends CodeOutputSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'You must carefully check the conditions and the code blocks. When an if is inside another if, the inner if is only executed if the outer if is true. Make sure that an else is paired with the correct if.',
+    },
+  ];
   gen(): CodeOutputQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e] = randInts(1n, 5n, 5);
@@ -209,6 +257,12 @@ export class NestedBranches7 extends CodeOutputSubtopic {
   }
 }
 export class NestedBranches8 extends CodeOutputSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'You must carefully check the conditions and the code blocks. When an if is inside another if, the inner if is only executed if the outer if is true. Make sure that an else is paired with the correct if.',
+    },
+  ];
   gen(): CodeOutputQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e] = randInts(1n, 5n, 5);

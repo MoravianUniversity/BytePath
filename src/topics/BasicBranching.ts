@@ -5,6 +5,12 @@ import { BASIC_PRINTS } from './BasicPrints';
 
 
 export class IfEntered extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+        afterFailedAttempts: 2,
+        message: 'If the condition is true, the code block after the colon is executed.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 10n, 4);
@@ -22,6 +28,12 @@ export class IfEntered extends EvalLastLineSubtopic {
 }
 
 export class IfSkipped extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+        afterFailedAttempts: 2,
+        message: 'If the condition is false, the code block after the colon is skipped.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 10n, 4);
@@ -39,6 +51,12 @@ export class IfSkipped extends EvalLastLineSubtopic {
 }
 
 export class IfSkippedClose extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+        afterFailedAttempts: 2,
+        message: 'If the condition is false, the code block after the colon is skipped.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, d] = randInts(1n, 10n, 3);
@@ -56,6 +74,12 @@ export class IfSkippedClose extends EvalLastLineSubtopic {
 }
 
 export class IfWrongVar extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+        afterFailedAttempts: 2,
+        message: 'Carefully check the variable names.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d] = randInts(1n, 10n, 4);
@@ -73,6 +97,12 @@ export class IfWrongVar extends EvalLastLineSubtopic {
 }
 
 export class IfElseEnterIf extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+        afterFailedAttempts: 2,
+        message: 'If the condition is true, the code block after the colon is executed. Otherwise, the code block after the else is executed.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e] = randInts(1n, 10n, 5);
@@ -92,6 +122,12 @@ export class IfElseEnterIf extends EvalLastLineSubtopic {
 }
 
 export class IfElseEnterElse extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+        afterFailedAttempts: 2,
+        message: 'If the condition is true, the code block after the colon is executed. Otherwise, the code block after the else is executed.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e] = randInts(1n, 10n, 5);
@@ -151,6 +187,12 @@ export class IfElseDifferentVarsEnterElse extends EvalLastLineSubtopic {
 }
 
 export class IfWithPrintEntered extends CodeOutputSubtopic {
+  readonly help = [
+    {
+        afterFailedAttempts: 2,
+        message: 'Code inside the if block is only executed if the condition is true.',
+    },
+  ];
   gen(): CodeOutputQuestionGen {
     const x = randVariable();
     const [a, b, c, d] = randInts(1n, 10n, 4);
@@ -171,6 +213,12 @@ export class IfWithPrintEntered extends CodeOutputSubtopic {
 }
 
 export class IfWithPrintSkipped extends CodeOutputSubtopic {
+  readonly help = [
+    {
+        afterFailedAttempts: 2,
+        message: 'Code inside the if block is only executed if the condition is true.',
+    },
+  ];
   gen(): CodeOutputQuestionGen {
     const x = randVariable();
     const [a, b, c, d] = randInts(1n, 10n, 4);
@@ -191,6 +239,12 @@ export class IfWithPrintSkipped extends CodeOutputSubtopic {
 }
 
 export class IfElseWithPrint extends CodeOutputSubtopic {
+  readonly help = [
+    {
+        afterFailedAttempts: 2,
+        message: 'Only one of the print statements in the if/else block will be executed.',
+    },
+  ];
   gen(): CodeOutputQuestionGen {
     const x = randVariable();
     const [a, b, c, d, e] = randInts(1n, 10n, 5);

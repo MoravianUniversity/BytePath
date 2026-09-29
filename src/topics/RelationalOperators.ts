@@ -48,6 +48,12 @@ export class CompareFloatWithIntEqual extends EvalLastLineSubtopic {
 }
   
 export class CompareWithMath extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Compute the values of the math operations before comparing.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const [a, b, c, d] = randFloats(1, 5, 4);
     const op1 = randOperation();
@@ -61,6 +67,12 @@ export class CompareWithMath extends EvalLastLineSubtopic {
 }
 
 export class CompareStrings extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Strings are compared character by character and every character must be exactly the same to be equal.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const [a, b] = randChoices(STRINGS, 2);
     let rel = randOp();
@@ -73,6 +85,12 @@ export class CompareStrings extends EvalLastLineSubtopic {
 }
 
 export class CompareStringsEqual_True extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Strings are compared character by character and every character must be exactly the same to be equal.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const a = randChoice(STRINGS);
     const rel = "==";
@@ -84,6 +102,12 @@ export class CompareStringsEqual_True extends EvalLastLineSubtopic {
 }
 
 export class CompareStringsEqual_False extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Strings are compared character by character and every character must be exactly the same to be equal.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const a = randChoice(STRINGS);
     const rel = "==";
@@ -95,6 +119,12 @@ export class CompareStringsEqual_False extends EvalLastLineSubtopic {
 }
 
 export class CompareStringsIntEqual extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Remember that str and int are different types, but we can ask if they are equal.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const a = randChoice(STRINGS);
     const b = randInt(1n, 5n);
@@ -107,6 +137,12 @@ export class CompareStringsIntEqual extends EvalLastLineSubtopic {
 }
 
 export class CompareStringsIntEqual2 extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Remember that str and int are different types, but we can ask if they are equal.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const b = randInt(1n, 5n);
     const rel = "==";
@@ -118,6 +154,12 @@ export class CompareStringsIntEqual2 extends EvalLastLineSubtopic {
 }
 
 export class CompareStringsIntLT extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Remember that str and int are different types.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const a = randChoice(STRINGS);
     const b = randInt(1n, 5n);
@@ -130,6 +172,12 @@ export class CompareStringsIntLT extends EvalLastLineSubtopic {
 }
 
 export class CompareStringsIntLT2 extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Remember that str and int are different types.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const b = randInt(1n, 5n);
     const rel = "<";

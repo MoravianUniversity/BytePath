@@ -15,6 +15,12 @@ export function randListAndString(): [(string | bigint)[], string] {
 }
 
 export class CharInString extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Remember that strings are case-sensitive.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
@@ -28,6 +34,12 @@ export class CharInString extends EvalLastLineSubtopic {
 }
 
 export class CapitalCharInString extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'Remember that strings are case-sensitive.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
@@ -41,6 +53,12 @@ export class CapitalCharInString extends EvalLastLineSubtopic {
 }
 
 export class SubstringInString extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The substring must match a contiguous part of the string.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
@@ -55,6 +73,12 @@ export class SubstringInString extends EvalLastLineSubtopic {
 }
 
 export class SubstringNotInString extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The substring must match a contiguous part of the string.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
@@ -72,6 +96,12 @@ export class SubstringNotInString extends EvalLastLineSubtopic {
 }
 
 export class StringInSubstring extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The substring must match a contiguous part of the string.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const a = randChoice(STRINGS);
     const i = randIntNum(1, a.length - 3);
@@ -85,6 +115,12 @@ export class StringInSubstring extends EvalLastLineSubtopic {
 }
 
 export class ItemInList extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The item must be an exact match for an entire item in the list.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     let a = randList();
@@ -102,6 +138,12 @@ export class ItemInList extends EvalLastLineSubtopic {
 }
 
 export class ItemNotInList extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The item must be an exact match for an entire item in the list.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     let a = randList();
@@ -119,6 +161,12 @@ export class ItemNotInList extends EvalLastLineSubtopic {
 }
 
 export class StringInList extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The string must be an exact match for an entire string in the list.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     let [a, item] = randListAndString();
@@ -131,6 +179,12 @@ export class StringInList extends EvalLastLineSubtopic {
 }
 
 export class StringNotInList extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The string must be an exact match for an entire string in the list.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     let [a, item] = randListAndString();
@@ -144,6 +198,12 @@ export class StringNotInList extends EvalLastLineSubtopic {
 }
 
 export class CharNotInList extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The character must be an exact match for an entire character in the list.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const [a, item] = randListAndString();
@@ -157,6 +217,12 @@ export class CharNotInList extends EvalLastLineSubtopic {
 }
 
 export class MembershipBackwards extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 2,
+      message: 'The membership operator is not commutative, so the order of the operands matters.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoices([...range(1n, 10n)], randIntNum(4, 8));

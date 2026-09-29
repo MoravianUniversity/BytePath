@@ -16,6 +16,12 @@ export function getFalseOp(a: bigint, b: bigint): string {
 }
 
 export class ChainedFirst extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+        afterFailedAttempts: 2,
+        message: 'The if/elif/else block executed is the first condition that is true, or the else block if no condition is true.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f, g] = randInts(1n, 15n, 7);
@@ -36,6 +42,12 @@ export class ChainedFirst extends EvalLastLineSubtopic {
 }
 
 export class ChainedSecond extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+        afterFailedAttempts: 2,
+        message: 'The if/elif/else block executed is the first condition that is true, or the else block if no condition is true.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f, g] = randInts(1n, 15n, 7);
@@ -58,6 +70,12 @@ export class ChainedSecond extends EvalLastLineSubtopic {
 }
 
 export class ChainedBoth extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+        afterFailedAttempts: 2,
+        message: 'The if/elif/else block executed is the first condition that is true, or the else block if no condition is true.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f, g] = randInts(1n, 15n, 7);
@@ -80,6 +98,12 @@ export class ChainedBoth extends EvalLastLineSubtopic {
 }
 
 export class ChainedNeither extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+        afterFailedAttempts: 2,
+        message: 'The if/elif/else block executed is the first condition that is true, or the else block if no condition is true.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f, g] = randInts(1n, 15n, 7);
@@ -102,6 +126,12 @@ export class ChainedNeither extends EvalLastLineSubtopic {
 }
 
 export class ChainedSecondNoElse extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+        afterFailedAttempts: 2,
+        message: 'The if/elif block executed is the first condition that is true, or none if no condition is true and there is no else block.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f] = randInts(1n, 15n, 6);
@@ -122,6 +152,12 @@ export class ChainedSecondNoElse extends EvalLastLineSubtopic {
 }
 
 export class ChainedNeitherNoElse extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+        afterFailedAttempts: 2,
+        message: 'The if/elif block executed is the first condition that is true, or none if no condition is true and there is no else block.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f] = randInts(1n, 15n, 6);
@@ -142,6 +178,12 @@ export class ChainedNeitherNoElse extends EvalLastLineSubtopic {
 }
 
 export class ChainedExtraElifEntered extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+        afterFailedAttempts: 2,
+        message: 'The if/elif block executed is the first condition that is true, or none if no condition is true and there is no else block.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f, g, h] = randInts(1n, 15n, 8);
@@ -165,6 +207,12 @@ export class ChainedExtraElifEntered extends EvalLastLineSubtopic {
 }
 
 export class ChainedExtraElifNotEntered extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+        afterFailedAttempts: 2,
+        message: 'The if/elif block executed is the first condition that is true, or none if no condition is true and there is no else block.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f, g, h] = randInts(1n, 15n, 8);
@@ -186,6 +234,12 @@ export class ChainedExtraElifNotEntered extends EvalLastLineSubtopic {
 }
 
 export class ChainedSeparateChainsBoth extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+        afterFailedAttempts: 2,
+        message: 'When there are multiple if\'s, each if is evaluated independently.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f] = randInts(1n, 15n, 6);
@@ -206,6 +260,12 @@ export class ChainedSeparateChainsBoth extends EvalLastLineSubtopic {
 }
 
 export class ChainedSeparateChainsMost extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+        afterFailedAttempts: 2,
+        message: 'When there are multiple if\'s, each if is evaluated independently.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f, g, h] = randInts(1n, 15n, 8);
@@ -229,6 +289,12 @@ export class ChainedSeparateChainsMost extends EvalLastLineSubtopic {
 }
 
 export class ChainedSeparateChainsElse extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+        afterFailedAttempts: 2,
+        message: 'When there are multiple if\'s, each if is evaluated independently. The else block is only executed if it\'s corresponding if block is false.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f, h] = randInts(1n, 15n, 7);
@@ -251,6 +317,12 @@ export class ChainedSeparateChainsElse extends EvalLastLineSubtopic {
 }
 
 export class ChainedSeparateChainsElseB extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+        afterFailedAttempts: 2,
+        message: 'When there are multiple if\'s, each if is evaluated independently. The else block is only executed if it\'s corresponding if block is false.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f, h] = randInts(1n, 15n, 7);
@@ -273,6 +345,12 @@ export class ChainedSeparateChainsElseB extends EvalLastLineSubtopic {
 }
 
 export class ChainedChangeBoth extends EvalLastLineSubtopic {
+  readonly help = [
+    {
+        afterFailedAttempts: 2,
+        message: 'The if/elif block executed is the first condition that is true, or none if no condition is true and there is no else block.',
+    },
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b, c, d, e, f] = randInts(1n, 15n, 6);
