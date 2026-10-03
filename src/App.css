@@ -533,6 +533,7 @@ select.dashboard-button option {
   display: flex;
   align-items: flex-start;
   overflow-y: auto;
+  min-width: 0;
   min-height: 0;
   background: var(--bg-page);
 }
@@ -545,6 +546,7 @@ select.dashboard-button option {
 
 .topic-container {
   width: 100%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
 }
@@ -552,6 +554,8 @@ select.dashboard-button option {
 .questions-container {
   flex: 1;
   width: calc(100% - 4rem);
+  min-width: 0;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -567,12 +571,14 @@ select.dashboard-button option {
   align-self: flex-start;
   box-sizing: border-box;
   width: fit-content;
+  min-width: 0;
   max-width: min(100%, calc(650px + 3rem));
   transition: max-width 0.3s ease;
 }
 
 @media (min-width: 769px) {
   .questions-container > .question-screen.has-workspace {
+    width: 100%;
     max-width: min(100%, calc(650px + 3rem + 1.25rem + 22rem));
   }
 }
