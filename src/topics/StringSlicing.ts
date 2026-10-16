@@ -161,13 +161,13 @@ export class StringSlicingFromNoneToNone extends StringSlicingBase {
 export const STRING_SLICING = new Topic('string-slicing', 'String Slicing', [
   new StringIndex1(),
   new StringSlicing(),
-  new StringSlicingFrom0(),
+  // new StringSlicingFrom0(), // not too useful
   new StringSlicingToLen(),
   new StringSlicingMake1Char(),
   new StringSlicingMakeEmpty(),
-  new StringSlicingChained(),
+  //new StringSlicingChained(), // too difficult for students and not very useful
   new StringSlicingToLenMinus1(),
   new StringSlicingToNone(),
   new StringSlicingFromNone(),
-  new StringSlicingFromNoneToNone(),
+  // new StringSlicingFromNoneToNone(), // not useful for strings
 ], [STRING_LENGTH, STRING_INDEX], {order: 'sequential'});
