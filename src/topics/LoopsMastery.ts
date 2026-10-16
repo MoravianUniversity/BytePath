@@ -204,4 +204,4 @@ export const LOOPS_MASTERY = new Topic('loops-mastery', "Loops Mastery", [
   new ShortCode2(),
   new LongCode(),
 ], [WHILE_LOOPS, FOR_LOOP_BASICS, FOR_LOOP_WITH_RANGE, FOR_LOOP_NESTING],
-{order: 'sequential', forceQuiz: true});
+{order: 'sequential', forceQuiz: true, skippable: true});

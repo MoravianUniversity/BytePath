@@ -135,4 +135,4 @@ export const LIST_MASTERY = new Topic('list-mastery', 'List Mastery', [
   new ListMastery_10(),
   new ListMastery_Long(),
 ], [LIST_BASICS, MEMBERSHIP_OPERATORS, LIST_SLICING],
-{order: 'sequential', forceQuiz: true});
+{order: 'sequential', forceQuiz: true, skippable: true});

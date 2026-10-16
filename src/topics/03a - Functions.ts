@@ -197,4 +197,4 @@ export const PRACTICE_03A_FUNCTIONS: Topic = new Topic('practice-03a-functions',
   new Functions2(),
   new Functions3(),
   new Functions4(),
-], [PRACTICE_03A_BASIC_FUNCTIONS]);
+], [PRACTICE_03A_BASIC_FUNCTIONS], {order: 'random', skippable: true});

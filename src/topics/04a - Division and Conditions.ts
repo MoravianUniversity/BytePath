@@ -60,4 +60,4 @@ export const PRACTICE_04A_DIVISION_AND_CONDITIONS: Topic = new Topic('practice-0
   new BooleanOpsWithRelOps(),
   new BooleanOpsWithRelOpsAndVars(),
   new BooleanOpsWithRelOpsAndVars2(),
-], [DIVISION, STRING_INDEX, STRING_LENGTH, BASIC_RELATIONAL_OPERATORS, BOOLEAN_OPERATORS, MEMBERSHIP_OPERATORS], {order: 'random'});
+], [DIVISION, STRING_INDEX, STRING_LENGTH, BASIC_RELATIONAL_OPERATORS, BOOLEAN_OPERATORS, MEMBERSHIP_OPERATORS], {order: 'random', skippable: true});

@@ -93,6 +93,8 @@ export abstract class Subtopic<K extends QuestionKind = QuestionKind> {
   incorrectLastTime: boolean = false;
   /** Force quiz mode for this subtopic. */
   forceQuiz: boolean = false;
+  /** Students may skip this question type before the topic is completed. */
+  skippable: boolean = false;
   /** Incorrect answers on this question type (used for progressive help). */
   failedAttempts: number = 0;
   /** Optional progressive help; hidden on first show, then unlocked by failed attempts. */
@@ -218,18 +220,23 @@ export class Topic {
   dependencies: Topic[];
   order: 'random' | 'random-beginning' | 'sequential' = 'random-beginning';
   forceQuiz: boolean = false;
+  /** Every question in this topic may be skipped before the topic is completed. */
+  skippable: boolean = false;
 
   constructor(id: string, name: string, subtopics: Subtopic[], dependencies: Topic[] = [],
     {order = 'random-beginning',
-      forceQuiz = false}:
+      forceQuiz = false,
+      skippable = false}:
     {order?: 'random' | 'random-beginning' | 'sequential',
-      forceQuiz?: boolean} = {}) {
+      forceQuiz?: boolean,
+      skippable?: boolean} = {}) {
     this.id = id;
     this.name = name;
     this.subtopics = subtopics;
     this.dependencies = dependencies;
     this.order = order;
     this.forceQuiz = forceQuiz;
+    this.skippable = skippable;
   }
 
   // Get a random subtopic that needs work

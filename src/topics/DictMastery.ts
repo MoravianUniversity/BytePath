@@ -159,4 +159,4 @@ export const DICT_MASTERY = new Topic('dict-mastery', 'Dict Mastery', [
   new DictMastery_8(),
   new DictMastery_Long(),
 ], [DICT_BASICS, DICT_WITH_LOOPS],
-{order: 'sequential', forceQuiz: true});
+{order: 'sequential', forceQuiz: true, skippable: true});

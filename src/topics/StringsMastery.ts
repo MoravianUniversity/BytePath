@@ -180,5 +180,5 @@ export const STRINGS_MASTERY = new Topic('strings-mastery', 'Strings Mastery', [
   ], [
       BASIC_ARITHMETIC, BASIC_VARIABLES, BASIC_PRINTS, STRING_LENGTH, STRING_CONCAT, STRING_INDEX,
       STRING_SLICING, STRING_NEG_INDEX, MEMBERSHIP_OPERATORS, STRING_METHODS, SPLITTING_AND_JOINING, F_STRINGS,
-  ], {order: 'sequential', forceQuiz: true}
+  ], {order: 'sequential', forceQuiz: true, skippable: true}
 );

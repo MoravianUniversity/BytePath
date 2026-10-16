@@ -39,6 +39,16 @@ import type { TopicProgress } from './services/progress';
 
 export const SKIPPED = Symbol('(skipped)');
 
+/** Skip is allowed in review, on a skippable topic, or on a skippable question type. */
+function canSkipQuestion(
+  topic: Topic | null,
+  subtopic: Subtopic | null,
+  completedTopics: Set<string>,
+): boolean {
+  if (!topic) return false;
+  return completedTopics.has(topic.id) || topic.skippable || (subtopic?.skippable ?? false);
+}
+
 type AppScreen = 'welcome' | 'question' | 'locked-topic' | 'roster' | 'topics' | 'dashboard';
 type DashboardTab = 'analytics' | 'roster' | 'topics' | 'results';
 
@@ -665,7 +675,7 @@ function App() {
   }
 
   const handleAnswerSelect = async (answer: UserAnswer | undefined, question: Question) => {
-    if (answer === undefined && !completedTopics.has(currentTopic?.id || '')) { return; }
+    if (answer === undefined && !canSkipQuestion(currentTopic, currentSubtopic, completedTopics)) { return; }
 
     const skipped = answer === undefined;
     let isCorrect = skipped;
@@ -1106,7 +1116,7 @@ function App() {
                       userAnswer={questionAnswers[index]}
                       onAnswerSelect={handleAnswerSelect}
                       isQuiz={mode === 'quiz' || (currentTopic?.forceQuiz ?? false) || (currentSubtopic?.forceQuiz ?? false)}
-                      canSkip={completedTopics.has(currentTopic?.id || '')}
+                      canSkip={canSkipQuestion(currentTopic, currentSubtopic, completedTopics)}
                       workspaceDefaultOpen={
                         (currentSubtopic?.showWorkspace ?? false) &&
                         questionAnswers[index] === undefined &&

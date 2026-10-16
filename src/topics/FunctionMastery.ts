@@ -186,4 +186,4 @@ export const FUNCTIONS_MASTERY = new Topic('functions-mastery', 'Functions Maste
   new FunctionMastery2(),
   new FunctionMastery3(),
   new ReadFunctionCode(),
-], [PRACTICE_03A_FUNCTIONS], {order: 'sequential', forceQuiz: true});
+], [PRACTICE_03A_FUNCTIONS], {order: 'sequential', forceQuiz: true, skippable: true});

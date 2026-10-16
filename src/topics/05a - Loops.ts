@@ -210,4 +210,4 @@ export const PRACTICE_05A_LOOPS: Topic = new Topic('practice-05a-loops', '05a Lo
   new ShortCode0(),
   new ShortCode1(),
   new ShortCode2(),
-], [WHILE_LOOPS, FOR_LOOP_BASICS, FOR_LOOP_WITH_RANGE, FOR_LOOP_NESTING], {order: 'random'});
+], [WHILE_LOOPS, FOR_LOOP_BASICS, FOR_LOOP_WITH_RANGE, FOR_LOOP_NESTING], {order: 'random', skippable: true});

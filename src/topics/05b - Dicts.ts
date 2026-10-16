@@ -143,4 +143,4 @@ export const PRACTICE_05B_DICTS = new Topic('practice-05b-dicts', '05b - Dicts',
   new DictVarIn2(),
   new DictStrIn2(),
   new LongRead(),
-], [DICT_BASICS, DICT_WITH_LOOPS], {order: 'random'});
+], [DICT_BASICS, DICT_WITH_LOOPS], {order: 'random', skippable: true});

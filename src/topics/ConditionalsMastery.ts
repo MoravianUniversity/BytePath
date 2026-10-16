@@ -428,4 +428,4 @@ export const CONDITIONALS_MASTERY = new Topic('conditionals-mastery', 'Condition
     BASIC_FUNCTIONS, FUNC_WITH_MULTIPLE_ARGS, FUNC_WITH_MULTIPLE_CALLS, FUNC_WITH_PRINT,
     BASIC_RELATIONAL_OPERATORS, BASIC_BOOLEAN_OPERATORS, MEMBERSHIP_OPERATORS,
     BASIC_BRANCHING, CHAINED_BRANCHES,
-], {order: 'sequential', forceQuiz: true});
+], {order: 'sequential', forceQuiz: true, skippable: true});

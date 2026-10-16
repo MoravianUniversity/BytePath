@@ -28,4 +28,4 @@ export const QUIZ_4: Topic = new Topic('quiz-4', 'Quiz 4 Practice', [
   new Func2ArgsReassign(),
   new Functions1(),
   new Functions2(),
-], [BASIC_VARIABLES, STRING_CONCAT, STRING_LENGTH, BASIC_PRINTS, BASIC_FUNCTIONS, FUNC_WITH_MULTIPLE_ARGS]);
+], [BASIC_VARIABLES, STRING_CONCAT, STRING_LENGTH, BASIC_PRINTS, BASIC_FUNCTIONS, FUNC_WITH_MULTIPLE_ARGS], {skippable: true});

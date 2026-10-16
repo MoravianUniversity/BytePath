@@ -91,4 +91,4 @@ export const PRACTICE_04B_LISTS: Topic = new Topic('practice-04b-lists', '04b Li
   new ListIndexSet(),
   new ListAppend(),
   new PrintListWithStr(),
-], [BASIC_PRINTS, MEMBERSHIP_OPERATORS, LIST_BASICS, LIST_SLICING, TUPLES], {order: 'random'});
+], [BASIC_PRINTS, MEMBERSHIP_OPERATORS, LIST_BASICS, LIST_SLICING, TUPLES], {order: 'random', skippable: true});

@@ -180,4 +180,4 @@ export const QUIZ_3: Topic = new Topic('quiz-3', 'Quiz 3 Practice', [
   new InputStrOfInt(),
   new InputInt(),
   new InputOutputTest(),
-], [BASIC_ARITHMETIC, BASIC_VARIABLES, STRING_CONCAT, STRING_LENGTH, BASIC_PRINTS], {order: 'random'});
+], [BASIC_ARITHMETIC, BASIC_VARIABLES, STRING_CONCAT, STRING_LENGTH, BASIC_PRINTS], {order: 'random', skippable: true});
