@@ -43,6 +43,7 @@ export class FStringMulti extends EvalLastLineSubtopic {
 }
 
 export class FStringFloats extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'When formatting a float, the format string tells you the number of decimal places to display.' }];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, b] = randFloats(1, 10, 2, false, 5);

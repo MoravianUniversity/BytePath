@@ -46,6 +46,7 @@ export class EscapeSequenceQuotePrint extends CodeOutputSubtopic {
 }
 
 export class EscapeSequenceNewline extends CodeOutputSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: '\\n stands for the newline character, i.e. a new line in the middle of the string.' }];
   gen(): CodeOutputQuestionGen {
     const [a, b] = randChoices(STRINGS, 2);
     return { code: `print('${a}\\n${b}')`, options: [a, b, `${a}\\n${b}`, `${a}n${b}`, `${a}${b}`, `${a}\n${b}`] };
@@ -53,6 +54,7 @@ export class EscapeSequenceNewline extends CodeOutputSubtopic {
 }
 
 export class EscapeSequenceBackslash extends CodeOutputSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'Since \\ is special in strings, we need a way to make a regular backslash character. So we write two backslashes, which is printed as one backslash.' }];
   gen(): CodeOutputQuestionGen {
     const [a, b] = randChoices(STRINGS, 2);
     const s = `${a}\\\\${b}`;

@@ -19,6 +19,7 @@ export function makeComment(s: string): string {
 }
 
 export class StringIndex1 extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The first character is at index 0 and the second at index 1.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
@@ -53,14 +54,17 @@ export abstract class StringSlicingBase extends EvalLastLineSubtopic {
 }
 
 export class StringSlicing extends StringSlicingBase {
+  readonly help = [{ afterFailedAttempts: 1, message: 'When slicing, stop before the last character in the slice.' }];
   gen(): EvalLastLineQuestionGen { return this.genQuestion(); }
 }
 
 export class StringSlicingMake1Char extends StringSlicingBase {
+  readonly help = [{ afterFailedAttempts: 1, message: 'When slicing, stop before the last character in the slice.' }];
   gen(): EvalLastLineQuestionGen { return this.genQuestion((s) => toTuple(randIntNum(1, s.length-2)), (_, start) => toTuple(start+1)); }
 }
 
 export class StringSlicingMakeEmpty extends StringSlicingBase {
+  readonly help = [{ afterFailedAttempts: 1, message: 'When slicing, stop before the last character in the slice. If the start and end are the same, the slice will be empty.' }];
   gen(): EvalLastLineQuestionGen { return this.genQuestion((s) => toTuple(randIntNum(1, s.length-2)), (_, start) => toTuple(start)); }
 }
 
@@ -106,6 +110,7 @@ export class StringSlicingChained extends EvalLastLineSubtopic {
 }
 
 export class StringIndexLenMinus1 extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The length of a string is the actual number of characters in the string (one more than the index of the last character).' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
@@ -120,6 +125,7 @@ export class StringIndexLenMinus1 extends EvalLastLineSubtopic {
 }
 
 export class StringIndexLenMinus2 extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The length of a string is the actual number of characters in the string (one more than the index of the last character).' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
@@ -134,24 +140,28 @@ export class StringIndexLenMinus2 extends EvalLastLineSubtopic {
 }
 
 export class StringSlicingToLenMinus1 extends StringSlicingBase {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The length of a string is the actual number of characters in the string (one more than the index of the last character).' }];
   gen(): EvalLastLineQuestionGen {
     return this.genQuestion(DEFAULT_START, (s, _, x) => [`len(${x})-1`, s.length - 1]);
   }
 }
 
 export class StringSlicingToNone extends StringSlicingBase {
+  readonly help = [{ afterFailedAttempts: 1, message: 'When the end is None, the slice goes to the end of the string.' }];
   gen(): EvalLastLineQuestionGen {
     return this.genQuestion(DEFAULT_START, (s) => ['', s.length]);
   }
 }
 
 export class StringSlicingFromNone extends StringSlicingBase {
+  readonly help = [{ afterFailedAttempts: 1, message: 'When the start is None, the slice starts at the beginning of the string.' }];
   gen(): EvalLastLineQuestionGen {
     return this.genQuestion(() => ['', 0]);
   }
 }
 
 export class StringSlicingFromNoneToNone extends StringSlicingBase {
+  readonly help = [{ afterFailedAttempts: 1, message: 'When the start and end are None, the slice goes to the end of the string.' }];
   gen(): EvalLastLineQuestionGen {
     return this.genQuestion(() => ['', 0], (s) => ['', s.length]);
   }

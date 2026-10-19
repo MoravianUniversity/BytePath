@@ -26,6 +26,7 @@ export class StringEqualsCapitalized extends EvalLastLineSubtopic {
 }
 
 export class StringLessThanFalse extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'Letters are in alphabetical order, with "a" less than "b".' }];
   gen(): EvalLastLineQuestionGen {
     let [a, b] = randChoices(STRINGS, 2);
     while (a <= b) { [a, b] = randChoices(STRINGS, 2); }
@@ -34,6 +35,7 @@ export class StringLessThanFalse extends EvalLastLineSubtopic {
 }
 
 export class StringLessThanTrue extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'Letters are in alphabetical order, with "a" less than "b".' }];
   gen(): EvalLastLineQuestionGen {
     let [a, b] = randChoices(STRINGS, 2);
     while (a >= b) { [a, b] = randChoices(STRINGS, 2); }
@@ -42,6 +44,7 @@ export class StringLessThanTrue extends EvalLastLineSubtopic {
 }
 
 export class StringLessThanLonger extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'If strings are otherwise the equal, the longer string is greater.' }];
   gen(): EvalLastLineQuestionGen {
     let a = randChoice(STRINGS);
     return { code: `${toPyStr(a)} <= ${toPyStr(a + 's')}`, options: [true, false] };
@@ -49,6 +52,7 @@ export class StringLessThanLonger extends EvalLastLineSubtopic {
 }
 
 export class StringLessThanCapitalized extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'Letters are in alphabetical order, with "a" less than "b". All uppercase letters are less than all lowercase letters.' }];
   gen(): EvalLastLineQuestionGen {
     const a = randChoice(STRINGS);
     return { code: `${toPyStr(a)} < ${toPyStr(capitalize(a))}`, options: [true, false] };
@@ -56,6 +60,7 @@ export class StringLessThanCapitalized extends EvalLastLineSubtopic {
 }
 
 export class StringLessThanOtherCaps extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'Letters are in alphabetical order, with "a" less than "b". All uppercase letters are less than all lowercase letters.' }];
   gen(): EvalLastLineQuestionGen {
     let [a, b] = randChoices(STRINGS, 2);
     while (a >= b) { [a, b] = randChoices(STRINGS, 2); }
@@ -64,6 +69,7 @@ export class StringLessThanOtherCaps extends EvalLastLineSubtopic {
 }
 
 export class StringLessThanBothCapsTrue extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'Letters are in alphabetical order, with "a" less than "b". All uppercase letters are less than all lowercase letters.' }];
   gen(): EvalLastLineQuestionGen {
     let [a, b] = randChoices(STRINGS, 2);
     while (a >= b) { [a, b] = randChoices(STRINGS, 2); }
@@ -80,6 +86,7 @@ export class StringLessThanBothCapsFalse extends EvalLastLineSubtopic {
 }
 
 export class StringLessThanOtherCapsTrue extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'Letters are in alphabetical order, with "a" less than "b". All uppercase letters are less than all lowercase letters.' }];
   gen(): EvalLastLineQuestionGen {
     let [a, b] = randChoices(STRINGS, 2);
     while (a >= b) { [a, b] = randChoices(STRINGS, 2); }

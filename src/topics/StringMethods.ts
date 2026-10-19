@@ -30,6 +30,7 @@ export class StringUpper extends EvalLastLineSubtopic {
 }
 
 export class StringStrip extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The strip() method removes whitespace from the beginning and end of a string, but not whitespace in the middle.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = `  ${randChoice(STRINGS)} ${randChoice(STRINGS)}   `;
@@ -43,6 +44,7 @@ export class StringStrip extends EvalLastLineSubtopic {
 }
 
 export class StringReplace extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The replace() method replaces all occurrences of a substring with a new substring. Like all other string methods, it is case-sensitive.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
@@ -59,6 +61,7 @@ export class StringReplace extends EvalLastLineSubtopic {
 }
 
 export class StringReplaceNothing extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The replace() method replaces all occurrences of a substring with a new substring. Like all other string methods, it is case-sensitive. In this case, it can even remove contents.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
@@ -75,6 +78,7 @@ export class StringReplaceNothing extends EvalLastLineSubtopic {
 }
 
 export class StringUpperReplace extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'With multiple method calls, evaluate from left to right, using return values from one call for the next call. For example, if `.upper()` is on the left, it will be evaluated first, so `.replace()` will be called on the uppercased string.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
@@ -91,6 +95,7 @@ export class StringUpperReplace extends EvalLastLineSubtopic {
 }
 
 export class StringReplaceUpper extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'With multiple method calls, evaluate from left to right, using return values from one call for the next call. For example, if `.upper()` is on the right, it will be evaluated second, after `.replace()` has been called on the original string.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
@@ -107,6 +112,7 @@ export class StringReplaceUpper extends EvalLastLineSubtopic {
 }
 
 export class StringFind extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The find() method returns the index of the first occurrence of a substring, or -1 if the substring is not found. Like all other string methods, it is case-sensitive.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
@@ -121,6 +127,7 @@ export class StringFind extends EvalLastLineSubtopic {
 }
 
 export class StringFindSub extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The find() method returns the index of the first occurrence of a substring, or -1 if the substring is not found. Like all other string methods, it is case-sensitive.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
@@ -136,6 +143,7 @@ export class StringFindSub extends EvalLastLineSubtopic {
 }
 
 export class StringFindMissing extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The find() method returns the index of the first occurrence of a substring, or -1 if the substring is not found. Like all other string methods, it is case-sensitive.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
@@ -151,6 +159,7 @@ export class StringFindMissing extends EvalLastLineSubtopic {
 }
 
 export class StringIndex extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The index() method returns the index of the first occurrence of a substring, or raises a ValueError if the substring is not found. Like all other string methods, it is case-sensitive.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
@@ -165,6 +174,7 @@ export class StringIndex extends EvalLastLineSubtopic {
 }
 
 export class StringIndexMissing extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The index() method returns the index of the first occurrence of a substring, or raises a ValueError if the substring is not found. Like all other string methods, it is case-sensitive.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
@@ -180,6 +190,7 @@ export class StringIndexMissing extends EvalLastLineSubtopic {
 }
 
 export class StringIsDigit extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The isdigit() method returns True if all characters in the string are digits, False otherwise. It doesn\'t look at the sign or the decimal point.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
@@ -193,6 +204,7 @@ export class StringIsDigit extends EvalLastLineSubtopic {
 }
 
 export class StringIsDigit2 extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The isdigit() method returns True if all characters in the string are digits, False otherwise. It doesn\'t look at the sign or the decimal point.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randIntsNum(0, 9, 4).join('');
@@ -206,6 +218,7 @@ export class StringIsDigit2 extends EvalLastLineSubtopic {
 }
 
 export class StringIsDigit3 extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The isdigit() method returns True if all characters in the string are digits, False otherwise. It doesn\'t look at the sign or the decimal point.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = "-" + randIntsNum(0, 9, 4).join('');

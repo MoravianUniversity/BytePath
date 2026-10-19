@@ -17,6 +17,7 @@ const PHRASES = [
 ];
 
 export class StringSplit extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The split() method returns a list of substrings, by default splitting on whitespace.' }];
   gen(): EvalLastLineQuestionGen {
     const s = randChoice(PHRASES);
     return { code: `
@@ -28,6 +29,7 @@ export class StringSplit extends EvalLastLineSubtopic {
 }
 
 export class StringSplitLen extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The length of a list is the actual number of elements in the list (i.e. how many pieces the string was split into).' }];
   gen(): EvalLastLineQuestionGen {
     const s = randChoice(PHRASES);
     const n = BigInt(s.split(' ').length);
@@ -40,6 +42,7 @@ export class StringSplitLen extends EvalLastLineSubtopic {
 }
 
 export class StringSplitChar extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The split() method returns a list of substrings at each occurrence of the given character. It will include empty strings for consecutive occurrences of the character.' }];
   gen(): EvalLastLineQuestionGen {
     let s = randChoice(PHRASES);
     let c = randChoice([...s]);
@@ -56,6 +59,7 @@ export class StringSplitChar extends EvalLastLineSubtopic {
 }
 
 export class StringSplitCharLen extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The split() method returns a list of substrings at each occurrence of the given character. It will include empty strings for consecutive occurrences of the character. The length of the list is the number of pieces the string was split into.' }];
   gen(): EvalLastLineQuestionGen {
     let s = randChoice(PHRASES);
     let c = randChoice([...s]);
@@ -89,6 +93,7 @@ export class StringSplitVars extends EvalLastLineSubtopic {
 const SYMBOLS = ['-', ',', '~', '_', '+'];
 
 export class StringJoinList extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The join() method joins a list of strings into a single string, using the given separator.' }];
   gen(): EvalLastLineQuestionGen {
     const sym = randChoice(SYMBOLS);
     const strs = randChoices(STRINGS, randIntNum(3, 5));
@@ -102,6 +107,7 @@ export class StringJoinList extends EvalLastLineSubtopic {
 }
 
 export class StringJoinStr extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The join() method joins all of the characters in a string, using the given separator. The separator is inserted between each character in the string.' }];
   gen(): EvalLastLineQuestionGen {
     const sym = randChoice(SYMBOLS);
     const str = randChoice(STRINGS);
@@ -114,6 +120,7 @@ export class StringJoinStr extends EvalLastLineSubtopic {
 }
 
 export class StringSplitJoin extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The join() method joins a list of strings into a single string, using the given separator. The separator is inserted between each string in the list.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const s = randChoice(PHRASES);
@@ -126,6 +133,7 @@ export class StringSplitJoin extends EvalLastLineSubtopic {
 }
 
 export class StringSplitJoinSym extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The join() method joins a list of strings into a single string, using the given separator. The separator is inserted between each string in the list.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const s = randChoice(PHRASES);

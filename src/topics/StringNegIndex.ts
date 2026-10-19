@@ -16,6 +16,7 @@ function makeComment(s: string): string {
 }
 
 export class StringIndexNeg1 extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'Negative indexing starts from the end of the string, with -1 being the last character.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
@@ -30,6 +31,7 @@ export class StringIndexNeg1 extends EvalLastLineSubtopic {
 }
 
 export class StringIndexNeg2 extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'Negative indexing starts from the end of the string, with -1 being the last character.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoice(STRINGS);
@@ -44,12 +46,14 @@ export class StringIndexNeg2 extends EvalLastLineSubtopic {
 }
 
 export class StringSlicingToNeg1 extends StringSlicingBase {
+  readonly help = [{ afterFailedAttempts: 1, message: 'When slicing, stop before the last character in the slice (i.e. before the character at index -1).' }];
   gen(): EvalLastLineQuestionGen {
     return this.genQuestion(DEFAULT_START, (s) => [`-1`, s.length - 1]);
   }
 }
 
 export class StringSlicingFromNegToNeg extends StringSlicingBase {
+  readonly help = [{ afterFailedAttempts: 1, message: 'When slicing, stop before the last character in the slice.' }];
   gen(): EvalLastLineQuestionGen {
     return this.genQuestion((s) => {
         const n = randIntNum(3, Math.min(6, s.length - 1));
@@ -61,6 +65,7 @@ export class StringSlicingFromNegToNeg extends StringSlicingBase {
 }
 
 export class StringSlicingFromNoneToNeg1 extends StringSlicingBase {
+  readonly help = [{ afterFailedAttempts: 1, message: 'When slicing, stop before the last character in the slice.' }];
   gen(): EvalLastLineQuestionGen {
     return this.genQuestion(() => ['', 0], (s) => ['-1', s.length - 1]);
   }
