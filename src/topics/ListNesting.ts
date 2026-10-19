@@ -9,6 +9,7 @@ function makeNestedLists(length: number = randIntNum(3, 5)): any[] {
 }
 
 export class ListNestingLen extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The length of a list is the number of elements in the list, it does not include the length of the nested lists.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const lists = makeNestedLists();
@@ -24,6 +25,7 @@ len(${x})`,
 }
 
 export class ListNestingLenNoPretty extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The length of a list is the number of elements in the list, it does not include the length of the nested lists.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const lists = makeNestedLists(2);
@@ -38,6 +40,7 @@ export class ListNestingLenNoPretty extends EvalLastLineSubtopic {
 }
 
 export class ListNestingIndex extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'Gets a single element from the list at the given index, starting at index 0.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const lists = makeNestedLists();
@@ -50,6 +53,7 @@ export class ListNestingIndex extends EvalLastLineSubtopic {
 }
 
 export class ListNestingIndexNoPretty extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'Gets a single element from the list at the given index, starting at index 0.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const lists = makeNestedLists(2);
@@ -62,6 +66,7 @@ export class ListNestingIndexNoPretty extends EvalLastLineSubtopic {
 }
 
 export class ListNestingIndexLength extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'This is taking the length of a single nested list, not the outer list.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const lists = makeNestedLists();
@@ -74,6 +79,7 @@ export class ListNestingIndexLength extends EvalLastLineSubtopic {
 }
 
 export class ListNestingIndexLengthNoPretty extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'This is taking the length of a single nested list, not the outer list.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const lists = makeNestedLists(2);
@@ -87,6 +93,7 @@ export class ListNestingIndexLengthNoPretty extends EvalLastLineSubtopic {
 
 
 export class ListNestingIndexNested extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The resulting list can itself be indexed.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const lists = makeNestedLists();
@@ -112,6 +119,7 @@ export class ListNestingIndexNested extends EvalLastLineSubtopic {
 }
 
 export class ListNestingIndexNestedNoPretty extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The resulting list can itself be indexed.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const lists = makeNestedLists(2);

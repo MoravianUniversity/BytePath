@@ -40,10 +40,12 @@ abstract class ListSlicingBase extends EvalLastLineSubtopic {
 }
 
 export class ListSlicing extends ListSlicingBase {
+  readonly help = [{ afterFailedAttempts: 1, message: 'When slicing, copy between the start index (inclusive) and stop index (exclusive), stopping before the last element in the slice.' }];
   gen(): EvalLastLineQuestionGen { return this.genQuestion(); }
 }
 
 export class ListSlicingToVar extends ListSlicingBase {
+  readonly help = [{ afterFailedAttempts: 1, message: 'When slicing, copy between the start index (inclusive) and stop index (exclusive), stopping before the last element in the slice.' }];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const list = makeList();
@@ -64,34 +66,40 @@ export class ListSlicingToVar extends ListSlicingBase {
 }
 
 export class ListSlicingMakeEmpty extends ListSlicingBase {
+  readonly help = [{ afterFailedAttempts: 1, message: 'When slicing, copy between the start index (inclusive) and stop index (exclusive), stopping before the last element in the slice. If the end is less than or equal to the start, the slice will be empty.' }];
   gen(): EvalLastLineQuestionGen { return this.genQuestion((list) => toTuple(randIntNum(1, list.length-2)),
     (_, start) => toTuple(start),
   ); }
 }
 
 export class ListSlicingMakeReallyEmpty extends ListSlicingBase {
+  readonly help = [{ afterFailedAttempts: 1, message: 'When slicing, copy between the start index (inclusive) and stop index (exclusive), stopping before the last element in the slice. If the end is less than or equal to the start, the slice will be empty.' }];
   gen(): EvalLastLineQuestionGen { return this.genQuestion((list) => toTuple(randIntNum(2, list.length-2)),
     (_, start) => toTuple(start-1),
   ); }
 }
 
 export class ListSlicingFrom0 extends ListSlicingBase {
+  readonly help = [{ afterFailedAttempts: 1, message: 'When the start is 0, the slice starts at the beginning of the list.' }];
   gen(): EvalLastLineQuestionGen { return this.genQuestion(() => ['0', 0]); }
 }
 
 export class ListSlicingToLen extends ListSlicingBase {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The length of a list is the actual number of elements in the list (one more than the index of the last element).' }];
   gen(): EvalLastLineQuestionGen {
     return this.genQuestion(DEFAULT_START, (s, _, x) => [`len(${x})`, s.length]);
   }
 }
 
 export class ListSlicingLen1 extends ListSlicingBase {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The length of a list is the actual number of elements in the list (one more than the index of the last element).' }];
   gen(): EvalLastLineQuestionGen { return this.genQuestion((list) => toTuple(randIntNum(1, list.length-2)),
     (_, start) => toTuple(start+1)
   ); }
 }
 
 export class ListIndex extends EvalLastLineSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'Gets a single element from the list at the given index, starting at index 0.' }];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const list = makeList();
@@ -108,36 +116,42 @@ export class ListIndex extends EvalLastLineSubtopic {
 }
 
 export class ListSlicingToLenMinus1 extends ListSlicingBase {
+  readonly help = [{ afterFailedAttempts: 1, message: 'The length of a list is the actual number of elements in the list (one more than the index of the last element).' }];
   gen(): EvalLastLineQuestionGen {
     return this.genQuestion(DEFAULT_START, (list, _, x) => [`len(${x})-1`, list.length - 1]);
   }
 }
 
 export class ListSlicingToNeg1 extends ListSlicingBase {
+  readonly help = [{ afterFailedAttempts: 1, message: 'When slicing, stop before the last element in the slice (i.e. before the element at index -1).' }];
   gen(): EvalLastLineQuestionGen {
     return this.genQuestion(DEFAULT_START, (list) => [`-1`, list.length - 1]);
   }
 }
 
 export class ListSlicingToNone extends ListSlicingBase {
+  readonly help = [{ afterFailedAttempts: 1, message: 'When the end is None, the slice goes to the end of the list.' }];
   gen(): EvalLastLineQuestionGen {
     return this.genQuestion(DEFAULT_START, (list) => ['', list.length]);
   }
 }
 
 export class ListSlicingFromNone extends ListSlicingBase {
+  readonly help = [{ afterFailedAttempts: 1, message: 'When the start is None, the slice starts at the beginning of the list.' }];
   gen(): EvalLastLineQuestionGen {
     return this.genQuestion(() => ['', 0]);
   }
 }
 
 export class ListSlicingFromNoneToNone extends ListSlicingBase {
+  readonly help = [{ afterFailedAttempts: 1, message: 'When the start and end are None, the slice goes to the end of the list. This creates a copy of the entire list.' }];
   gen(): EvalLastLineQuestionGen {
     return this.genQuestion(() => ['', 0], (list) => ['', list.length]);
   }
 }
 
 export class ListCopyAndModify extends CodeOutputSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'When copying a list, the new list is a copy of the original list. Modifying the new list will not modify the original list.' }];
   gen(): CodeOutputQuestionGen {
     const [x, y] = randVars(2);
     const list = makeList(randIntNum(2, 4));
@@ -160,6 +174,7 @@ export class ListCopyAndModify extends CodeOutputSubtopic {
 }
 
 export class ListAssignAndModify extends CodeOutputSubtopic {
+  readonly help = [{ afterFailedAttempts: 1, message: 'When copying a list, the new list is a copy of the original list. Modifying the new list will not modify the original list.' }];
   gen(): CodeOutputQuestionGen {
     const [x, y] = randVars(2);
     const list = makeList(randIntNum(2, 4));
