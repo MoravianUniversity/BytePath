@@ -4,6 +4,9 @@ code, code .token {
   text-shadow: none !important;
   color: inherit !important;
 }
+code .token {
+  color: var(--text-code) !important;
+}
 
 code.language-python {
   overflow-x: auto;
