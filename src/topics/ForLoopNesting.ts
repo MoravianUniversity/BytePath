@@ -9,6 +9,9 @@ import { BASIC_BRANCHING } from './BasicBranching';
 const ANIMALS = ["cat", "dog", "bird", "fish", "snake", "turtle", "duck", "cow", "pig"]
 
 export class ForLoopNestingPrintList extends CodeOutputSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'Every time the outer loop runs once, the inner loop runs completely from its start to its end.'}
+  ];
   gen(): CodeOutputQuestionGen {
     const [x, y] = ['i', 'j'];
     const [i, j] = randInts(2n, 3n, 2);
@@ -26,6 +29,9 @@ export class ForLoopNestingPrintList extends CodeOutputSubtopic {
 }
 
 export class ForLoopNestingPrintVs extends CodeOutputSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'Every time the outer loop runs once, the inner loop runs completely from its start to its end.'}
+  ];
   gen(): CodeOutputQuestionGen {
     const w = "animals";
     const x = "animal1";
@@ -48,6 +54,9 @@ export class ForLoopNestingPrintVs extends CodeOutputSubtopic {
 }
 
 export class ForLoopNestingPrintVsSkipEqual extends CodeOutputSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'Every time the outer loop runs once, the inner loop runs completely from its start to its end.'}
+  ];
   gen(): CodeOutputQuestionGen {
     const w = "animals";
     const x = "animal1";
@@ -71,6 +80,10 @@ export class ForLoopNestingPrintVsSkipEqual extends CodeOutputSubtopic {
 }
 
 export class ForLoopNestingSumNested extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'Every time the outer loop runs once, the inner loop runs completely from its start to its end.'},
+    {afterFailedAttempts: 2, message: 'The sum statement adds the element (a number) for each iteration of the inner loop, one at a time.'}
+  ];
   gen(): EvalLastLineQuestionGen {
     const [w, x, y, z] = ['data', 'row', 'value', 'total'];
     const size = randIntNum(2, 4);
@@ -97,6 +110,10 @@ export class ForLoopNestingSumNested extends EvalLastLineSubtopic {
 }
 
 export class ForLoopNestingSumEachRow extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'Every time the outer loop runs once, the inner loop runs completely from its start to its end.'},
+    {afterFailedAttempts: 2, message: 'The sum statement adds the element (a number) for each iteration of the inner loop, one at a time.'}
+  ];
   gen(): EvalLastLineQuestionGen {
     const [w, x, y, z, a] = ['data', 'row', 'value', 'totals', 'total'];
     const size = randIntNum(2, 4);
@@ -126,6 +143,10 @@ export class ForLoopNestingSumEachRow extends EvalLastLineSubtopic {
 }
 
 export class ForLoopNestingSumEachRowIndentIssue extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'Every time the outer loop runs once, the inner loop runs completely from its start to its end.'},
+    {afterFailedAttempts: 2, message: 'The sum statement adds the element (a number) for each iteration of the inner loop, one at a time.'}
+  ];
   gen(): EvalLastLineQuestionGen {
     const [w, x, y, z, a] = ['data', 'row', 'value', 'totals', 'total'];
     const size = randIntNum(2, 4);
@@ -153,6 +174,10 @@ export class ForLoopNestingSumEachRowIndentIssue extends EvalLastLineSubtopic {
 }
 
 export class ForLoopNestingSumEvens extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'Every time the outer loop runs once, the inner loop runs completely from its start to its end.'},
+    {afterFailedAttempts: 2, message: 'The sum statement adds the element (a number) for each iteration of the inner loop, one at a time.'}
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y, z] = randVars(3);
     const list = randInts(1n, 10n, randIntNum(4, 8), false);

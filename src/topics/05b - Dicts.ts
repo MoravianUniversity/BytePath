@@ -37,6 +37,9 @@ function createCode(): {code: string, dict: Map<Immutable, PyType>, vars: string
 }
 
 class DictLen extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The length of a dict is the number of key-value pairs in the dict.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const {code, vars} = createCode();
     return {
@@ -47,6 +50,9 @@ class DictLen extends EvalLastLineSubtopic {
 }
 
 class DictIndexStr extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The index operator is used to get the value associated with a key in a dict.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const {code, dict, vars} = createCode();
     return {
@@ -57,6 +63,9 @@ class DictIndexStr extends EvalLastLineSubtopic {
 }
 
 class DictIndexVar extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The index operator is used to get the value associated with a key in a dict.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const {code, dict, vars} = createCode();
     return {
@@ -67,6 +76,9 @@ class DictIndexVar extends EvalLastLineSubtopic {
 }
 
 class DictIndexInt extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The index operator is used to get the value associated with a key in a dict.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const {code, dict, vars, vals} = createCode();
     return {
@@ -77,6 +89,9 @@ class DictIndexInt extends EvalLastLineSubtopic {
 }
 
 class DictVarIn extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The membership operator checks if a *key* is in a dict.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const {code, vars} = createCode();
     return {
@@ -87,6 +102,9 @@ class DictVarIn extends EvalLastLineSubtopic {
 }
 
 class DictStrIn extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The membership operator checks if a *key* is in a dict.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const {code, vars} = createCode();
     return {
@@ -96,6 +114,9 @@ class DictStrIn extends EvalLastLineSubtopic {
   }
 }
 class DictVarIn2 extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The membership operator checks if a *key* is in a dict.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const {code, vars} = createCode();
     return {
@@ -106,6 +127,9 @@ class DictVarIn2 extends EvalLastLineSubtopic {
 }
 
 class DictStrIn2 extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The membership operator checks if a *key* is in a dict.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const {code, vars} = createCode();
     return {
@@ -116,6 +140,10 @@ class DictStrIn2 extends EvalLastLineSubtopic {
 }
 
 class LongRead extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The for loop takes each *key* in the dict, one at a time.'},
+    {afterFailedAttempts: 2, message: 'The for loop takes each *key* in the dict, one at a time, and the code block inside the loop adds the key to a new dict with the value as the key and the value as a list of the keys with that value, one at a time.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y, z] = randVars(3);
     const dict = createDict([...ASCII_LETTERS], [2n, 3n, 4n], randIntNum(4, 7), false);

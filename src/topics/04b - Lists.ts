@@ -8,6 +8,9 @@ import { LIST_SLICING, ListSlicingToVar } from './ListSlicing';
 import { TUPLES } from './Tuples';
 
 export class ConcatSlices extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'When slicing, copy between the start index (inclusive) and stop index (exclusive), stopping before the last element in the slice.'}
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const a = randChoices(STRINGS, randIntNum(5, 8));
@@ -27,6 +30,9 @@ export class ConcatSlices extends EvalLastLineSubtopic {
 }
 
 export class LengthOfListItem extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'Here, the length is of one of the elements in the list.'}
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const [a, item] = randListAndString();
@@ -42,6 +48,9 @@ export class LengthOfListItem extends EvalLastLineSubtopic {
 }
 
 export class LengthOfListItemConcat extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'Here, the length is of one of the elements in the list, concatenated with a string.'}
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const [a, item] = randListAndString();
@@ -59,6 +68,9 @@ export class LengthOfListItemConcat extends EvalLastLineSubtopic {
 }
 
 export class CharInListItem extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The membership operator checks if a character is in a string that is an element of the list.'}
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const [a, item] = randListAndString();

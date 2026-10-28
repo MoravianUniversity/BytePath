@@ -32,6 +32,10 @@ const PLURAL_TO_SINGULAR_STRS = {
 };
 
 export class ForLoopPrintList extends CodeOutputSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The for loop takes each element in the list, one at a time.'},
+    {afterFailedAttempts: 2, message: 'The for loop takes each element in the list, one at a time, and the print statement prints each element, one at a time.'}
+  ];
   gen(): CodeOutputQuestionGen {
     const x = randChoice(Object.keys(PLURAL_TO_SINGULAR_NUMS));
     const y = PLURAL_TO_SINGULAR_NUMS[x as keyof typeof PLURAL_TO_SINGULAR_NUMS];
@@ -47,6 +51,10 @@ export class ForLoopPrintList extends CodeOutputSubtopic {
 }
 
 export class ForLoopSumStrLen extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The for loop takes each element in the list, one at a time.'},
+    {afterFailedAttempts: 2, message: 'The for loop takes each element in the list, one at a time, and the sum statement adds the length of each element (a str), one at a time.'}
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randChoice(Object.keys(PLURAL_TO_SINGULAR_STRS));
     const y = PLURAL_TO_SINGULAR_STRS[x as keyof typeof PLURAL_TO_SINGULAR_STRS];
@@ -64,6 +72,10 @@ export class ForLoopSumStrLen extends EvalLastLineSubtopic {
 }
 
 export class ForLoopPrintChars extends CodeOutputSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The for loop takes each character in the string, one at a time.'},
+    {afterFailedAttempts: 2, message: 'The for loop takes each character in the string, one at a time, and the print statement prints each character, one at a time.'}
+  ];
   gen(): CodeOutputQuestionGen {
     const [x, y] = randVars(2);
     const str = randChoice(STRINGS);
@@ -78,6 +90,10 @@ export class ForLoopPrintChars extends CodeOutputSubtopic {
 }
 
 export class ForLoopCharsToList extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The for loop takes each character in the string, one at a time.'},
+    {afterFailedAttempts: 2, message: 'The for loop takes each character in the string, one at a time, and the append statement adds the character to the list, one at a time.'}
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y, z] = randVars(3);
     const str = randChoice(STRINGS);
@@ -94,6 +110,10 @@ export class ForLoopCharsToList extends EvalLastLineSubtopic {
 }
 
 export class ForLoopTuple extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The for loop takes each element in the tuple, one at a time.'},
+    {afterFailedAttempts: 2, message: 'The for loop takes each element in the tuple, one at a time, and the sum statement adds the element, one at a time.'}
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randChoice(Object.keys(PLURAL_TO_SINGULAR_NUMS));
     const y = PLURAL_TO_SINGULAR_NUMS[x as keyof typeof PLURAL_TO_SINGULAR_NUMS];
@@ -111,6 +131,10 @@ export class ForLoopTuple extends EvalLastLineSubtopic {
 }
 
 export class ForLoopTuple2 extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The for loop takes each element in the tuple, one at a time.'},
+    {afterFailedAttempts: 2, message: 'The for loop takes each element in the tuple, one at a time, and the sum statement adds the element along with a counter, one at a time.'}
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randChoice(Object.keys(PLURAL_TO_SINGULAR_NUMS));
     const y = PLURAL_TO_SINGULAR_NUMS[x as keyof typeof PLURAL_TO_SINGULAR_NUMS];

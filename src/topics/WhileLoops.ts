@@ -11,6 +11,7 @@ import { BASIC_RELATIONAL_OPERATORS } from './BasicRelationalOperators';
 
 
 export class WhileLoopInc extends EvalLastLineSubtopic {
+  readonly help = [{afterFailedAttempts: 1, message: 'Remember to increment the variable for each iteration of the loop.'}];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const i = randInt(2n, 10n);
@@ -25,6 +26,7 @@ export class WhileLoopInc extends EvalLastLineSubtopic {
 }
 
 export class WhileLoopPrintInc extends CodeOutputSubtopic {
+  readonly help = [{afterFailedAttempts: 1, message: 'Remember to increment the variable for each iteration of the loop. The print statement occurs *before* the increment.'}];
   gen(): CodeOutputQuestionGen {
     const x = randVariable();
     const i = randInt(2n, 4n);
@@ -44,6 +46,7 @@ export class WhileLoopPrintInc extends CodeOutputSubtopic {
 }
 
 export class WhileLoopIncPrint extends CodeOutputSubtopic {
+  readonly help = [{afterFailedAttempts: 1, message: 'Remember to increment the variable for each iteration of the loop. The print statement occurs *after* the increment.'}];
   gen(): CodeOutputQuestionGen {
     const x = randVariable();
     const i = randInt(2n, 4n);
@@ -63,6 +66,7 @@ export class WhileLoopIncPrint extends CodeOutputSubtopic {
 }
 
 export class WhileLoopStringConcat extends EvalLastLineSubtopic {
+  readonly help = [{afterFailedAttempts: 1, message: 'Remember to concatenate the string for each iteration of the loop.'}];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const i = randInt(2n, 5n);
@@ -78,6 +82,7 @@ export class WhileLoopStringConcat extends EvalLastLineSubtopic {
 }
 
 export class WhileLoopDouble extends EvalLastLineSubtopic {
+  readonly help = [{afterFailedAttempts: 1, message: 'Remember to double the variable for each iteration of the loop.'}];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const i = randInt(3n, 10n);
@@ -92,6 +97,7 @@ export class WhileLoopDouble extends EvalLastLineSubtopic {
 }
 
 export class WhileLoopFind extends EvalLastLineSubtopic {
+  readonly help = [{afterFailedAttempts: 1, message: 'Remember to increment the index for each iteration of the loop.'}];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const list = randInts(1n, 10n, randIntNum(3, 5));
@@ -108,6 +114,7 @@ export class WhileLoopFind extends EvalLastLineSubtopic {
 }
 
 export class WhileLoopAppend extends EvalLastLineSubtopic {
+  readonly help = [{afterFailedAttempts: 1, message: 'Each iteration of the loop add the current length of the list to the list itself, which will then increase the length of the list by 1 for future iterations.'}];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const i = randInt(2n, 5n);

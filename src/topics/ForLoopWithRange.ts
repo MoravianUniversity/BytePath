@@ -4,6 +4,9 @@ import { createException } from '../python';
 import { FOR_LOOP_BASICS } from './ForLoopBasics';
 
 export class ForLoopPrintRange extends CodeOutputSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The range function generates a sequence of numbers, starting from 0 and incrementing by 1, up to but not including the second argument.'},
+  ];
   gen(): CodeOutputQuestionGen {
     const x = randVariable();
     const i = randInt(2n, 5n);
@@ -28,6 +31,10 @@ export class ForLoopPrintRange extends CodeOutputSubtopic {
 }
 
 export class ForLoopRangeToList extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The range function generates a sequence of numbers, starting from 0 and incrementing by 1, up to but not including the second argument.'},
+    {afterFailedAttempts: 2, message: 'The for loop takes each number in the sequence, one at a time, and the append statement adds the number to the list, one at a time.'}
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const i = randInt(2n, 5n);
@@ -53,6 +60,10 @@ export class ForLoopRangeToList extends EvalLastLineSubtopic {
 }
 
 export class ForLoopPrintRangeTo1 extends CodeOutputSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The range function generates a sequence of numbers, starting from 0 and incrementing by 1, up to but not including the second argument.'},
+    {afterFailedAttempts: 2, message: 'The for loop takes each number in the sequence, one at a time, and the print statement prints each number, one at a time.'}
+  ];
   gen(): CodeOutputQuestionGen {
     const x = randVariable();
     return { code: `
@@ -71,6 +82,9 @@ export class ForLoopPrintRangeTo1 extends CodeOutputSubtopic {
 }
 
 export class ForLoopPrintRangeTo0 extends CodeOutputSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The range will start at 0 and go up to but not including 0, so it will not print anything.'}
+  ];
   gen(): CodeOutputQuestionGen {
     const x = randVariable();
     return { code: `
@@ -85,6 +99,9 @@ export class ForLoopPrintRangeTo0 extends CodeOutputSubtopic {
 }
 
 export class ForLoopPrintRangeToNeg1 extends CodeOutputSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The range will start at 0 and go up to but not including -1, so it will not print anything.'}
+  ];
   gen(): CodeOutputQuestionGen {
     const x = randVariable();
     return { code: `
@@ -102,6 +119,9 @@ export class ForLoopPrintRangeToNeg1 extends CodeOutputSubtopic {
 }
 
 export class ForLoopPrintRangeStartStop extends CodeOutputSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The range function generates a sequence of numbers, starting from the first argument and incrementing by 1, up to but not including the second argument.'}
+  ];
   gen(): CodeOutputQuestionGen {
     const x = randVariable();
     const i = randInt(2n, 3n);
@@ -121,6 +141,9 @@ export class ForLoopPrintRangeStartStop extends CodeOutputSubtopic {
 }
 
 export class ForLoopPrintRangeStartStopPlus1 extends CodeOutputSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The range function generates a sequence of numbers, starting from the first argument and incrementing by 1, up to but not including the second argument.'}
+  ];
   gen(): CodeOutputQuestionGen {
     const x = randVariable();
     const i = randInt(2n, 5n);
@@ -136,6 +159,9 @@ export class ForLoopPrintRangeStartStopPlus1 extends CodeOutputSubtopic {
 }
 
 export class ForLoopPrintRangeStartStopSame extends CodeOutputSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The range function generates a sequence of numbers, starting from the first argument and incrementing by 1, up to but not including the second argument. If the start and stop are the same, the range will not print anything.'}
+  ];
   gen(): CodeOutputQuestionGen {
     const x = randVariable();
     const i = randInt(2n, 5n);
@@ -152,6 +178,9 @@ export class ForLoopPrintRangeStartStopSame extends CodeOutputSubtopic {
 }
 
 export class ForLoopPrintRangeStartStopBackwards extends CodeOutputSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The range function generates a sequence of numbers, starting from the first argument and incrementing by 1, up to but not including the second argument.'}
+  ];
   gen(): CodeOutputQuestionGen {
     const x = randVariable();
     const i = randInt(4n, 5n);
@@ -173,6 +202,9 @@ export class ForLoopPrintRangeStartStopBackwards extends CodeOutputSubtopic {
 }
 
 export class ForLoopPrintRangeStartNegStopNeg extends CodeOutputSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The range function generates a sequence of numbers, starting from the first argument and incrementing by 1, up to but not including the second argument.'}
+  ];
   gen(): CodeOutputQuestionGen {
     const x = randVariable();
     const i = randInt(-5n, -4n);

@@ -16,6 +16,10 @@ function getDictPrints(dict: Map<string, bigint>): string[] {
 }
 
 export class DictForIn extends CodeOutputSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The for loop takes each *key* in the dict, one at a time.'},
+    {afterFailedAttempts: 2, message: 'The for loop takes each *key* in the dict, one at a time, and the code block inside the loop prints the key, one at a time.'},
+  ];
   gen(): CodeOutputQuestionGen {
     const [x, y] = randVars(2);
     const dict = createDict_StrToInt(randIntNum(3, 5));
@@ -30,6 +34,10 @@ export class DictForIn extends CodeOutputSubtopic {
 }
 
 export class DictForInKeys extends CodeOutputSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The for loop takes each *key* in the dict, one at a time.'},
+    {afterFailedAttempts: 2, message: 'The for loop takes each *key* in the dict, one at a time, and the code block inside the loop prints the key, one at a time.'},
+  ];
   gen(): CodeOutputQuestionGen {
     const [x, y] = randVars(2);
     const dict = createDict_StrToInt(randIntNum(3, 5));
@@ -44,6 +52,10 @@ export class DictForInKeys extends CodeOutputSubtopic {
 }
 
 export class DictForInValues extends CodeOutputSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The for loop takes each *value* in the dict, one at a time.'},
+    {afterFailedAttempts: 2, message: 'The for loop takes each *value* in the dict, one at a time, and the code block inside the loop prints the value, one at a time.'},
+  ];
   gen(): CodeOutputQuestionGen {
     const [x, y] = randVars(2);
     const dict = createDict_StrToInt(randIntNum(3, 5));
@@ -58,6 +70,10 @@ export class DictForInValues extends CodeOutputSubtopic {
 }
 
 export class DictForInItems extends CodeOutputSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The for loop takes each *key-value pair* in the dict (a `tuple`), one at a time.'},
+    {afterFailedAttempts: 2, message: 'The for loop takes each *key-value pair* in the dict (a `tuple`), one at a time, and the code block inside the loop prints the key-value pair, one at a time.'},
+  ];
   gen(): CodeOutputQuestionGen {
     const [x, y] = randVars(2);
     const dict = createDict_StrToInt(randIntNum(3, 5));
@@ -72,6 +88,10 @@ export class DictForInItems extends CodeOutputSubtopic {
 }
 
 export class DictForInItems2 extends CodeOutputSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The for loop takes each *key-value pair* in the dict, one at a time, breaking it into two variables: the key and the value.'},
+    {afterFailedAttempts: 2, message: 'The for loop takes each *key-value pair* in the dict, one at a time, breaking it into two variables: the key and the value, and the code block inside the loop prints the key and the value, one at a time.'},
+  ];
   gen(): CodeOutputQuestionGen {
     const [x, y, z] = randVars(3);
     const dict = createDict_StrToInt(randIntNum(3, 5));
@@ -86,6 +106,10 @@ export class DictForInItems2 extends CodeOutputSubtopic {
 }
 
 export class DictForValuesUsingKeys extends CodeOutputSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The for loop takes each *key* in the dict, one at a time.'},
+    {afterFailedAttempts: 2, message: 'The for loop takes each *key* in the dict, one at a time, and the code block inside the loop prints the value associated with the key, one at a time.'},
+  ];
   gen(): CodeOutputQuestionGen {
     const [x, y] = randVars(3);
     const dict = createDict_StrToInt(randIntNum(3, 5));

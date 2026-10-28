@@ -35,6 +35,9 @@ export function toTuples<K, V>(dict: Map<K, V>): (readonly [K, V])[] {
 }
 
 export class DictLength_StrToInt extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The length of a dict is the number of key-value pairs in the dict.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const dict = createDict_StrToInt(randIntNum(3, 5));
@@ -47,6 +50,9 @@ export class DictLength_StrToInt extends EvalLastLineSubtopic {
 }
 
 export class DictLength_StrToString extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The length of a dict is the number of key-value pairs in the dict.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const dict = createDict_StrToString(randIntNum(3, 5));
@@ -59,6 +65,9 @@ export class DictLength_StrToString extends EvalLastLineSubtopic {
 }
 
 export class DictIndex_StrToInt extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The index operator is used to get the value associated with a key in a dict.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const dict = createDict_StrToInt(randIntNum(3, 5));
@@ -72,6 +81,9 @@ export class DictIndex_StrToInt extends EvalLastLineSubtopic {
 }
 
 export class DictIndex_IntToStr extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The index operator is used to get the value associated with a key in a dict.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const dict = createDict_IntToStr(randIntNum(3, 5));
@@ -85,6 +97,9 @@ export class DictIndex_IntToStr extends EvalLastLineSubtopic {
 }
 
 export class DictIndex_IntToInt extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The index operator is used to get the value associated with a key in a dict.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const dict = createDict_IntToInt(randIntNum(3, 5));
@@ -98,6 +113,9 @@ export class DictIndex_IntToInt extends EvalLastLineSubtopic {
 }
 
 export class DictIndexSetNew extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The index operator is used to set the value associated with a key in a dict.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const dict = createDict_StrToInt(randIntNum(2, 3));
@@ -119,6 +137,9 @@ export class DictIndexSetNew extends EvalLastLineSubtopic {
 }
 
 export class DictIndexSetExisting extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The index operator is used to set the value associated with a key in a dict.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const dict = createDict_StrToInt(randIntNum(2, 3));
@@ -140,6 +161,9 @@ export class DictIndexSetExisting extends EvalLastLineSubtopic {
 }
 
 export class DictIn extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The membership operator checks if a *key* is in a dict.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const dict = createDict_StrToInt(randIntNum(3, 5));
@@ -153,6 +177,9 @@ export class DictIn extends EvalLastLineSubtopic {
 }
 
 export class DictNotIn extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The membership operator checks if a *key* is not in a dict.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const dict = createDict_StrToInt(randIntNum(3, 5));
@@ -166,6 +193,9 @@ export class DictNotIn extends EvalLastLineSubtopic {
 }
 
 export class DictInMissing extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The membership operator checks if a *key* is in a dict.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const dict = createDict_StrToString(randIntNum(3, 5));
@@ -180,6 +210,9 @@ export class DictInMissing extends EvalLastLineSubtopic {
 }
 
 export class DictInValues extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The membership operator checks if a *key* is in a dict (not a value).'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const dict = createDict_StrToString(randIntNum(3, 5));
@@ -193,6 +226,9 @@ export class DictInValues extends EvalLastLineSubtopic {
 }
 
 export class DictIndexInValues extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The index operator is used to get the value associated with a key in a dict (not a value).'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const dict = createDict_StrToString(randIntNum(3, 4));
@@ -205,6 +241,9 @@ export class DictIndexInValues extends EvalLastLineSubtopic {
   }
 }
 export class DictIndexMissing extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The index operator is used to get the value associated with a key in a dict (not a value).'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const dict = createDict_StrToString(randIntNum(3, 4));
@@ -219,6 +258,9 @@ export class DictIndexMissing extends EvalLastLineSubtopic {
 }
 
 export class DictIndexGet extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'Using the `get()` method with a key that is not in the dict returns `None`.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const dict = createDict_StrToString(randIntNum(3, 4));
@@ -232,6 +274,9 @@ export class DictIndexGet extends EvalLastLineSubtopic {
 }
 
 export class DictIndexGetInValues extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'Using the `get()` method with a key that is not in the dict returns `None`.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const dict = createDict_StrToString(randIntNum(3, 4));
@@ -245,6 +290,9 @@ export class DictIndexGetInValues extends EvalLastLineSubtopic {
 }
 
 export class DictIndexGetMissing extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'Using the `get()` method with a key that is not in the dict returns `None`.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const dict = createDict_StrToString(randIntNum(3, 4));
@@ -259,6 +307,9 @@ export class DictIndexGetMissing extends EvalLastLineSubtopic {
 }
 
 export class DictIndexGetWithDefault extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'Using the `get()` method with a key that is not in the dict returns the default value.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const dict = createDict_StrToString(randIntNum(3, 4));
@@ -276,6 +327,9 @@ export class DictIndexGetWithDefault extends EvalLastLineSubtopic {
 }
 
 export class DictIndexGetWithDefaultMissing extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'Using the `get()` method with a key that is not in the dict returns the default value.'},
+  ];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const dict = createDict_StrToString(randIntNum(3, 4));

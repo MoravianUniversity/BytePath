@@ -7,6 +7,7 @@ import { STRING_LENGTH } from './StringLength';
 import { STRING_INDEX } from './StringIndexing';
 
 export class ListOfIntLength extends EvalLastLineSubtopic {
+  readonly help = [{afterFailedAttempts: 1, message: 'Remember that the length of a list is the number of elements in the list.'}];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const list = randInts(1n, 10n, randIntNum(3, 5));
@@ -19,6 +20,7 @@ export class ListOfIntLength extends EvalLastLineSubtopic {
 }
 
 export class ListOfIntIndex1 extends EvalLastLineSubtopic {
+  readonly help = [{afterFailedAttempts: 1, message: 'Remember that the index of the first element is 0.'}];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const list = randInts(1n, 10n, randIntNum(3, 5));
@@ -31,6 +33,7 @@ export class ListOfIntIndex1 extends EvalLastLineSubtopic {
 }
 
 export class ListOfIntIndexNeg1 extends EvalLastLineSubtopic {
+  readonly help = [{afterFailedAttempts: 1, message: 'Remember that the index of the last element of a list is -1.'}];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const list = randInts(1n, 10n, randIntNum(3, 5));
@@ -43,6 +46,7 @@ export class ListOfIntIndexNeg1 extends EvalLastLineSubtopic {
 }
 
 export class ListOfIntIndex0 extends EvalLastLineSubtopic {
+  readonly help = [{afterFailedAttempts: 1, message: 'Remember that the index of the first element is 0.'}];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const list = randInts(1n, 10n, randIntNum(3, 5));
@@ -55,6 +59,7 @@ export class ListOfIntIndex0 extends EvalLastLineSubtopic {
 }
 
 export class ListOfStrLength extends EvalLastLineSubtopic {
+  readonly help = [{afterFailedAttempts: 1, message: 'Remember that the length of a list is the number of elements in the list, not the number of characters in the strings in the list.'}];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const list = randChoices(STRINGS, randIntNum(3, 5));
@@ -68,6 +73,7 @@ export class ListOfStrLength extends EvalLastLineSubtopic {
 }
 
 export class ListOfStrIndex0 extends EvalLastLineSubtopic {
+  readonly help = [{afterFailedAttempts: 1, message: 'Remember that the index of the first element is 0, and indexing gets the entire element.'}];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const list = randChoices(STRINGS, randIntNum(3, 5));
@@ -80,6 +86,7 @@ export class ListOfStrIndex0 extends EvalLastLineSubtopic {
 }
 
 export class ListOfStrIndex extends EvalLastLineSubtopic {
+  readonly help = [{afterFailedAttempts: 1, message: 'Remember that the index of the first element is 0, and indexing gets the entire element.'}];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const list = randChoices(STRINGS, randIntNum(3, 5));
@@ -93,6 +100,7 @@ export class ListOfStrIndex extends EvalLastLineSubtopic {
 }
 
 export class ListOfStrVarIndex extends EvalLastLineSubtopic {
+  readonly help = [{afterFailedAttempts: 1, message: 'Remember that the index of the first element is 0, and indexing gets the entire element.'}];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const list = randChoices(STRINGS, randIntNum(3, 5));
@@ -107,6 +115,7 @@ export class ListOfStrVarIndex extends EvalLastLineSubtopic {
 }
 
 export class ListConcat extends EvalLastLineSubtopic {
+  readonly help = [{afterFailedAttempts: 1, message: 'Remember that the concatenation operator (+) concatenates two lists, not two strings.'}];
   gen(): EvalLastLineQuestionGen {
     const [x, y, z] = randVars(3);
     const list1 = randInts(1n, 10n, randIntNum(2, 4));
@@ -122,6 +131,7 @@ export class ListConcat extends EvalLastLineSubtopic {
 }
 
 export class ListIndexSet extends EvalLastLineSubtopic {
+  readonly help = [{afterFailedAttempts: 1, message: 'Remember that the index of the first element is 0, and that indexing will replace the entire element.'}];
   gen(): EvalLastLineQuestionGen {
     const x = randVariable();
     const list = randInts(1n, 10n, randIntNum(3, 5));

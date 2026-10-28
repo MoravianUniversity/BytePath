@@ -10,6 +10,9 @@ import { FOR_LOOP_NESTING } from './ForLoopNesting';
 const ANIMALS = ["cat", "dog", "bird", "fish", "snake", "turtle", "duck", "cow", "pig"]
 
 export class ReadRangeBasic extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The range function generates a sequence of numbers, starting from 0 and incrementing by 1, up to but not including the second argument. The `list()` function converts the range into a list.'}
+  ];
   gen(): EvalLastLineQuestionGen {
     const a = randInt(3n, 6n);
     return {
@@ -23,6 +26,9 @@ export class ReadRangeBasic extends EvalLastLineSubtopic {
 }
 
 export class ReadRangeStartStop extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The range function generates a sequence of numbers, starting from the first argument and incrementing by 1, up to but not including the second argument. The `list()` function converts the range into a list.'}
+  ];
   gen(): EvalLastLineQuestionGen {
     let [a, b] = randInts(3n, 6n, 2);
     if (a > b) { [a, b] = [b, a]; }
@@ -39,6 +45,9 @@ export class ReadRangeStartStop extends EvalLastLineSubtopic {
 }
 
 export class ReadRangeStartStopBackwards extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The range function generates a sequence of numbers, starting from the first argument and incrementing by 1, up to but not including the second argument. The `list()` function converts the range into a list.'}
+  ];
   gen(): EvalLastLineQuestionGen {
     let [a, b] = randInts(3n, 6n, 2);
     if (a < b) { [a, b] = [b, a]; }
@@ -55,6 +64,9 @@ export class ReadRangeStartStopBackwards extends EvalLastLineSubtopic {
 }
 
 export class ReadRangeStartStopEquals extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The range function generates a sequence of numbers, starting from the first argument and incrementing by 1, up to but not including the second argument. The `list()` function converts the range into a list.'}
+  ];
   gen(): EvalLastLineQuestionGen {
     const a = randInt(3n, 6n);
     return {
@@ -71,6 +83,9 @@ export class ReadRangeStartStopEquals extends EvalLastLineSubtopic {
 }
 
 export class ReadRange0 extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The range function generates a sequence of numbers, starting from 0 and incrementing by 1, up to but not including the second argument. The `list()` function converts the range into a list.'}
+  ];
   gen(): EvalLastLineQuestionGen {
     return {
       code: `list(range(0))`,
@@ -80,6 +95,9 @@ export class ReadRange0 extends EvalLastLineSubtopic {
 }
 
 export class NumberOfLoopsList extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'This counts the number of iterations of the loop, which is the number of elements in the list.'}
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const lst = randChoices(ANIMALS, randIntNum(2, 4));
@@ -100,6 +118,9 @@ export class NumberOfLoopsList extends EvalLastLineSubtopic {
 }
 
 export class NumberOfLoopsStr extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'This counts the number of iterations of the loop, which is the number of characters in the string.'}
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(2);
     const str = randChoice(ANIMALS);
@@ -116,6 +137,9 @@ export class NumberOfLoopsStr extends EvalLastLineSubtopic {
 }
 
 export class NumberOfLoopsRange extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'This counts the number of iterations of the loop, which is the number of elements in the range.'}
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y] = randVars(3);
     const num = randInt(3n, 5n);
@@ -132,6 +156,9 @@ export class NumberOfLoopsRange extends EvalLastLineSubtopic {
 }
 
 export class NumberOfLoopsRangeNested extends EvalLastLineSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'This counts the number of iterations of the inner loop, which is the iterations of the outer loop times the iterations of the inner loop.'}
+  ];
   gen(): EvalLastLineQuestionGen {
     const [x, y, z] = randVars(3);
     const [a, b] = randInts(2n, 4n, 2);
@@ -149,6 +176,10 @@ export class NumberOfLoopsRangeNested extends EvalLastLineSubtopic {
 }
 
 export class ShortCode0 extends CodeOutputSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The for loop takes each word in the list, one at a time.'},
+    {afterFailedAttempts: 2, message: 'The for loop takes each word in the list, one at a time, and the print statement prints the length of the word and the word, one at a time.'}
+  ];
   gen(): CodeOutputQuestionGen {
     const [word, letter] = randChoice([
       ["potato", "t"], ["better", "e"], ["kinetic", "i"], ["perfect", "e"], ["vacant", "a"],
@@ -168,6 +199,10 @@ export class ShortCode0 extends CodeOutputSubtopic {
 }
 
 export class ShortCode1 extends CodeOutputSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The for loop takes each word in the list, one at a time.'},
+    {afterFailedAttempts: 2, message: 'The for loop takes each word in the list, one at a time, and the print statement prints the length of the word and the word, one at a time.'}
+  ];
   gen(): CodeOutputQuestionGen {
     const words = (Math.random() < 0.7) ? randChoices(ANIMALS, 3) : ["Coding", "Is", "Fun!"];
     const [x, y, z] = randVars(4);
@@ -182,6 +217,10 @@ export class ShortCode1 extends CodeOutputSubtopic {
 }
 
 export class ShortCode2 extends CodeOutputSubtopic {
+  readonly help = [
+    {afterFailedAttempts: 1, message: 'The for loop takes each number in the range, one at a time.'},
+    {afterFailedAttempts: 2, message: 'The for loop takes each number in the range, one at a time, and the print statement prints the number and the number, one at a time.'}
+  ];
   gen(): CodeOutputQuestionGen {
     let [outer, inner] = randInts(2n, 4n, 2);
     if (outer > inner) { [outer, inner] = [inner, outer]; }

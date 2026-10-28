@@ -1,11 +1,13 @@
-import { Topic, EvalLastLineSubtopic, TopicContext } from '../topics';
-import { randInts, randIntNum, randChoices, randVars, range, shuffle, randBool, ASCII_LOWER, ASCII_UPPER } from '../util';
-import { toPyStr, toPyAtom } from '../python.ts';
+import { Topic, EvalLastLineSubtopic, CodeWriteSubtopic, CodeWriteQuestionGen, ConceptualSubtopic, ConceptualQuestionGen, TopicContext } from '../topics';
+import { randInts, randIntNum, randChoice, randChoices, randVars, range, shuffle, randBool, ASCII_LOWER, ASCII_UPPER } from '../util';
+import { toPyStr, toPyAtom, PyType, Immutable } from '../python.ts';
 import { DICT_BASICS } from './DictionaryBasics';
 import { DICT_WITH_LOOPS } from './DictionaryWithLoops';
 import dedent from 'dedent-js';
 
 const ANIMALS = ["cat", "dog", "bird", "fish", "snake", "duck", "cow", "pig"]
+const VAR_NAMES_LONG = ["foo", "bar", "baz", "qux", "quux"];
+const IMMUTABLE_TYPES = new Set(["bool", "int", "float", "str", "tuple"]);
 
 class DictMasteryContext extends TopicContext {
   var1: string;
@@ -82,7 +84,100 @@ function sample_with_repeats<T>(data: T[],
   return shuffle([...data, ...randChoices(repeats, randIntNum(min_repeat, max_repeat), false)]);
 }
 
+class DictMastery_Write extends CodeWriteSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 1,
+      message: 'Write only the condition expression — do not include `if` or a trailing `:`. Use `len(...)`, `in` / `not in`, and `and` / `or` to combine parts.',
+    },
+  ];
+  gen(): CodeWriteQuestionGen {
+    const varName = randChoice(VAR_NAMES_LONG);
+    const count = randIntNum(2, 6);
+    const value = randChoice(ANIMALS);
+    const valueLit = toPyStr(value);
+    const pre = `Write the condition (just the condition, not the \`if\` or the \`:\`) for checking if the \`dict\` variable \`${varName}\``;
+    const others = ANIMALS.filter(a => a !== value);
+    const dictWith = (...keys: (string | bigint)[]) =>
+      new Map<Immutable, PyType>(keys.map(k => [k, 0n]));
+    const take = (n: number) => others.slice(0, n);
+
+    return randChoice([
+      (): CodeWriteQuestionGen => ({
+        prompt: `${pre} has at least \`${count}\` key-value pairs and it has the key \`${valueLit}\`.`,
+        correct: `len(${varName}) >= ${count} and ${valueLit} in ${varName}`,
+        options: [
+          `len(${varName}) >= ${count} or ${valueLit} in ${varName}`,
+          `len(${varName}) > ${count} and ${valueLit} in ${varName}`,
+          `len(${varName}) >= ${count} and ${valueLit} not in ${varName}`,
+          `len(${varName}) <= ${count} and ${valueLit} in ${varName}`,
+        ],
+        variables: [varName],
+        testCases: [
+          { values: [dictWith(value, ...take(count - 1))], expected: true },
+          { values: [dictWith(value, ...take(count))], expected: true },
+          { values: [dictWith(...take(count))], expected: false },
+          { values: [dictWith(value, ...take(Math.max(0, count - 2)))], expected: false },
+        ],
+      }),
+      (): CodeWriteQuestionGen => ({
+        prompt: `${pre} has at most \`${count}\` key-value pairs and it does not have the key \`${valueLit}\`.`,
+        correct: `len(${varName}) <= ${count} and ${valueLit} not in ${varName}`,
+        options: [
+          `len(${varName}) <= ${count} and ${valueLit} in ${varName}`,
+          `len(${varName}) < ${count} and ${valueLit} not in ${varName}`,
+          `len(${varName}) <= ${count} or ${valueLit} not in ${varName}`,
+          `len(${varName}) >= ${count} and ${valueLit} not in ${varName}`,
+        ],
+        variables: [varName],
+        testCases: [
+          { values: [dictWith(...take(count))], expected: true },
+          { values: [dictWith(...take(Math.max(0, count - 1)))], expected: true },
+          { values: [dictWith(...take(count + 1))], expected: false },
+          { values: [dictWith(value, ...take(count - 1))], expected: false },
+        ],
+      }),
+      (): CodeWriteQuestionGen => ({
+        prompt: `${pre} has at least \`${count}\` key-value pairs or it has the key \`${valueLit}\`.`,
+        correct: `len(${varName}) >= ${count} or ${valueLit} in ${varName}`,
+        options: [
+          `len(${varName}) >= ${count} and ${valueLit} in ${varName}`,
+          `len(${varName}) > ${count} or ${valueLit} in ${varName}`,
+          `len(${varName}) <= ${count} or ${valueLit} in ${varName}`,
+          `len(${varName}) >= ${count} or ${valueLit} not in ${varName}`,
+        ],
+        variables: [varName],
+        testCases: [
+          { values: [dictWith(...take(count))], expected: true },
+          { values: [dictWith(value, ...take(Math.max(0, count - 2)))], expected: true },
+          { values: [dictWith(...take(Math.max(0, count - 1)))], expected: false },
+          { values: [new Map()], expected: false },
+        ],
+      }),
+      (): CodeWriteQuestionGen => ({
+        prompt: `${pre} has the keys \`${valueLit}\` and \`${count}\`.`,
+        correct: `${valueLit} in ${varName} and ${count} in ${varName}`,
+        options: [
+          `${valueLit} in ${varName} or ${count} in ${varName}`,
+          `${valueLit} in ${varName} and ${toPyStr(String(count))} in ${varName}`,
+          `len(${varName}) >= ${count} and ${valueLit} in ${varName}`,
+          `${valueLit} in ${varName} and ${count} not in ${varName}`,
+        ],
+        variables: [varName],
+        testCases: [
+          { values: [dictWith(value, BigInt(count))], expected: true },
+          { values: [dictWith(value, BigInt(count), ...take(1))], expected: true },
+          { values: [dictWith(value)], expected: false },
+          { values: [dictWith(BigInt(count))], expected: false },
+          { values: [dictWith(...take(2))], expected: false },
+        ],
+      }),
+    ])();
+  }
+}
+
 class DictMastery_Long extends EvalLastLineSubtopic {
+  readonly showWorkspace = true;
   gen(): string {
     const [var1, var2, i] = randVars(3);
     const elem1 = `${var1}[${i}]`;
@@ -148,6 +243,33 @@ ${var2}`;
   }
 }
 
+class DictMastery_Immutable extends ConceptualSubtopic {
+  readonly help = [
+    {
+      afterFailedAttempts: 1,
+      message: 'Immutable types cannot be changed after they are created. Lists and dicts are mutable; the rest of the types in that list are immutable.',
+    },
+  ];
+  gen(): ConceptualQuestionGen {
+    return {
+      prompt: 'Which of the following types are immutable? `bool`, `int`, `float`, `str`, `list`, `tuple`, `dict`',
+      correct: {
+        display: 'bool, int, float, str, tuple',
+        check: (answer) => {
+          const parts = new Set(
+            answer.toLowerCase().replace(/[`'"]/g, '').split(/[,\s]+/).filter(Boolean),
+          );
+          if (parts.size !== IMMUTABLE_TYPES.size) { return false; }
+          for (const part of parts) {
+            if (!IMMUTABLE_TYPES.has(part)) { return false; }
+          }
+          return true;
+        },
+      },
+    };
+  }
+}
+
 export const DICT_MASTERY = new Topic('dict-mastery', 'Dict Mastery', [
   new DictMastery_1(),
   new DictMastery_2(),
@@ -157,6 +279,8 @@ export const DICT_MASTERY = new Topic('dict-mastery', 'Dict Mastery', [
   new DictMastery_6(),
   new DictMastery_7(),
   new DictMastery_8(),
+  new DictMastery_Immutable(),
+  new DictMastery_Write(),
   new DictMastery_Long(),
 ], [DICT_BASICS, DICT_WITH_LOOPS],
 {order: 'sequential', forceQuiz: true, skippable: true});
