@@ -77,7 +77,7 @@ class ListMastery_6 extends EvalLastLineSubtopic {
 class ListMastery_7 extends EvalLastLineSubtopic {
   readonly help = [{ afterFailedAttempts: 1, message: 'The length of a list or string is the actual number of elements in the list (one more than the index of the last element).' }];
   readonly contextConstructor = ListMasteryContext;
-  gen(ctx: ListMasteryContext): string { return `len(${ctx.var3}[${randInt(1n, BigInt(ctx.list.length-1))}]))`; }
+  gen(ctx: ListMasteryContext): string { return `len(${ctx.var3}[${randInt(1n, BigInt(ctx.list.length-1))}])`; }
 }
 class ListMastery_8 extends EvalLastLineSubtopic {
   readonly help = [{ afterFailedAttempts: 1, message: 'The membership operator checks if an entire element is in a list or string.' }];
@@ -111,7 +111,7 @@ class ListMastery_Long extends CodeOutputSubtopic {
     const ch1 = lst[0];
     const ch2 = lst[1];
     lst.splice(0, 2);
-    const [index1, index2, index3] = randInts(0n, BigInt(list_len+1), 3);
+    const [index1, index2, index3] = randInts(0n, BigInt(list_len-1), 3);
     const lst_repr = lst.map(item => toPyStr(item));
     lst_repr.splice(Number(index3), 0, item_var);
     const option = randIntNum(0, 2);
