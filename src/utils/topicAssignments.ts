@@ -174,6 +174,7 @@ export function buildAssignmentProgress(
     best_completion_percentage: 0,
     questions_answered: 0,
     last_accessed: null,
+    class_id: 0,
   };
 }
 

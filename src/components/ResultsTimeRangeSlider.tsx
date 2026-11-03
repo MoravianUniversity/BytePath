@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
-import noUiSlider, { PipsMode, type API, type Range } from 'nouislider';
+import noUiSlider, { PipsMode, type API, type Options } from 'nouislider';
 import 'nouislider/dist/nouislider.css';
 import { formatDateTime } from '../util';
 import { type AssignmentDueDatePip, type ResultsTimeRange } from '../utils/resultsGrid';
@@ -43,7 +43,7 @@ export default function ResultsTimeRangeSlider({
   useEffect(() => {
     const element = sliderRef.current;
     if (!element || !rangeValid || !bounds) return;
-    const range: Range = {
+    const range: Options['range'] = {
       min: bounds.startMs,
       max: bounds.endMs,
     };
