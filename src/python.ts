@@ -2,9 +2,10 @@ import dedent from 'dedent-js';
 import JSON5 from "json5";
 
 // Python compatible types
-export type Tuple<T> = Readonly<T[]>;
+export type Tuple<T> = readonly T[];
 export type FrozenSet<T> = Readonly<Set<T>>;
-export type Immutable = string | bigint | number | boolean | null | Tuple<any>; // TODO: avoid any?
+// Nested frozen tuples are structural; elements are checked at runtime via isAnswerSame.
+export type Immutable = string | bigint | number | boolean | null | Tuple<unknown>;
 
 // Python Exception type extends JS Error
 export type Exception = Error;
@@ -53,48 +54,55 @@ const decoder = new TextDecoder('utf-8');
 let stdout: string = "";
 let stdin: string[] = [];
 
+/** Minimal typing for the Pyodide runtime surface we use. */
+interface PyodideGlobals {
+  get(key: string): unknown;
+  keys(): Iterable<string>;
+  delete(key: string): void;
+}
+
+interface PyodideAPI {
+  runPython(code: string): unknown;
+  globals: PyodideGlobals;
+  setStdin(options: { stdin: () => string | undefined }): void;
+  setStdout(options: { write: (buf: Uint8Array) => number }): void;
+  setStderr(stderr: typeof console.error): void;
+}
+
+type PyodideModule = {
+  loadPyodide: () => Promise<PyodideAPI>;
+};
+
 // Create a promise that resolves when Python is loaded
-let pythonLoadPromise: Promise<any> | null = null;
-let python: any = null;
-let IS_MICROPYTHON = false;
+let pythonLoadPromise: Promise<void> | null = null;
+let python: PyodideAPI | null = null;
 
 /**
- * Load Python Interpreter.
+ * Load Python Interpreter (Pyodide).
  */
-function loadPython(): Promise<any> {
+function loadPython(): Promise<void> {
   if (pythonLoadPromise) { return pythonLoadPromise; }
-  if (IS_MICROPYTHON) {
-    // @ts-ignore
-    pythonLoadPromise = import("https://cdn.jsdelivr.net/npm/@micropython/micropython-webassembly-pyscript@1.26.0/micropython.mjs").then((mp_mjs) =>
-      mp_mjs.loadMicroPython({
-        stdout: (text: string) => { stdout += text + "\n"; },
-        stderr: console.error,
-        // stdin: () => { return stdin.shift(); }, // TODO
-      })
-    ).then((mp) => { python = mp; window.python = mp; });
-  } else {
-    // @ts-ignore
-    pythonLoadPromise = import("https://cdn.jsdelivr.net/pyodide/v0.28.2/full/pyodide.mjs").then((pyodide_mjs) =>
-      pyodide_mjs.loadPyodide()
-    ).then((pyodide) => {
-      pyodide.setStdin({stdin: () => {
-        const val = stdin.shift();
-        if (val !== undefined) {
-          stdout += INPUT_START; // use a special character to indicate that the input was echoed
-          stdout += val;
-          if (!val.endsWith('\n')) {
-            stdout += '\n';
-          }
-          stdout += INPUT_END; // use a special character to indicate the end of the input
+  // @ts-expect-error Dynamic CDN import has no local type declarations
+  pythonLoadPromise = import("https://cdn.jsdelivr.net/pyodide/v0.28.2/full/pyodide.mjs").then((pyodide_mjs: PyodideModule) =>
+    pyodide_mjs.loadPyodide()
+  ).then((pyodide) => {
+    pyodide.setStdin({stdin: () => {
+      const val = stdin.shift();
+      if (val !== undefined) {
+        stdout += INPUT_START; // use a special character to indicate that the input was echoed
+        stdout += val;
+        if (!val.endsWith('\n')) {
+          stdout += '\n';
         }
-        return val;
-      }});
-      pyodide.setStdout({write: (buf: Uint8Array) => { stdout += decoder.decode(buf); return buf.length; }});
-      pyodide.setStderr(console.error);
-      python = pyodide;
-      window.python = pyodide;
-    });
-  }
+        stdout += INPUT_END; // use a special character to indicate the end of the input
+      }
+      return val;
+    }});
+    pyodide.setStdout({write: (buf: Uint8Array) => { stdout += decoder.decode(buf); return buf.length; }});
+    pyodide.setStderr(console.error);
+    python = pyodide;
+    window.python = pyodide;
+  });
 
   return pythonLoadPromise;
 }
@@ -105,7 +113,7 @@ loadPython();
 /**
  * Get the Python loading promise
  */
-export function getPythonLoadPromise(): Promise<any> {
+export function getPythonLoadPromise(): Promise<void> {
   return loadPython();
 }
 
@@ -134,17 +142,9 @@ export function runLastLine(code: string, reset_globals: boolean = true): PyType
   const last_line = `repr(${raw_last_line})`;
   if (reset_globals) { resetGlobals(); }
   try {
-    let repr_val: string;
-    if (IS_MICROPYTHON) {
-      // last line does not work in MicroPython - use a special global variable instead
-      lines[lines.length - 1] = `_ = ${last_line}`;
-      python.runPython(lines.join('\n'));
-      repr_val = python.globals.get("_");
-    } else {
-      lines[lines.length - 1] = last_line;
-      repr_val = python.runPython(lines.join('\n'));
-    }
-    return parsePyAtom(repr_val)[0];
+    lines[lines.length - 1] = last_line;
+    const repr_val = python.runPython(lines.join('\n'));
+    return parsePyAtom(String(repr_val))[0];
   } catch (e) {
     console.error(e);
     console.error(lines.join('\n'));
@@ -175,7 +175,7 @@ export function runGrabOutput(code: string, reset_globals: boolean = true): stri
   }
 }
 
-function convertPythonError(e: any): Error | undefined {
+function convertPythonError(e: unknown): Error | undefined {
   if (e instanceof Error && e.constructor.name === 'PythonError') {
     const lines = e.message.trim().split('\n');
     const lastLine = lines[lines.length - 1];
@@ -190,11 +190,7 @@ function convertPythonError(e: any): Error | undefined {
  * @param input - The input to add.
  */
 export function addInput(input: string[] | string) {
-  if (IS_MICROPYTHON) {
-    // TODO: does not work?
-  } else {
-    stdin.push(...(Array.isArray(input) ? input : input.split('\n')));
-  }
+  stdin.push(...(Array.isArray(input) ? input : input.split('\n')));
 }
 
 /**
@@ -202,11 +198,7 @@ export function addInput(input: string[] | string) {
  * @param input - The input to set.
  */
 export function setInput(input: string[] | string) {
-  if (IS_MICROPYTHON) {
-    // TODO: does not work?
-  } else {
-    stdin = Array.isArray(input) ? input.slice() : input.split('\n');
-  }
+  stdin = Array.isArray(input) ? input.slice() : input.split('\n');
 }
 
 /**
@@ -221,13 +213,9 @@ export function getInput(): string {
  * Reset the globals to their original state.
  */
 export function resetGlobals() {
-  if (IS_MICROPYTHON) {
-    const keys = [...python.globals.__dict__];
-    for (const key of keys) { python.globals.delete(key); }
-  } else {
-    const keys = [...python.globals.keys()].filter(key => !key.startsWith('__') && key !== '_pyodide_core');
-    for (const key of keys) { python.globals.delete(key); }
-  }
+  if (!python) { throw new Error('Python not initialized'); }
+  const keys = [...python.globals.keys()].filter(key => !key.startsWith('__') && key !== '_pyodide_core');
+  for (const key of keys) { python.globals.delete(key); }
 }
 
 const ERROR_TYPES = [
@@ -318,7 +306,7 @@ export function parsePyAtom(s: string): [PyType, string] {
   }
 
   // primitives
-  let result =
+  const result =
     // bools/None
     runMatch(/^True\b/, s, () => true) ||
     runMatch(/^False\b/, s, () => false) ||
@@ -345,7 +333,7 @@ export function parsePyAtom(s: string): [PyType, string] {
 
   // Collections
   if (s[0] === '(') {
-    let [list, rem] = parsePyAtomList(s.slice(1), ')');
+    const [list, rem] = parsePyAtomList(s.slice(1), ')');
     if (list.length === 1) {
       const contents = s.slice(1, s.lastIndexOf(rem)).trim();
       if (!contents.match(/,\s*\)$/)) { // parenthesized atom is not a single-element tuple
@@ -359,20 +347,20 @@ export function parsePyAtom(s: string): [PyType, string] {
     // dict or set (read 1 atom then check for a : or ,)
     s = s.slice(1).trim();
     if (s[0] === '}') { return [new Map<Immutable, PyType>(), s.slice(1)]; } // empty dict
-    let [_, rem] = parsePyAtom(s);
-    rem = rem.trim();
+    const [, remRaw] = parsePyAtom(s);
+    const rem = remRaw.trim();
     if (rem[0] === ':') { return parsePyAtomDict(s); }
     if (rem[0] === ',' || rem[0] === '}') {
-      let [list, rem2] = parsePyAtomList(s, '}');
+      const [list, rem2] = parsePyAtomList(s, '}');
       return [new Set<Immutable>(list as Immutable[]), rem2];
     }
 
     throw new Error(`Invalid syntax: ${s}`);
   }
-  let frozenset_re = /^frozenset\(\s*\)/;
+  const frozenset_re = /^frozenset\(\s*\)/;
   match = s.match(frozenset_re);
   if (match) {
-    let [list, rem] = parsePyAtom(s.slice(match[0].length));
+    const [list, rem] = parsePyAtom(s.slice(match[0].length));
     if (Array.isArray(list) || list instanceof Set) {
       return [Object.freeze(new Set<Immutable>(list as Immutable[])), rem];
     }
@@ -383,7 +371,7 @@ export function parsePyAtom(s: string): [PyType, string] {
   }
 
   // Empty set is special
-  let empty_set_re = /^set\(\s*\)/;
+  const empty_set_re = /^set\(\s*\)/;
   match = s.match(empty_set_re);
   if (match) { return [new Set<Immutable>(), s.slice(match[0].length)]; }
 
@@ -404,13 +392,13 @@ export function parsePyAtom(s: string): [PyType, string] {
 function parsePyAtomList(s: string, end: string): [PyType[], string] {
   s = s.trim();
   if (s[0] === end) { return [[], s.slice(1)]; } // empty list
-  let [atom, rem] = parsePyAtom(s);
-  rem = rem.trim();
+  const [atom, remRaw] = parsePyAtom(s);
+  let rem = remRaw.trim();
   if (rem[0] === end) { return [[atom], rem.slice(1)]; }
   if (rem[0] !== ',') { throw new Error(`Invalid syntax: ${s}`); }
   rem = rem.slice(1).trim();
   if (rem[0] === end) { return [[atom], rem.slice(1)]; }
-  let [list, rem2] = parsePyAtomList(rem, end);
+  const [list, rem2] = parsePyAtomList(rem, end);
   return [[atom, ...list], rem2];
 };
 
@@ -422,23 +410,22 @@ function parsePyAtomList(s: string, end: string): [PyType[], string] {
 function parsePyAtomDict(s: string): [Map<Immutable, PyType>, string] {
   s = s.trim();
   if (s[0] === '}') { return [new Map<Immutable, PyType>(), s.slice(1)]; } // empty dict
-  let [key, rem] = parsePyAtom(s);
-  rem = rem.trim();
+  const [key, keyRem] = parsePyAtom(s);
+  let rem = keyRem.trim();
   if (rem[0] !== ':') { throw new Error(`Invalid syntax: ${s}`); }
   rem = rem.slice(1).trim();
-  let value;
-  [value, rem] = parsePyAtom(rem);
-  rem = rem.trim();
+  const [value, valueRem] = parsePyAtom(rem);
+  rem = valueRem.trim();
   if (rem[0] === '}') { return [new Map<Immutable, PyType>([[key as Immutable, value]]), rem.slice(1)]; }
   if (rem[0] !== ',') { throw new Error(`Invalid syntax: ${s}`); }
   rem = rem.slice(1).trim();
   if (rem[0] === '}') { return [new Map<Immutable, PyType>([[key as Immutable, value]]), rem.slice(1)]; }
-  let [dict, rem2] = parsePyAtomDict(rem);
+  const [dict, rem2] = parsePyAtomDict(rem);
   return [new Map<Immutable, PyType>([[key as Immutable, value], ...dict]), rem2];
 };
 
 function runMatch(re: RegExp, s: string, convert: (x: string) => PyType): [PyType, string] | undefined {
-  let match = s.match(re);
+  const match = s.match(re);
   if (match) { return [convert(match[0]), s.slice(match[0].length)]; }
   return undefined;
 }

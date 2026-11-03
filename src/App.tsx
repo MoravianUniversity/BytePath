@@ -103,15 +103,14 @@ function App() {
   });
   const [instructorDashboardTab, setInstructorDashboardTab] = useState<DashboardTab>(() => getDashboardTabFromPath(window.location.pathname));
   useEffect(() => { localStorage.setItem('currentScreen', currentScreen); }, [currentScreen]);
-  let [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [loadingError, setLoadingError] = useState<string | null>(null);
-  let [topicToSelectAfterLoading, setTopicToSelectAfterLoading] = useState<Topic | null>(null);
   const [mode, setMode] = useState<'learning' | 'quiz'>(() => {
     const saved = localStorage.getItem('mode');
     return saved ? saved as 'learning' | 'quiz' : 'learning';
   });
   useEffect(() => { localStorage.setItem('mode', mode); }, [mode]);
-  let [currentTopic, setCurrentTopic] = useState<Topic | null>(null);
+  const [currentTopic, setCurrentTopic] = useState<Topic | null>(null);
   const [allTopics] = useState<Topic[]>(getAllTopics());
   const [currentSubtopic, setCurrentSubtopic] = useState<Subtopic | null>(null);
   type ContextConstructor = new () => TopicContext;
@@ -161,6 +160,8 @@ function App() {
   const [questionStartTime, setQuestionStartTime] = useState<number>(Date.now());
   const contentAreaRef = useRef<HTMLDivElement>(null);
   const selectTopicRef = useRef<(topic: Topic) => void>(() => {});
+  const isLoadingRef = useRef(true);
+  const topicToSelectAfterLoadingRef = useRef<Topic | null>(null);
   const [theme, setThemeState] = useState<'light' | 'dark'>(getThemePreference());
   const isInstructor = currentUser?.role === 'instructor';
   const [instructorPractice, setInstructorPractice] = useState(false);
@@ -194,7 +195,7 @@ function App() {
       }
       // If multiple classes and no class selected yet, leave null — class picker will show.
     });
-  }, [currentUser]);
+  }, [currentUser, isInstructor]);
 
   useEffect(() => {
     if (!currentClass || isInstructor) return;
@@ -227,11 +228,12 @@ function App() {
   useEffect(() => {
     getPythonLoadPromise()
       .then(() => {
+        isLoadingRef.current = false;
         setIsLoading(false);
-        isLoading = false; // since the selectTopic function uses isLoading, we need to update it here
-        if (topicToSelectAfterLoading) {
-          selectTopicRef.current(topicToSelectAfterLoading);
-          setTopicToSelectAfterLoading(null);
+        const pending = topicToSelectAfterLoadingRef.current;
+        if (pending) {
+          topicToSelectAfterLoadingRef.current = null;
+          selectTopicRef.current(pending);
         }
       })
       .catch((error) => { setLoadingError(error.message); });
@@ -346,7 +348,7 @@ function App() {
       setInstructorDashboardTab('analytics');
       syncPathForScreen('dashboard', 'analytics', { replace: true });
     }
-  }, [isInstructor]);
+  }, [isInstructor, currentScreen]);
 
   // Student dashboard lives on the welcome screen (with the topic sidebar).
   useEffect(() => {
@@ -357,7 +359,7 @@ function App() {
       clearUrlHash();
       syncPathForScreen('welcome', instructorDashboardTab, { replace: true });
     }
-  }, [isInstructor, currentScreen]);
+  }, [isInstructor, currentScreen, instructorDashboardTab]);
 
   // Prevent instructors from landing on student-only screens unless they enable practice mode.
   useEffect(() => {
@@ -395,7 +397,7 @@ function App() {
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+  }, [isInstructor]);
 
   useEffect(() => {
     if (!hasMountedRef.current) {
@@ -580,8 +582,7 @@ function App() {
     setCurrentScreen('question');
 
     if (startQuestions) {
-      currentTopic = topic;
-      startTopic();
+      startTopic(topic);
     }
   }
 
@@ -594,9 +595,8 @@ function App() {
   }
 
   function selectTopic(topic: Topic) {
-    if (isLoading) {
-      setTopicToSelectAfterLoading(topic);
-      topicToSelectAfterLoading = topic;
+    if (isLoadingRef.current) {
+      topicToSelectAfterLoadingRef.current = topic;
       navigateToTopic(topic, { startQuestions: false });
       return;
     }
@@ -636,42 +636,41 @@ function App() {
     toggleGroup(group.id);
   };
 
-  function startTopic() {
+  function startTopic(topic: Topic) {
     clearContextCache();
     setQuestionList([]);
     setQuestionAnswers([]);
-    addQuestion();
+    addQuestion(topic);
   }
 
-  function addQuestion() {
-    if (currentTopic) {
-      const subtopic = currentTopic.getRandomSubtopic();
-      setCurrentSubtopic(subtopic);
-      if (subtopic === null) {
-        // Topic is completed, show completion screen (indicated by a null question)
-        // Only add completion screen if it doesn't already exist
-        setQuestionList(prev => {
-          const hasCompletionScreen = prev.some(q => q === null);
-          return hasCompletionScreen ? prev : [...prev, null];
-        });
-      } else {
-        // Topic is not completed, add a new question
-        const ctx = resolveContext(subtopic);
-        contextByQuestionIndexRef.current.push(ctx);
-        const nextQuestion = subtopic.generateQuestion(ctx);
-        setQuestionList(prev => [...prev, nextQuestion]);
-        setQuestionStartTime(Date.now());
-      }
-      // Scroll to the new question after it's added
-      setTimeout(() => {
-        if (contentAreaRef.current) {
-          contentAreaRef.current.scrollTo({
-            top: contentAreaRef.current.scrollHeight,
-            behavior: 'smooth'
-          });
-        }
-      }, 100);
+  function addQuestion(topic: Topic | null = currentTopic) {
+    if (!topic) return;
+    const subtopic = topic.getRandomSubtopic();
+    setCurrentSubtopic(subtopic);
+    if (subtopic === null) {
+      // Topic is completed, show completion screen (indicated by a null question)
+      // Only add completion screen if it doesn't already exist
+      setQuestionList(prev => {
+        const hasCompletionScreen = prev.some(q => q === null);
+        return hasCompletionScreen ? prev : [...prev, null];
+      });
+    } else {
+      // Topic is not completed, add a new question
+      const ctx = resolveContext(subtopic);
+      contextByQuestionIndexRef.current.push(ctx);
+      const nextQuestion = subtopic.generateQuestion(ctx);
+      setQuestionList(prev => [...prev, nextQuestion]);
+      setQuestionStartTime(Date.now());
     }
+    // Scroll to the new question after it's added
+    setTimeout(() => {
+      if (contentAreaRef.current) {
+        contentAreaRef.current.scrollTo({
+          top: contentAreaRef.current.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    }, 100);
   }
 
   const handleAnswerSelect = async (answer: UserAnswer | undefined, question: Question) => {
@@ -761,7 +760,7 @@ function App() {
       currentTopic.reset();
       
       // Start fresh with the topic
-      startTopic();
+      startTopic(currentTopic);
     }
   };
 

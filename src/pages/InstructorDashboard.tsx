@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { createPortal } from 'react-dom';
 import Button from '../components/ui/Button';
 import RosterPage from './RosterPage';
@@ -203,7 +203,7 @@ export default function InstructorDashboard({
       document.removeEventListener('scroll', reposition, true);
       window.removeEventListener('resize', reposition);
     };
-  }, [remainingTooltip?.studentId]);
+  }, [remainingTooltip]);
   const pageTitle = className
     ? `${className} ${activeTab === 'analytics' ? 'Analytics' : activeTab === 'roster' ? 'Roster' : activeTab === 'results' ? 'Results' : 'Topics'}`
     : activeTab === 'analytics'
@@ -242,6 +242,17 @@ export default function InstructorDashboard({
     </>
   );
 
+  const loadClassOverview = useCallback(async () => {
+    try {
+      const data = await reportsService.getClassOverview(classId, selectedSection);
+      setClassOverview(data);
+    } catch (error) {
+      console.error('Failed to load class overview:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [classId, selectedSection]);
+
   useEffect(() => {
     setSelectedStudent(null);
     setLookupError(null);
@@ -261,18 +272,7 @@ export default function InstructorDashboard({
 
     setLoading(true);
     loadClassOverview();
-  }, [classId, selectedSection, activeTab]);
-
-  const loadClassOverview = async () => {
-    try {
-      const data = await reportsService.getClassOverview(classId, selectedSection);
-      setClassOverview(data);
-    } catch (error) {
-      console.error('Failed to load class overview:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [classId, selectedSection, activeTab, loadClassOverview]);
 
   const viewStudentReport = async (studentId: number) => {
     try {
@@ -333,8 +333,14 @@ export default function InstructorDashboard({
   };
 
   const topPerformers = classOverview?.top_performers ?? [];
-  const topicsOverview = classOverview?.topics_overview ?? [];
-  const rosteredStudents = classOverview?.rostered_students ?? [];
+  const topicsOverview = useMemo(
+    () => classOverview?.topics_overview ?? [],
+    [classOverview?.topics_overview],
+  );
+  const rosteredStudents = useMemo(
+    () => classOverview?.rostered_students ?? [],
+    [classOverview?.rostered_students],
+  );
   const topicsInSidebarOrder = useMemo(() => {
     const orderIndex = new Map(SIDEBAR_TOPIC_IDS.map((id, index) => [id, index]));
     return topicsOverview.slice().sort((a, b) => {

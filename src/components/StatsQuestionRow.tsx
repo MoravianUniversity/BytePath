@@ -98,6 +98,12 @@ function StatsQuestionRowFallback({ response }: { response: StudentResponse }) {
 export default function StatsQuestionRow({ response }: { response: StudentResponse }) {
   const {subtopic, question, userAnswer} = useMemo(() =>
     unserializeResponse(response) ?? {subtopic: null, question: null, userAnswer: null}, [response]);
+
+  useEffect(() => {
+    if (!question) return;
+    Prism.highlightAll();
+  }, [question, userAnswer, response.id]);
+
   if (!question) { return <StatsQuestionRowFallback response={response} />; }
 
   const status =
@@ -108,10 +114,6 @@ export default function StatsQuestionRow({ response }: { response: StudentRespon
         : response.is_correct
           ? 'correct'
           : 'incorrect';
-
-  useEffect(() => {
-    Prism.highlightAll();
-  }, [question, userAnswer, response.id]);
 
   const def = QUESTION_TYPES[question.kind];
   const isCorrect = response.is_correct && userAnswer !== undefined && userAnswer !== SKIPPED;

@@ -55,7 +55,7 @@ export default function ClassSelector({ currentClassId, onClassChange, activeCla
       next[index] = activeClass;
       return next;
     });
-  }, [activeClass?.id, activeClass?.class_name, activeClass?.updated_at]);
+  }, [activeClass]);
 
   // Close dropdown when clicking outside
   useEffect(() => {

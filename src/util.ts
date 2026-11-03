@@ -165,7 +165,7 @@ export function getInitials(name: string | null | undefined): string {
 }
 
 // Write a list of values, separated by commas and/or and as appropriate
-export function written_list_of_values(values: any[]): string {
+export function written_list_of_values(values: ReadonlyArray<{ toString(): string }>): string {
   if (values.length === 0) { return ''; }
   if (values.length === 1) { return values[0].toString(); }
   if (values.length === 2) { return values[0].toString() + ' and ' + values[1].toString(); }

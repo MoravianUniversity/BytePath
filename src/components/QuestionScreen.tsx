@@ -217,11 +217,12 @@ const Workspace: React.FC<{ question: Question; panelId: string; collapsed: bool
   const traceMeasureRef = useRef<HTMLSpanElement>(null);
   const traceCellRefs = useRef<(HTMLInputElement | null)[][]>([]);
 
+  const fingerprint = questionFingerprint(question);
   useEffect(() => {
     setTab('notes');
     setNotes('');
     setTraceCells(emptyGrid(TRACE_INITIAL_ROWS, TRACE_INITIAL_COLS));
-  }, [questionFingerprint(question)]);
+  }, [fingerprint]);
 
   useLayoutEffect(() => {
     const measureEl = traceMeasureRef.current;

@@ -19,7 +19,7 @@ export function useQuizDisplayMode(
   return isQuiz || readOnly || optionCount <= 1;
 }
 
-export function getCorrectClass(answer: any | typeof SKIPPED | undefined, isCorrect: boolean) {
+export function getCorrectClass<T>(answer: T | typeof SKIPPED | undefined, isCorrect: boolean): string {
   const cn = answer instanceof Error ? 'exception ' : '';
   if (answer === undefined) { return cn; }
   if (answer === SKIPPED) { return cn + 'skipped'; }
@@ -129,15 +129,19 @@ export const QuestionHelp: React.FC<{helpMessage: string | undefined}> = (
   );
 };
 
-export const QuestionAnswerOptions: React.FC<{
-  options: any[] | undefined,
-  onSelect: (element: EventTarget | null, option: any) => void,
-  getAnswerClass: (answer: any) => string,
-  formatAnswer: (answer: any) => React.ReactNode,
+export function QuestionAnswerOptions<T>({
+  options,
+  onSelect,
+  getAnswerClass,
+  formatAnswer,
+  disabled = false,
+}: {
+  options: T[] | undefined,
+  onSelect: (element: EventTarget | null, option: T) => void,
+  getAnswerClass: (answer: T) => string,
+  formatAnswer: (answer: T) => React.ReactNode,
   disabled: boolean,
-}> = (
-  {options, onSelect, getAnswerClass, formatAnswer, disabled = false}
-) => {
+}) {
   if (options === undefined) {
     return null;
   }
@@ -147,7 +151,7 @@ export const QuestionAnswerOptions: React.FC<{
         <button
           key={index}
           type="button"
-          className={`answer-option ${getAnswerClass(option)}`} 
+          className={`answer-option ${getAnswerClass(option)}`}
           onClick={(e) => onSelect(e.currentTarget, option)}
           disabled={disabled}
         >
@@ -156,13 +160,17 @@ export const QuestionAnswerOptions: React.FC<{
       ))}
     </div>
   );
-};
+}
 
-export const QuestionQuizInputSingleLine: React.FC<{
-  onSubmit: (element: EventTarget | null, answer: any) => void,
-  parseAnswer?: (inputValue: string) => any,
+export function QuestionQuizInputSingleLine<T = string>({
+  onSubmit,
+  parseAnswer = defaultParseQuizAnswer as (inputValue: string) => T | undefined,
+  placeholder = '',
+}: {
+  onSubmit: (element: EventTarget | null, answer: T | undefined) => void,
+  parseAnswer?: (inputValue: string) => T | undefined,
   placeholder?: string,
-}> = ({onSubmit, parseAnswer = defaultParseQuizAnswer, placeholder = ''}) => {
+}) {
   const [inputValue, setInputValue] = useState('');
   return (
     <>
@@ -184,13 +192,17 @@ export const QuestionQuizInputSingleLine: React.FC<{
       <QuestionSubmitButton onClick={(e) => onSubmit(e.target, parseAnswer(inputValue))} />
     </>
   );
-};
+}
 
-export const QuestionQuizInputMultiLine: React.FC<{
-  onSubmit: (element: EventTarget | null, answer: any) => void,
-  parseAnswer?: (inputValue: string) => any,
+export function QuestionQuizInputMultiLine<T = string>({
+  onSubmit,
+  parseAnswer = defaultParseQuizAnswer as (inputValue: string) => T | undefined,
+  placeholder = '',
+}: {
+  onSubmit: (element: EventTarget | null, answer: T | undefined) => void,
+  parseAnswer?: (inputValue: string) => T | undefined,
   placeholder?: string,
-}> = ({onSubmit, parseAnswer = defaultParseQuizAnswer, placeholder = ''}) => {
+}) {
   const [inputValue, setInputValue] = useState('');
   return (
     <>
@@ -213,18 +225,23 @@ export const QuestionQuizInputMultiLine: React.FC<{
       <QuestionSubmitButton onClick={(e) => onSubmit(e.target, parseAnswer(inputValue))} />
     </>
   );
-};
+}
 
-export const QuestionQuizInputAnswerDisplay: React.FC<{
-  userAnswer: any | typeof SKIPPED,
-  correctAnswer: any,
+export function QuestionQuizInputAnswerDisplay<T>({
+  userAnswer,
+  correctAnswer,
+  isCorrect,
+  formatAnswer,
+  children = undefined,
+  isShowingStats = false,
+}: {
+  userAnswer: T | typeof SKIPPED,
+  correctAnswer: T,
   isCorrect: boolean,
-  formatAnswer: (answer: any) => React.ReactNode,
+  formatAnswer: (answer: T) => React.ReactNode,
   children?: React.ReactNode,
   isShowingStats?: boolean,
-}> = (
-  {userAnswer, correctAnswer, isCorrect, formatAnswer, children = undefined, isShowingStats = false}
-) => {
+}) {
   if (userAnswer === SKIPPED) {
     return (
       <>
@@ -243,7 +260,7 @@ export const QuestionQuizInputAnswerDisplay: React.FC<{
   return (
     <>
       <div key="user-answer" className={'quiz-input ' + correctClass}>
-        {formatAnswer(userAnswer!)}
+        {formatAnswer(userAnswer)}
       </div>
       {!isShowingStats && (
         <button key="feedback-button" className={'feedback submit-button ' + correctClass} disabled>
@@ -257,8 +274,8 @@ export const QuestionQuizInputAnswerDisplay: React.FC<{
         </div>
       )}
     </>
-  )
-};
+  );
+}
 
 export const QuestionSubmitButton: React.FC<{onClick: (e: React.MouseEvent<HTMLButtonElement>) => void}> = (
   {onClick}

@@ -20,7 +20,7 @@ function removeTrailingSpaces(s: string): string {
 }
 
 function checkAnswerCorrect(userAnswer: string, question: CodeOutputQuestion): boolean {
-  let inputs = Array.isArray(question.input) ? question.input : (question.input ? [question.input] : []);
+  const inputs = Array.isArray(question.input) ? question.input : (question.input ? [question.input] : []);
   let correct = correctOutputString(question.correct);
   // if there are inputs or the answer doesn't contain INPUT_START/INPUT_END, deal with input echos
   if (inputs.length !== 0 && !userAnswer.includes(INPUT_START)) {
@@ -59,9 +59,12 @@ function parseAnswer(value: string): string | Exception {
   return trimmed;
 }
 
-function formatHtmlAnswer(answer: string): React.ReactNode {
+function formatHtmlAnswer(answer: UserAnswerFor<'code-output'>): React.ReactNode {
+  if (answer instanceof Error) {
+    return <code>{answer.name}</code>;
+  }
   const outputs: React.ReactNode[] = [];
-  let ans = String(answer);  // just in case the answer is not a string...
+  let ans = answer;
   // Go through the string and find the INPUT_START and INPUT_END characters
   // Each time add a span with class "input-echo" around the text between the characters
   while (ans.includes(INPUT_START)) {
@@ -126,8 +129,8 @@ const CodeOutputView: React.FC<QuestionViewProps<'code-output'>> = ({
 
   const userAnswerString = correctOutputStringWithSkipped(userAnswer);
   const correctAnswerString = correctOutputString(question.correct);
-  const myGetAnswerClass = (answer: string) =>
-    getAnswerClass(answer, userAnswerString, correctAnswerString, isCorrect);
+  const myGetAnswerClass = (answer: UserAnswerFor<'code-output'>) =>
+    getAnswerClass(correctOutputString(answer), userAnswerString, correctAnswerString, isCorrect);
 
   return (
     <>

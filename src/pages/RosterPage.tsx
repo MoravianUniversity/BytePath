@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { studentsService, type Student } from "../services/students";
+import { studentsService, UploadSummary, type Student } from "../services/students";
 import { classesService, type Class, type CoInstructor } from "../services/classes";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload, faFilter, faFilterCircleXmark, faSortUp, faSortDown, faSort } from '@fortawesome/free-solid-svg-icons';
@@ -32,7 +32,7 @@ export default function RosterPage({
   const [loadingMore, setLoadingMore] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState<Array<{ line: number; email?: string; reason: string }>>([]);
-  const [uploadSummary, setUploadSummary] = useState<any>(null);
+  const [uploadSummary, setUploadSummary] = useState<UploadSummary | null>(null);
 
   const [sortBy, setSortBy] = useState<SortField>("email");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
@@ -130,7 +130,7 @@ export default function RosterPage({
     } finally {
       if (reqId === requestIdRef.current) setLoadingInitial(false);
     }
-  }, [classId, "", columnFilters, sectionFilter, sortBy, sortOrder]);
+  }, [classId, columnFilters, sectionFilter, sortBy, sortOrder]);
 
   useEffect(() => {
     reloadFirstPage();
@@ -563,9 +563,9 @@ export default function RosterPage({
           <div className="upload-summary app-page-panel">
             <strong>Upload Summary:</strong>{" "}
             <>
-              {uploadSummary.added > 0 && <span>+{uploadSummary.added} added</span>}
-              {uploadSummary.restored > 0 && <span>, {uploadSummary.restored} restored</span>}
-              {uploadSummary.skipped > 0 && <span>, {uploadSummary.skipped} skipped</span>}
+              {uploadSummary?.added && uploadSummary.added > 0 && <span>+{uploadSummary.added} added</span>}
+              {uploadSummary?.restored && uploadSummary.restored > 0 && <span>, {uploadSummary.restored} restored</span>}
+              {uploadSummary?.skipped && uploadSummary.skipped > 0 && <span>, {uploadSummary.skipped} skipped</span>}
             </>
             {" "}(processed {uploadSummary.total_processed})
           </div>

@@ -35,17 +35,21 @@ export default function ResultsTimeRangeSlider({
     pipTitlesRef.current = new Map(dueDatePips.map((pip) => [pip.ms, pip.title]));
   }, [dueDatePips]);
 
+  const boundsStartMs = bounds?.startMs;
+  const boundsEndMs = bounds?.endMs;
   const rangeValid = bounds != null
-    && Number.isFinite(bounds.startMs)
-    && Number.isFinite(bounds.endMs)
-    && bounds.endMs > bounds.startMs;
+    && Number.isFinite(boundsStartMs)
+    && Number.isFinite(boundsEndMs)
+    && boundsEndMs > boundsStartMs;
 
+  // Recreate the slider when bounds/pips change. `value` is intentionally omitted —
+  // handle updates are synced in the effect below so dragging doesn't remount the widget.
   useEffect(() => {
     const element = sliderRef.current;
-    if (!element || !rangeValid || !bounds) return;
+    if (!element || !rangeValid || boundsStartMs == null || boundsEndMs == null) return;
     const range: Options['range'] = {
-      min: bounds.startMs,
-      max: bounds.endMs,
+      min: boundsStartMs,
+      max: boundsEndMs,
     };
     if (pipValues.length > 0) {
       const min = Math.min(...pipValues);
@@ -118,7 +122,8 @@ export default function ResultsTimeRangeSlider({
       api.destroy();
       apiRef.current = null;
     };
-  }, [bounds?.startMs, bounds?.endMs, rangeValid, pipValues, dueDatePips]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- value synced via api.set in the next effect
+  }, [boundsStartMs, boundsEndMs, rangeValid, pipValues, dueDatePips]);
 
   useEffect(() => {
     const api = apiRef.current;

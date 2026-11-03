@@ -15,7 +15,7 @@ function checkAnswer(
 }
 
 function parseAnswer(raw: string): Answer | undefined {
-  let answer = raw.trim();
+  const answer = raw.trim();
   if (answer === '') { return undefined; }
   const errors = [
     'syntaxerror', 'nameerror', 'attributeerror', 'typeerror', 'valueerror',

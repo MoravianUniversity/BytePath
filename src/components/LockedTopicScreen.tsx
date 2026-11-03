@@ -20,7 +20,7 @@ const LockedTopicScreen: React.FC<LockedTopicScreenProps> = ({
 
   // Get all required topics (dependencies) for this topic
   const getRequiredTopics = (): Topic[] => {
-    let requiredTopics: Topic[] = [];
+    const requiredTopics: Topic[] = [];
     const visited = new Set<string>();
     
     const collectDependencies = (currentTopic: Topic) => {
