@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, lazy, Suspense } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-python';
 import './code.css';
@@ -19,7 +19,6 @@ import type { Class } from './services/classes';
 import { classesService } from './services/classes';
 import { responsesService } from './services/responses';
 import { progressService } from './services/progress';
-import InstructorDashboard from './pages/InstructorDashboard';
 import StudentDashboard from './pages/StudentDashboard';
 import { toggleTheme, getThemePreference } from './utils/theme';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -36,6 +35,8 @@ import {
   replaySubtopicCompletion,
 } from './utils/subtopicCompletion';
 import type { TopicProgress } from './services/progress';
+
+const InstructorDashboard = lazy(() => import('./pages/InstructorDashboard'));
 
 export const SKIPPED = Symbol('(skipped)');
 
@@ -945,13 +946,15 @@ function App() {
 
       <main className="App-main">
         {currentScreen === 'dashboard' && isInstructor ? (
-          <InstructorDashboard
-            classId={currentClass?.id ?? null}
-            className={currentClass?.class_name ?? null}
-            activeTab={instructorDashboardTab}
-            onTabChange={setInstructorDashboardTab}
-            onClassRenamed={setCurrentClass}
-          />
+          <Suspense fallback={<div className="loading-screen"><div className="loading-content"><div className="loading-spinner"></div><h2>Loading dashboard…</h2></div></div>}>
+            <InstructorDashboard
+              classId={currentClass?.id ?? null}
+              className={currentClass?.class_name ?? null}
+              activeTab={instructorDashboardTab}
+              onTabChange={setInstructorDashboardTab}
+              onClassRenamed={setCurrentClass}
+            />
+          </Suspense>
         ) : isLoading ? (
           <div className="loading-screen">
             <div className="loading-content">
