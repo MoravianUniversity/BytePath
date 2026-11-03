@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { useEffect, useEffectEvent, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { createPortal } from 'react-dom';
 import Button from '../components/ui/Button';
 import RosterPage from './RosterPage';
@@ -166,8 +166,6 @@ export default function InstructorDashboard({
     top: number;
   } | null>(null);
   const remainingTooltipAnchorRef = useRef<HTMLElement | null>(null);
-  const remainingTooltipRef = useRef(remainingTooltip);
-  remainingTooltipRef.current = remainingTooltip;
 
   const positionRemainingTooltip = (
     anchor: HTMLElement,
@@ -189,13 +187,16 @@ export default function InstructorDashboard({
     });
   };
 
+  const repositionRemainingTooltip = useEffectEvent(() => {
+    const anchor = remainingTooltipAnchorRef.current;
+    if (!anchor || !remainingTooltip) return;
+    positionRemainingTooltip(anchor, remainingTooltip.studentId, remainingTooltip.labels);
+  });
+
   useEffect(() => {
     if (!remainingTooltip) return;
     const reposition = () => {
-      const anchor = remainingTooltipAnchorRef.current;
-      const current = remainingTooltipRef.current;
-      if (!anchor || !current) return;
-      positionRemainingTooltip(anchor, current.studentId, current.labels);
+      repositionRemainingTooltip();
     };
     document.addEventListener('scroll', reposition, true);
     window.addEventListener('resize', reposition);
@@ -242,18 +243,7 @@ export default function InstructorDashboard({
     </>
   );
 
-  const loadClassOverview = useCallback(async () => {
-    try {
-      const data = await reportsService.getClassOverview(classId, selectedSection);
-      setClassOverview(data);
-    } catch (error) {
-      console.error('Failed to load class overview:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [classId, selectedSection]);
-
-  useEffect(() => {
+  const resetAnalyticsSelectionState = () => {
     setSelectedStudent(null);
     setLookupError(null);
     setShowRoster(false);
@@ -264,15 +254,65 @@ export default function InstructorDashboard({
     setTopicLoading(false);
     setSelectedQuestion(null);
     setSelectedSubtopic(null);
+    setRemainingTooltip(null);
+  };
 
-    if (activeTab !== 'analytics') {
+  const [prevClassId, setPrevClassId] = useState(classId);
+  const [prevSelectedSection, setPrevSelectedSection] = useState(selectedSection);
+  const [prevActiveTab, setPrevActiveTab] = useState(activeTab);
+
+  if (classId !== prevClassId) {
+    setPrevClassId(classId);
+    setPrevSelectedSection(null);
+    setSelectedSection(null);
+    resetAnalyticsSelectionState();
+    setClassOverview(null);
+    if (activeTab === 'analytics' && classId != null) {
+      setLoading(true);
+    } else {
       setLoading(false);
+    }
+  } else if (selectedSection !== prevSelectedSection) {
+    setPrevSelectedSection(selectedSection);
+    resetAnalyticsSelectionState();
+    if (activeTab === 'analytics' && classId != null) {
+      setLoading(true);
+    }
+  } else if (activeTab !== prevActiveTab) {
+    setPrevActiveTab(activeTab);
+    resetAnalyticsSelectionState();
+    if (activeTab === 'analytics' && classId != null) {
+      setLoading(true);
+    } else {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab !== 'analytics' || classId == null) {
       return;
     }
 
-    setLoading(true);
-    loadClassOverview();
-  }, [classId, selectedSection, activeTab, loadClassOverview]);
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await reportsService.getClassOverview(classId, selectedSection);
+        if (!cancelled) {
+          setClassOverview(data);
+        }
+      } catch (error) {
+        console.error('Failed to load class overview:', error);
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [classId, selectedSection, activeTab]);
 
   const viewStudentReport = async (studentId: number) => {
     try {
@@ -486,10 +526,6 @@ export default function InstructorDashboard({
   }, [topicsOverview, normalizedTopicsSearch, topicsPerformanceSort]);
   const sectionOptions = classOverview?.sections ?? [];
   const showSectionSelector = sectionOptions.length > 1;
-
-  useEffect(() => {
-    setSelectedSection(null);
-  }, [classId]);
 
   const handleRosterSelection = (studentId: number | null) => {
     if (!studentId) {
@@ -1225,11 +1261,16 @@ export default function InstructorDashboard({
         )}
 
         {activeTab === 'roster' ? (
-          <RosterPage classId={classId} className={className} onClassRenamed={onClassRenamed} />
+          <RosterPage
+            key={classId ?? 'none'}
+            classId={classId}
+            className={className}
+            onClassRenamed={onClassRenamed}
+          />
         ) : activeTab === 'topics' ? (
-          <TopicSettingsPage classId={classId} />
+          <TopicSettingsPage key={classId ?? 'none'} classId={classId} />
         ) : activeTab === 'results' ? (
-          <ResultsPage classId={classId} />
+          <ResultsPage key={classId ?? 'none'} classId={classId} />
         ) : (
           <>
       <section className="dashboard-overview">

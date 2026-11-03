@@ -359,11 +359,18 @@ export default function StudentDashboard({
     Awaited<ReturnType<typeof classTopicSettingsService.getSettings>> | null
   >(null);
   const [expandedTopic, setExpandedTopic] = useState<string | null>(null);
+  const loadKey = `${user.id}:${currentClassId}`;
+  const [prevLoadKey, setPrevLoadKey] = useState(loadKey);
+
+  if (loadKey !== prevLoadKey) {
+    setPrevLoadKey(loadKey);
+    setLoading(true);
+    setError(null);
+    setExpandedTopic(null);
+  }
 
   useEffect(() => {
     let mounted = true;
-    setLoading(true);
-    setError(null);
 
     const settingsPromise = classTopicSettingsService
       .getSettings(currentClassId)
@@ -1038,29 +1045,45 @@ function TopicExpandedPanelShell({
   asOfDueDateLabel?: string | null;
   onClose: () => void;
 }) {
+  type PanelSnapshot = {
+    topic: TopicProgress;
+    responses: StudentResponse[];
+    asOfDueDateLabel?: string | null;
+  };
+
   const [shown, setShown] = useState(open);
   const [expanded, setExpanded] = useState(open);
-  const frozenTopic = useRef<TopicProgress | undefined>(topic);
-  const frozenResponses = useRef(responses);
-  const frozenAsOfDueDateLabel = useRef(asOfDueDateLabel);
+  const [snapshot, setSnapshot] = useState<PanelSnapshot | null>(
+    open && topic ? { topic, responses, asOfDueDateLabel } : null,
+  );
   const openRef = useRef(open);
-  openRef.current = open;
 
-  if (topic) {
-    frozenTopic.current = topic;
-    frozenResponses.current = responses;
-    frozenAsOfDueDateLabel.current = asOfDueDateLabel;
+  useEffect(() => {
+    openRef.current = open;
+  }, [open]);
+
+  if (open && topic) {
+    if (
+      !snapshot
+      || snapshot.topic !== topic
+      || snapshot.responses !== responses
+      || snapshot.asOfDueDateLabel !== asOfDueDateLabel
+    ) {
+      setSnapshot({ topic, responses, asOfDueDateLabel });
+    }
+    if (!shown) {
+      setShown(true);
+    }
+  } else if (!open && expanded) {
+    setExpanded(false);
   }
 
   useEffect(() => {
-    if (open) {
-      setShown(true);
-      const frame = requestAnimationFrame(() => {
-        requestAnimationFrame(() => setExpanded(true));
-      });
-      return () => cancelAnimationFrame(frame);
-    }
-    setExpanded(false);
+    if (!open) return;
+    const frame = requestAnimationFrame(() => {
+      requestAnimationFrame(() => setExpanded(true));
+    });
+    return () => cancelAnimationFrame(frame);
   }, [open]);
 
   const handleTransitionEnd = (e: React.TransitionEvent<HTMLDivElement>) => {
@@ -1069,10 +1092,11 @@ function TopicExpandedPanelShell({
     }
     if (!openRef.current) {
       setShown(false);
+      setSnapshot(null);
     }
   };
 
-  if (!shown || !frozenTopic.current) {
+  if (!shown || !snapshot) {
     return null;
   }
 
@@ -1083,9 +1107,9 @@ function TopicExpandedPanelShell({
     >
       <div className="topic-expanded-panel-shell__inner">
         <TopicExpandedPanel
-          topic={frozenTopic.current}
-          responses={frozenResponses.current}
-          asOfDueDateLabel={frozenAsOfDueDateLabel.current}
+          topic={snapshot.topic}
+          responses={snapshot.responses}
+          asOfDueDateLabel={snapshot.asOfDueDateLabel}
           onClose={onClose}
         />
       </div>

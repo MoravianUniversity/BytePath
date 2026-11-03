@@ -63,19 +63,22 @@ export default function ResultsPage({
 }) {
   const [data, setData] = useState<ClassResultsResponse | null>(null);
   const [classBoundsSource, setClassBoundsSource] = useState<ClassResultsResponse | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(classId != null);
   const [error, setError] = useState<string | null>(null);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [groupMode, setGroupMode] = useState<AssignmentGroupMode>('topic');
   const [gradeMetric, setGradeMetric] = useState<GradeMetric>('subtopics-completed');
   const [timeRange, setTimeRange] = useState<ResultsTimeRange | null>(null);
   const [hoveredCell, setHoveredCell] = useState<HoveredGridCell | null>(null);
+  const [prevSelectedSection, setPrevSelectedSection] = useState(selectedSection);
 
-  useEffect(() => {
-    setSelectedSection(null);
-    setTimeRange(null);
-    setClassBoundsSource(null);
-  }, [classId]);
+  if (selectedSection !== prevSelectedSection) {
+    setPrevSelectedSection(selectedSection);
+    if (classId != null) {
+      setLoading(true);
+      setError(null);
+    }
+  }
 
   useEffect(() => {
     if (!classId) return;
@@ -98,21 +101,16 @@ export default function ResultsPage({
   }, [classId]);
 
   useEffect(() => {
-    if (!classId) {
-      setData(null);
-      setLoading(false);
-      return;
-    }
+    if (!classId) return;
 
     let cancelled = false;
-    setLoading(true);
-    setError(null);
 
     reportsService
       .getClassResults(classId, selectedSection)
       .then((response) => {
         if (!cancelled) {
           setData(response);
+          setError(null);
         }
       })
       .catch((err) => {
@@ -133,20 +131,25 @@ export default function ResultsPage({
     };
   }, [classId, selectedSection]);
 
-  const sectionOptions = data?.sections ?? classBoundsSource?.sections ?? [];
+  const resolvedData = classId == null ? null : data;
+  const resolvedLoading = classId == null ? false : loading;
+  const resolvedError = classId == null ? null : error;
+  const resolvedBoundsSource = classId == null ? null : classBoundsSource;
+
+  const sectionOptions = resolvedData?.sections ?? resolvedBoundsSource?.sections ?? [];
   const showSectionSelector = sectionOptions.length > 1;
 
   const fullTimeBounds = useMemo(
     () => (
-      classBoundsSource
+      resolvedBoundsSource
         ? resolveResultsTimeBounds(
-          classBoundsSource.activity_bounds,
-          classBoundsSource.topic_settings,
+          resolvedBoundsSource.activity_bounds,
+          resolvedBoundsSource.topic_settings,
           null,
         )
         : null
     ),
-    [classBoundsSource],
+    [resolvedBoundsSource],
   );
 
   const defaultTimeRange = useMemo(
@@ -154,29 +157,35 @@ export default function ResultsPage({
     [fullTimeBounds],
   );
 
-  useEffect(() => {
-    if (!fullTimeBounds) {
-      return;
+  const boundsSignature = fullTimeBounds
+    ? `${fullTimeBounds.startMs}:${fullTimeBounds.endMs}`
+    : null;
+  const [prevBoundsSignature, setPrevBoundsSignature] = useState(boundsSignature);
+  if (boundsSignature !== prevBoundsSignature) {
+    setPrevBoundsSignature(boundsSignature);
+    if (fullTimeBounds) {
+      setTimeRange((current) => (
+        current
+          ? clampTimeRange(current, fullTimeBounds)
+          : getDefaultResultsTimeRange(fullTimeBounds)
+      ));
+    } else {
+      setTimeRange(null);
     }
-    setTimeRange((current) => (
-      current
-        ? clampTimeRange(current, fullTimeBounds)
-        : getDefaultResultsTimeRange(fullTimeBounds)
-    ));
-  }, [fullTimeBounds]);
+  }
 
   const effectiveTimeRange = timeRange ?? defaultTimeRange ?? fullTimeBounds;
 
   const columns = useMemo(() => {
-    if (!data || !effectiveTimeRange || !fullTimeBounds) return [];
+    if (!resolvedData || !effectiveTimeRange || !fullTimeBounds) return [];
     return buildResultsColumns(
-      data,
+      resolvedData,
       groupMode,
       selectedSection,
       effectiveTimeRange,
       fullTimeBounds,
     );
-  }, [data, groupMode, selectedSection, effectiveTimeRange, fullTimeBounds]);
+  }, [resolvedData, groupMode, selectedSection, effectiveTimeRange, fullTimeBounds]);
 
   const isFilteringByDueDate = Boolean(
     effectiveTimeRange
@@ -185,21 +194,21 @@ export default function ResultsPage({
   );
 
   const dueDatePips = useMemo(() => {
-    if (!classBoundsSource || !fullTimeBounds) return [];
+    if (!resolvedBoundsSource || !fullTimeBounds) return [];
     const assignmentPips = collectAssignmentDueDatePips(
-      classBoundsSource,
+      resolvedBoundsSource,
       null,
       fullTimeBounds,
     );
     return buildTimeRangeSliderPips(assignmentPips, fullTimeBounds);
-  }, [classBoundsSource, fullTimeBounds]);
+  }, [resolvedBoundsSource, fullTimeBounds]);
 
-  const canExport = columns.length > 0 && data != null && data.students.length > 0;
+  const canExport = columns.length > 0 && resolvedData != null && resolvedData.students.length > 0;
 
   const handleExportCsv = () => {
-    if (!data || !classId || columns.length === 0) return;
+    if (!resolvedData || !classId || columns.length === 0) return;
     const csv = buildResultsCsv({
-      data,
+      data: resolvedData,
       columns,
       gradeMetric,
       includeSection: selectedSection == null,
@@ -218,7 +227,7 @@ export default function ResultsPage({
     );
   }
 
-  if (loading) {
+  if (resolvedLoading) {
     return (
       <div className="results-page">
         <p className="results-page__empty">Loading results…</p>
@@ -226,21 +235,23 @@ export default function ResultsPage({
     );
   }
 
-  if (error) {
+  if (resolvedError) {
     return (
       <div className="results-page">
-        <p className="results-page__error">{error}</p>
+        <p className="results-page__error">{resolvedError}</p>
       </div>
     );
   }
 
-  if (!data) {
+  if (!resolvedData) {
     return (
       <div className="results-page">
         <p className="results-page__empty">No results available.</p>
       </div>
     );
   }
+
+  const results = resolvedData;
 
   return (
     <div className="results-page">
@@ -322,7 +333,7 @@ export default function ResultsPage({
             ? 'No assignments due in this time range.'
             : 'No assigned topics to display.'}
         </p>
-      ) : data.students.length === 0 ? (
+      ) : results.students.length === 0 ? (
         <p className="results-page__empty">No students on the roster.</p>
       ) : (
         <div className="results-grid-scroll">
@@ -362,7 +373,7 @@ export default function ResultsPage({
               </tr>
             </thead>
             <tbody>
-              {data.students.map((student, rowIndex) => (
+              {results.students.map((student, rowIndex) => (
                 <tr key={student.student_email}>
                   <th
                     scope="row"
@@ -375,7 +386,7 @@ export default function ResultsPage({
                   {columns.map((column, colIndex) => {
                     const col = colIndex + 1;
                     const highlight = gridHighlightClass(rowIndex, col, hoveredCell);
-                    const grade = computeCellGrade(data, student, column, gradeMetric);
+                    const grade = computeCellGrade(results, student, column, gradeMetric);
                     if (grade == null) {
                       return (
                         <td

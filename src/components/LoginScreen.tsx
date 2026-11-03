@@ -9,13 +9,12 @@ interface LoginScreenProps {
 
 export default function LoginScreen({ onLogin }: LoginScreenProps) {
   const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const isLocalhost = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
 
   useEffect(() => {
     let isMounted = true;
-    setLoading(true);
     authService.getProfile()
       .then((user) => {
         if (!isMounted) return;

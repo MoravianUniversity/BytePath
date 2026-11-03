@@ -45,17 +45,15 @@ export default function ClassSelector({ currentClassId, onClassChange, activeCla
     }
   }, [classes, currentClassId, onClassChange]);
 
-  useEffect(() => {
-    if (!activeClass) return;
-    setClasses((prev) => {
-      const index = prev.findIndex((c) => c.id === activeClass.id);
-      if (index < 0) return prev;
-      if (prev[index].class_name === activeClass.class_name) return prev;
-      const next = [...prev];
+  // Sync renamed active class into the list during render (avoids setState-in-effect).
+  if (activeClass) {
+    const index = classes.findIndex((c) => c.id === activeClass.id);
+    if (index >= 0 && classes[index].class_name !== activeClass.class_name) {
+      const next = [...classes];
       next[index] = activeClass;
-      return next;
-    });
-  }, [activeClass]);
+      setClasses(next);
+    }
+  }
 
   // Close dropdown when clicking outside
   useEffect(() => {

@@ -21,9 +21,12 @@ export default function ResultsTimeRangeSlider({
   const sliderRef = useRef<HTMLDivElement | null>(null);
   const apiRef = useRef<API | null>(null);
   const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
   const pipLabelsRef = useRef<Map<number, string>>(new Map());
   const pipTitlesRef = useRef<Map<number, string>>(new Map());
+
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   const pipValues = useMemo(
     () => [...dueDatePips.map((pip) => pip.ms)],

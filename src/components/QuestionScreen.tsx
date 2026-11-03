@@ -208,6 +208,16 @@ const Workspace: React.FC<{ question: Question; panelId: string; collapsed: bool
   panelId,
   collapsed,
 }) => {
+  const fingerprint = questionFingerprint(question);
+  return (
+    <WorkspacePanel key={fingerprint} panelId={panelId} collapsed={collapsed} />
+  );
+};
+
+const WorkspacePanel: React.FC<{ panelId: string; collapsed: boolean }> = ({
+  panelId,
+  collapsed,
+}) => {
   const [tab, setTab] = useState<WorkspaceTab>('notes');
   const [notes, setNotes] = useState('');
   const [traceCells, setTraceCells] = useState(() =>
@@ -216,13 +226,6 @@ const Workspace: React.FC<{ question: Question; panelId: string; collapsed: bool
   const [traceColWidthsPx, setTraceColWidthsPx] = useState<number[]>([]);
   const traceMeasureRef = useRef<HTMLSpanElement>(null);
   const traceCellRefs = useRef<(HTMLInputElement | null)[][]>([]);
-
-  const fingerprint = questionFingerprint(question);
-  useEffect(() => {
-    setTab('notes');
-    setNotes('');
-    setTraceCells(emptyGrid(TRACE_INITIAL_ROWS, TRACE_INITIAL_COLS));
-  }, [fingerprint]);
 
   useLayoutEffect(() => {
     const measureEl = traceMeasureRef.current;

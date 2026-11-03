@@ -28,7 +28,7 @@ export default function RosterPage({
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [total, setTotal] = useState(0);
-  const [loadingInitial, setLoadingInitial] = useState(false);
+  const [loadingInitial, setLoadingInitial] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState<Array<{ line: number; email?: string; reason: string }>>([]);
@@ -100,6 +100,37 @@ export default function RosterPage({
     filtersRef.current = { classId, columnFilters, sectionFilter, sortBy, sortOrder };
   }, [classId, columnFilters, sectionFilter, sortBy, sortOrder]);
 
+  const listDepsKey = JSON.stringify({
+    classId,
+    columnFilters,
+    sectionFilter,
+    sortBy,
+    sortOrder,
+  });
+  const [prevListDepsKey, setPrevListDepsKey] = useState(listDepsKey);
+  const [prevPage, setPrevPage] = useState(page);
+  const [prevClassName, setPrevClassName] = useState(className);
+
+  if (listDepsKey !== prevListDepsKey) {
+    setPrevListDepsKey(listDepsKey);
+    setLoadingInitial(true);
+    setLoadingMore(false);
+    setPage(1);
+    setPrevPage(1);
+    setEditing(null);
+  } else if (page !== prevPage) {
+    setPrevPage(page);
+    if (page > 1) {
+      setLoadingMore(true);
+    }
+  }
+
+  if (className !== prevClassName) {
+    setPrevClassName(className);
+    setClassNameDraft(className ?? "");
+    setClassRenameError(null);
+  }
+
   const reloadFirstPage = useCallback(async () => {
     requestIdRef.current += 1;
     const reqId = requestIdRef.current;
@@ -107,6 +138,7 @@ export default function RosterPage({
     setLoadingInitial(true);
     setLoadingMore(false);
     setPage(1);
+    setPrevPage(1);
     setEditing(null);
 
     try {
@@ -133,8 +165,41 @@ export default function RosterPage({
   }, [classId, columnFilters, sectionFilter, sortBy, sortOrder]);
 
   useEffect(() => {
-    reloadFirstPage();
-  }, [reloadFirstPage]);
+    let cancelled = false;
+    const reqId = ++requestIdRef.current;
+
+    (async () => {
+      try {
+        const data = await studentsService.list(
+          1,
+          PAGE_SIZE,
+          "",
+          false,
+          classId ?? undefined,
+          columnFilters,
+          sectionFilter,
+          sortBy,
+          sortOrder,
+        );
+        if (cancelled || reqId !== requestIdRef.current) return;
+        setStudents(data.items);
+        setTotal(data.total);
+        setHasMore(data.page < data.total_pages && data.items.length > 0);
+      } catch (e) {
+        if (!cancelled && reqId === requestIdRef.current) {
+          alert(`Failed to load students: ${e}`);
+        }
+      } finally {
+        if (!cancelled && reqId === requestIdRef.current) {
+          setLoadingInitial(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [classId, columnFilters, sectionFilter, sortBy, sortOrder]);
 
   const refreshSectionSuggestions = useCallback(async () => {
     if (!classId) {
@@ -150,35 +215,43 @@ export default function RosterPage({
   }, [classId]);
 
   useEffect(() => {
-    refreshSectionSuggestions();
-  }, [refreshSectionSuggestions]);
+    if (!classId) return;
 
-  useEffect(() => {
-    setSectionFilter(null);
-    setSectionFilterDraft("");
-    setShowSectionFilterPicker(false);
-    setColumnFilters({ email: "", first_name: "", last_name: "", notes: "" });
-    setColumnFilterDrafts({ email: "", first_name: "", last_name: "", notes: "" });
-    setActiveTextFilterPicker(null);
+    let cancelled = false;
+    studentsService
+      .listSections(classId)
+      .then((sections) => {
+        if (!cancelled) setSectionSuggestions(sections);
+      })
+      .catch(() => {
+        if (!cancelled) setSectionSuggestions([]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [classId]);
 
   useEffect(() => {
-    setClassNameDraft(className ?? "");
-    setClassRenameError(null);
-  }, [className, classId]);
+    if (!classId) return;
 
-  useEffect(() => {
-    setCoInstructorError(null);
-    setCoInstructorEmail("");
-    if (!classId) {
-      setCoInstructors([]);
-      return;
-    }
+    let cancelled = false;
     classesService
       .listCoInstructors(classId)
-      .then(setCoInstructors)
-      .catch(() => setCoInstructors([]));
+      .then((instructors) => {
+        if (!cancelled) setCoInstructors(instructors);
+      })
+      .catch(() => {
+        if (!cancelled) setCoInstructors([]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [classId]);
+
+  const displaySectionSuggestions = classId ? sectionSuggestions : [];
+  const displayCoInstructors = classId ? coInstructors : [];
 
   const handleSaveClassName = async () => {
     if (!classId) return;
@@ -243,7 +316,7 @@ export default function RosterPage({
       sortOrder: currentSortOrder,
     } = filtersRef.current;
 
-    setLoadingMore(true);
+    let cancelled = false;
     (async () => {
       try {
         const data = await studentsService.list(
@@ -257,16 +330,24 @@ export default function RosterPage({
           currentSortBy,
           currentSortOrder,
         );
-        if (reqId !== requestIdRef.current) return;
+        if (cancelled || reqId !== requestIdRef.current) return;
         setStudents(prev => [...prev, ...data.items]);
         setTotal(data.total);
         setHasMore(page < data.total_pages && data.items.length > 0);
       } catch (e) {
-        alert(`Failed to load more students: ${e}`);
+        if (!cancelled && reqId === requestIdRef.current) {
+          alert(`Failed to load more students: ${e}`);
+        }
       } finally {
-        if (reqId === requestIdRef.current) setLoadingMore(false);
+        if (!cancelled && reqId === requestIdRef.current) {
+          setLoadingMore(false);
+        }
       }
     })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [page]);
 
   // Trigger loading more as the user scrolls.
@@ -492,9 +573,9 @@ export default function RosterPage({
               {coInstructorSaving ? "Adding..." : "Add"}
             </button>
           </div>
-          {coInstructors.length !== 0 && (
+          {displayCoInstructors.length !== 0 && (
             <div className="co-instructor-list">
-              {coInstructors.map((instructor) => (
+              {displayCoInstructors.map((instructor) => (
                 <div key={instructor.user_id} className="co-instructor-row">
                   <div>
                     <div className="co-instructor-name">{instructor.name}</div>
@@ -544,7 +625,7 @@ export default function RosterPage({
                 <SectionCombobox
                   value={defaultImportSection}
                   onChange={setDefaultImportSection}
-                  suggestions={sectionSuggestions}
+                  suggestions={displaySectionSuggestions}
                   placeholder="(none)"
                 />
               </span>
@@ -766,12 +847,12 @@ export default function RosterPage({
                     <SectionCombobox
                       value={sectionFilterDraft}
                       onChange={setSectionFilterDraft}
-                      suggestions={sectionSuggestions}
+                      suggestions={displaySectionSuggestions}
                       placeholder="Select section"
                       autoFocus
                       onCommit={(value) => {
                         const picked = value.trim();
-                        if (picked && sectionSuggestions.includes(picked)) {
+                        if (picked && displaySectionSuggestions.includes(picked)) {
                           setSectionFilter(picked);
                         }
                         setShowSectionFilterPicker(false);
@@ -886,7 +967,7 @@ export default function RosterPage({
                   <SectionCombobox
                     value={manualForm.section}
                     onChange={v => setManualForm(f => ({ ...f, section: v }))}
-                    suggestions={sectionSuggestions}
+                    suggestions={displaySectionSuggestions}
                     placeholder="Section (optional)"
                   />
                 </td>
@@ -1033,7 +1114,7 @@ export default function RosterPage({
                     <SectionCombobox
                       value={editing.value}
                       onChange={v => setEditing({ ...editing, value: v })}
-                      suggestions={sectionSuggestions}
+                      suggestions={displaySectionSuggestions}
                       placeholder="Section"
                       autoFocus
                       onCommit={v => handleInlineEdit(s, "section", v)}

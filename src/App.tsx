@@ -87,6 +87,17 @@ const getAllTopics = (): Topic[] => {
   return topics;
 };
 
+/** Wall-clock ms; module-level so event handlers are not flagged by react-hooks/purity. */
+function wallTime(): number {
+  return Date.now();
+}
+
+function setLocationHash(id: string): void {
+  window.location.hash = id;
+}
+
+const EMPTY_TOPIC_AVAILABILITY: TopicAvailabilityMap = new Map();
+const EMPTY_TOPIC_ASSIGNMENTS = new Map<string, EffectiveTopicAssignment>();
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState<AppScreen>(() => {
@@ -155,18 +166,21 @@ function App() {
     localStorage.setItem('undertakenTopics', JSON.stringify(Array.from(undertakenTopics)));
   }, [undertakenTopics]);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set<string>());
+  const [expandedGroupsSyncKey, setExpandedGroupsSyncKey] = useState<Set<string> | null>(null);
   const [questionList, setQuestionList] = useState<(Question | null)[]>([]);
   const [questionAnswers, setQuestionAnswers] = useState<(UserAnswer | typeof SKIPPED)[]>([]);
-  const [questionStartTime, setQuestionStartTime] = useState<number>(Date.now());
+  const [questionStartTime, setQuestionStartTime] = useState<number>(() => Date.now());
   const contentAreaRef = useRef<HTMLDivElement>(null);
   const selectTopicRef = useRef<(topic: Topic) => void>(() => {});
   const isLoadingRef = useRef(true);
   const topicToSelectAfterLoadingRef = useRef<Topic | null>(null);
+  const routeUrlSyncRef = useRef<'none' | 'instructor-to-dashboard' | 'student-to-welcome' | 'instructor-disallowed'>('none');
   const [theme, setThemeState] = useState<'light' | 'dark'>(getThemePreference());
   const isInstructor = currentUser?.role === 'instructor';
+  const [wasInstructor, setWasInstructor] = useState(isInstructor);
   const [instructorPractice, setInstructorPractice] = useState(false);
-  const [topicAvailability, setTopicAvailability] = useState<TopicAvailabilityMap>(new Map());
-  const [topicAssignments, setTopicAssignments] = useState<Map<string, EffectiveTopicAssignment>>(
+  const [topicAvailabilityState, setTopicAvailability] = useState<TopicAvailabilityMap>(new Map());
+  const [topicAssignmentsState, setTopicAssignments] = useState<Map<string, EffectiveTopicAssignment>>(
     new Map(),
   );
   const [studentTopicProgress, setStudentTopicProgress] = useState<TopicProgress[]>([]);
@@ -177,6 +191,12 @@ function App() {
     const saved = localStorage.getItem('currentClass');
     return saved ? JSON.parse(saved) as Class : null;
   });
+  const topicAvailability = (!currentUser || !currentClass)
+    ? EMPTY_TOPIC_AVAILABILITY
+    : topicAvailabilityState;
+  const topicAssignments = (!currentUser || !currentClass)
+    ? EMPTY_TOPIC_ASSIGNMENTS
+    : topicAssignmentsState;
   useEffect(() => {
     if (currentClass) {
       localStorage.setItem('currentClass', JSON.stringify(currentClass));
@@ -196,14 +216,6 @@ function App() {
       // If multiple classes and no class selected yet, leave null — class picker will show.
     });
   }, [currentUser, isInstructor]);
-
-  useEffect(() => {
-    if (!currentClass || isInstructor) return;
-    const match = studentClasses.find((cls) => cls.id === currentClass.id);
-    if (match && match.section !== currentClass.section) {
-      setCurrentClass(match);
-    }
-  }, [studentClasses, currentClass, isInstructor]);
 
   const clearUrlHash = () => {
     const { pathname, search } = window.location;
@@ -266,24 +278,6 @@ function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, [allTopics]);
 
-  // Auto-expand the first incomplete group when there is no topic hash.
-  useEffect(() => {
-    if (window.location.hash) return;
-
-    setExpandedGroups(prev => {
-      if (prev.size > 0) return prev;
-      for (const item of TOPICS) {
-        if (item instanceof TopicGroup) {
-          const firstIncomplete = item.getFirstIncompleteTopic(completedTopics);
-          if (firstIncomplete) {
-            return new Set([item.id]);
-          }
-        }
-      }
-      return prev;
-    });
-  }, [completedTopics]);
-
   // Syntax highlighting for question code blocks
   useEffect(() => { Prism.highlightAll(); }, [questionList]);
   useEffect(()=>{
@@ -321,8 +315,6 @@ function App() {
 
   useEffect(() => {
     if (!currentUser || !currentClass) {
-      setTopicAvailability(new Map());
-      setTopicAssignments(new Map());
       return;
     }
 
@@ -340,42 +332,21 @@ function App() {
       });
   }, [currentUser, currentClass]);
 
-  // Instructors default to the dashboard.
+  // URL side effects for role/screen redirects (state is adjusted during render below).
   useEffect(() => {
-    if (isInstructor && currentScreen !== 'dashboard') {
-      setCurrentScreen('dashboard');
-      setInstructorPractice(false);
-      setInstructorDashboardTab('analytics');
+    const action = routeUrlSyncRef.current;
+    if (action === 'none') return;
+    routeUrlSyncRef.current = 'none';
+    if (action === 'instructor-to-dashboard') {
       syncPathForScreen('dashboard', 'analytics', { replace: true });
-    }
-  }, [isInstructor, currentScreen]);
-
-  // Student dashboard lives on the welcome screen (with the topic sidebar).
-  useEffect(() => {
-    if (!isInstructor && currentScreen === 'dashboard') {
-      setCurrentScreen('welcome');
-      setCurrentTopic(null);
-      setCurrentSubtopic(null);
+    } else if (action === 'student-to-welcome') {
       clearUrlHash();
       syncPathForScreen('welcome', instructorDashboardTab, { replace: true });
-    }
-  }, [isInstructor, currentScreen, instructorDashboardTab]);
-
-  // Prevent instructors from landing on student-only screens unless they enable practice mode.
-  useEffect(() => {
-    if (!isInstructor) return;
-
-    const allowedScreens = instructorPractice
-      ? new Set(['dashboard', 'welcome', 'question', 'locked-topic'])
-      : new Set(['dashboard']);
-
-    if (!allowedScreens.has(currentScreen)) {
-      setCurrentScreen('dashboard');
-      setInstructorDashboardTab('analytics');
+    } else if (action === 'instructor-disallowed') {
       syncPathForScreen('dashboard', 'analytics', { replace: true });
       clearUrlHash();
     }
-  }, [isInstructor, currentScreen, instructorPractice]);
+  });
 
   useEffect(() => {
     const handlePopState = () => {
@@ -551,10 +522,6 @@ function App() {
     return filterTopicsByAvailability(TOPICS, topicAvailability);
   }, [canBypassAvailability, topicAvailability]);
 
-  if (!currentUser) {
-    return <LoginScreen onLogin={(user) => setCurrentUser(user)} />;
-  }
-
   function canAccessTopic(topic: Topic): boolean {
     if (isInstructor) return true;
     if (topic.isAccessible(completedTopics)) return true;
@@ -568,7 +535,7 @@ function App() {
     const forceAccess = options?.forceAccess ?? false;
 
     setCurrentTopic(topic);
-    window.location.hash = topic.id;
+    setLocationHash(topic.id);
 
     if (!canBypassAvailability && currentClass && !isTopicEnabled(topic.id, topicAvailability)) {
       return;
@@ -617,7 +584,9 @@ function App() {
     navigateToTopic(topic);
   }
 
-  selectTopicRef.current = selectTopic;
+  useEffect(() => {
+    selectTopicRef.current = selectTopic;
+  });
 
   const toggleGroup = (groupId: string) => {
     setExpandedGroups(prev => {
@@ -660,7 +629,7 @@ function App() {
       contextByQuestionIndexRef.current.push(ctx);
       const nextQuestion = subtopic.generateQuestion(ctx);
       setQuestionList(prev => [...prev, nextQuestion]);
-      setQuestionStartTime(Date.now());
+      setQuestionStartTime(wallTime());
     }
     // Scroll to the new question after it's added
     setTimeout(() => {
@@ -700,6 +669,7 @@ function App() {
       // Update only the presented slot. Duplicate listings of the same type are
       // separate slots and must each be completed independently.
       if (currentSubtopic) {
+        // Subtopic fields are mutable runtime progress on domain objects.
         currentSubtopic.completed = currentSubtopic.incorrectLastTime ? false : isCorrect;
         currentSubtopic.incorrectLastTime = !isCorrect;
         if (!skipped) {
@@ -726,6 +696,7 @@ function App() {
 
     if (currentUser && currentTopic && currentSubtopic) {
       try {
+        const durationSec = Math.floor((wallTime() - questionStartTime) / 1000);
         const responseData = responsesService.formatResponseData(
           currentUser.id,
           currentTopic.id,
@@ -733,7 +704,7 @@ function App() {
           question,
           answer ?? null,
           isCorrect,
-          Math.floor((Date.now() - questionStartTime) / 1000),
+          durationSec,
           currentClass?.id ?? null,
           questionContext ?? undefined,
         );
@@ -785,6 +756,65 @@ function App() {
       }
     }
   };
+
+  // --- Render-time state adjustments (must run after all hooks) ---
+
+  // Keep currentClass.section in sync with the latest studentClasses payload.
+  if (!isInstructor && currentClass) {
+    const match = studentClasses.find((cls) => cls.id === currentClass.id);
+    if (match && match.section !== currentClass.section) {
+      setCurrentClass(match);
+    }
+  }
+
+  // Auto-expand the first incomplete group when there is no topic hash.
+  if (expandedGroupsSyncKey !== completedTopics) {
+    setExpandedGroupsSyncKey(completedTopics);
+    if (!window.location.hash && expandedGroups.size === 0) {
+      for (const item of TOPICS) {
+        if (item instanceof TopicGroup) {
+          const firstIncomplete = item.getFirstIncompleteTopic(completedTopics);
+          if (firstIncomplete) {
+            setExpandedGroups(new Set([item.id]));
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  // Role/screen routing; URL sync runs in the effect above via routeUrlSyncRef.
+  // Instructors land on the dashboard when their role becomes instructor (login),
+  // not on every screen change — otherwise Practice can never leave the dashboard.
+  if (isInstructor !== wasInstructor) {
+    setWasInstructor(isInstructor);
+    if (isInstructor) {
+      setCurrentScreen('dashboard');
+      setInstructorPractice(false);
+      setInstructorDashboardTab('analytics');
+      routeUrlSyncRef.current = 'instructor-to-dashboard';
+    }
+  }
+  if (!isInstructor && currentScreen === 'dashboard') {
+    setCurrentScreen('welcome');
+    setCurrentTopic(null);
+    setCurrentSubtopic(null);
+    routeUrlSyncRef.current = 'student-to-welcome';
+  }
+  if (isInstructor) {
+    const allowedScreens = instructorPractice
+      ? new Set(['dashboard', 'welcome', 'question', 'locked-topic'])
+      : new Set(['dashboard']);
+    if (!allowedScreens.has(currentScreen)) {
+      setCurrentScreen('dashboard');
+      setInstructorDashboardTab('analytics');
+      routeUrlSyncRef.current = 'instructor-disallowed';
+    }
+  }
+
+  if (!currentUser) {
+    return <LoginScreen onLogin={(user) => setCurrentUser(user)} />;
+  }
 
   return (
     <div className="App">

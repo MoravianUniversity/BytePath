@@ -135,7 +135,7 @@ export default function TopicSettingsPage({ classId }: { classId: number | null 
   >({});
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [sectionOptions, setSectionOptions] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(!!classId);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const timezoneLabel = useMemo(() => getTimezoneLabel(), []);
@@ -196,43 +196,59 @@ export default function TopicSettingsPage({ classId }: { classId: number | null 
     setSectionOverrideDrafts(nextOverrides);
   };
 
-  const load = async () => {
-    if (!classId) return;
-    setLoading(true);
-    try {
-      const [settings, sections] = await Promise.all([
-        classTopicSettingsService.getSettings(classId),
-        studentsService.listSections(classId, true),
-      ]);
-      applyServerSettings(settings.global_settings, settings.section_overrides);
-      setSectionOptions(sections);
-      setDirty(false);
-    } catch (error) {
-      alert(`Failed to load topic settings: ${error}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!classId) {
+  const [prevClassId, setPrevClassId] = useState(classId);
+  if (classId !== prevClassId) {
+    setPrevClassId(classId);
+    if (classId != null) {
+      setLoading(true);
+    } else {
       setGlobalDrafts({});
       setSectionOverrideDrafts({});
       setSectionOptions([]);
       setSelectedSection(null);
       setDirty(false);
-      return;
+      setLoading(false);
     }
-    void load();
+  }
+
+  useEffect(() => {
+    if (!classId) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const [settings, sections] = await Promise.all([
+          classTopicSettingsService.getSettings(classId),
+          studentsService.listSections(classId, true),
+        ]);
+        if (cancelled) return;
+        applyServerSettings(settings.global_settings, settings.section_overrides);
+        setSectionOptions(sections);
+        setDirty(false);
+      } catch (error) {
+        if (!cancelled) {
+          alert(`Failed to load topic settings: ${error}`);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // applyServerSettings closes over allTopics; reload only when class changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [classId]);
 
-  useEffect(() => {
-    if (selectedSection === null) return;
-    if (!sectionOptions.includes(selectedSection)) {
-      setSelectedSection(null);
-    }
-  }, [sectionOptions, selectedSection]);
+  if (
+    selectedSection !== null
+    && !sectionOptions.includes(selectedSection)
+  ) {
+    setSelectedSection(null);
+  }
 
   const updateTopic = (topicId: string, patch: Partial<TopicDraft>) => {
     if (selectedSection === null) {
