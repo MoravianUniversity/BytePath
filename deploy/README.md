@@ -7,21 +7,29 @@ Prerequisites
 -------------
 Install and setup nginx using either self-signed certificates (if using something like CloudFlare proxy) or Let's Encrypt (if using a domain name directly pointing to the server).
 
-Make sure `npm` and `python3` are installed on the server.
+Make sure `python3` is installed on the server. Node.js is installed via **nvm** in the setup steps below (Vite 8 requires Node 20.19+ or 24+; this guide uses Node 24).
 
 Setup Repository
 ----------------
 ```bash
 sudo useradd -m bytepath
 sudo su -l bytepath
+
+# Install nvm and Node 24 (as the bytepath user)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+export NVM_DIR="$HOME/.nvm"
+. "$NVM_DIR/nvm.sh"
+nvm install 24
+nvm alias default 24
+
 git clone https://github.com/MoravianUniversity/BytePath.git
 cd BytePath
-python3 -m venv .venv
-source .venv/bin/activate
+python3 -m venv backend/.venv
+source backend/.venv/bin/activate
 pip install --upgrade pip --quiet
 pip install -r backend/requirements.txt
 npm install
-if [ ! -f "$BACKEND_DIR/bytepath.db" ]; then
+if [ ! -f backend/bytepath.db ]; then
     python3 -m backend.init_db
 fi
 ```
@@ -34,6 +42,7 @@ Setup your Google OAuth credentials and download the client secrets JSON file fr
 FLASK_RUN_PORT=5005
 FLASK_DEBUG=0
 VITE_API_BASE=https://bytepath.moravian.dev/api
+VITE_PYODIDE_VERSION=314.0.7
 CORS_ORIGINS=https://bytepath.moravian.dev
 FRONTEND_URL=https://bytepath.moravian.dev
 
@@ -88,7 +97,7 @@ server {
 
 Create Systemd Services
 -----------------------
-Run the create-services.sh script (look at the script for details if not using the standard username or paths).
+Run the `create-services.sh` script (look at the script for details if not using the standard username or paths). It resolves `npm` from the `bytepath` user's nvm install and sets that path on the frontend unit so systemd does not depend on `/usr/bin/npm`.
 
 Updating
 --------
@@ -97,7 +106,7 @@ To update the application, pull the latest changes from the repository, install 
 ```bash
 sudo su -l bytepath
 cd BytePath
-source .venv/bin/activate
+source backend/.venv/bin/activate
 git pull
 pip install -r backend/requirements.txt
 npm install

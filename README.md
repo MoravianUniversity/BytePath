@@ -25,7 +25,7 @@ BytePath is a full-stack learning assistant that tracks student roster data, top
 
 ## Prerequisites
 - Python 3.10+ with `venv`
-- Node.js 18+ and npm
+- Node.js 24+ and npm
 - Git and SSH access for deployment targets
 
 ## Local Setup and Run

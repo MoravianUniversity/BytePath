@@ -82,8 +82,8 @@ let python: PyodideAPI | null = null;
  */
 function loadPython(): Promise<void> {
   if (pythonLoadPromise) { return pythonLoadPromise; }
-  // @ts-expect-error Dynamic CDN import has no local type declarations
-  pythonLoadPromise = import("https://cdn.jsdelivr.net/pyodide/v0.28.2/full/pyodide.mjs").then((pyodide_mjs: PyodideModule) =>
+  const pyodideVersion = import.meta.env.VITE_PYODIDE_VERSION ?? '314.0.7';
+  pythonLoadPromise = import(`https://cdn.jsdelivr.net/pyodide/v${pyodideVersion}/full/pyodide.mjs`).then((pyodide_mjs: PyodideModule) =>
     pyodide_mjs.loadPyodide()
   ).then((pyodide) => {
     pyodide.setStdin({stdin: () => {
