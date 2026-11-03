@@ -83,7 +83,8 @@ let python: PyodideAPI | null = null;
 function loadPython(): Promise<void> {
   if (pythonLoadPromise) { return pythonLoadPromise; }
   const pyodideVersion = import.meta.env.VITE_PYODIDE_VERSION ?? '314.0.7';
-  pythonLoadPromise = import(`https://cdn.jsdelivr.net/pyodide/v${pyodideVersion}/full/pyodide.mjs`).then((pyodide_mjs: PyodideModule) =>
+  const pyodideUrl = `https://cdn.jsdelivr.net/pyodide/v${pyodideVersion}/full/pyodide.mjs`;
+  pythonLoadPromise = import(/* @vite-ignore */ pyodideUrl).then((pyodide_mjs: PyodideModule) =>
     pyodide_mjs.loadPyodide()
   ).then((pyodide) => {
     pyodide.setStdin({stdin: () => {
